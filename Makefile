@@ -1,6 +1,8 @@
 OBJS =
 OBJS += main.o
 OBJS += config.o
+OBJS += mosaic.o
+OBJS += tessera.o
 
 CC = gcc
 

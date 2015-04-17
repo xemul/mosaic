@@ -40,4 +40,10 @@ struct mosaic_state {
 	struct list_head mosaics;  /* ties mosaic.sl */
 };
 
+extern struct mosaic_state *ms;
+
+int list_mosaics(void);
+int list_tesserae(void);
+int add_mosaic(int argc, char **argv);
+int add_tessera(int argc, char **argv);
 #endif

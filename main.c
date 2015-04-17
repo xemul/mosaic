@@ -4,7 +4,7 @@
 #include "mosaic.h"
 #include "config.h"
 
-static struct mosaic_state *ms;
+struct mosaic_state *ms;
 
 static inline int argv_is(char *argv, char *is)
 {
@@ -21,66 +21,30 @@ static inline int argv_is(char *argv, char *is)
 	}
 }
 
-static void show_mosaic(struct mosaic *m)
-{
-	struct element *e;
-
-	printf("name: %s\n", m->m_name);
-	list_for_each_entry(e, &m->elements, ml) {
-		printf("\ttessera: %s\n", e->t->t_name);
-		if (e->e_age == AGE_LAST)
-			printf("\tage:     latest\n");
-		else
-			printf("\tage:     %d\n", e->e_age);
-		printf("\tat:      %s\n", e->e_at);
-		printf("\toptions: %s\n", e->e_options ? : "None");
-
-		printf("\n");
-	}
-}
-
-static int list_mosaics(int argc, char **argv)
-{
-	struct mosaic *m;
-
-	list_for_each_entry(m, &ms->mosaics, sl)
-		show_mosaic(m);
-
-	return 0;
-}
-
-static char *t_types[] = {
-	[ TESSERA_OVERLAY ] = "overlay",
-	[ TESSERA_BTRFS ] = "btrfs",
-	[ TESSERA_DMTHIN ] = "dmthin",
-};
-
-static void show_tessera(struct tessera *t)
-{
-	printf("name: %s\n", t->t_name);
-	printf("type: %s\n", t_types[t->t_type]);
-	printf("\n");
-}
-
-static int list_tesserae(int argc, char **argv)
-{
-	struct tessera *t;
-
-	list_for_each_entry(t, &ms->tesserae, sl)
-		show_tessera(t);
-
-	return 0;
-}
-
-static int mosaic_list(int argc, char **argv)
+static int do_list(int argc, char **argv)
 {
 	if (argc == 0)
 		goto out;
 
 	if (argv_is(argv[0], "mosaic"))
-		return list_mosaics(argc - 1, argv + 1);
+		return list_mosaics();
 	if (argv_is(argv[0], "tessera"))
-		return list_tesserae(argc - 1, argv + 1);
+		return list_tesserae();
+
+	printf("Unknown object %s\n", argv[0]);
+out:
+	return 1;
+}
+
+static int do_add(int argc, char **argv)
+{
+	if (argc == 0)
+		goto out;
+
+	if (argv_is(argv[0], "mosaic"))
+		return add_mosaic(argc - 1, argv + 1);
+	if (argv_is(argv[0], "tessera"))
+		return add_tessera(argc - 1, argv + 1);
 
 	printf("Unknown object %s\n", argv[0]);
 out:
@@ -99,7 +63,9 @@ int main(int argc, char **argv)
 		return 1;
 
 	if (argv_is(argv[1], "list"))
-		return mosaic_list(argc - 2, argv + 2);
+		return do_list(argc - 2, argv + 2);
+	if (argv_is(argv[1], "add"))
+		return do_add(argc - 2, argv + 2);
 
 	printf("Unknown action %s\n", argv[1]);
 	return 1;
