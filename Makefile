@@ -6,9 +6,9 @@ OBJS += tessera.o
 
 CC = gcc
 
-all: mosaic
+all: moctl
 
-mosaic: $(OBJS)
+moctl: $(OBJS)
 	$(CC) $^ -o $@ -lyaml
 
 %.o: %.c

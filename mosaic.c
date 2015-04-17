@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include "mosaic.h"
 #include "tessera.h"
+#include "util.h"
 
 static void show_mosaic(struct mosaic *m)
 {
@@ -22,7 +23,7 @@ static void show_mosaic(struct mosaic *m)
 	}
 }
 
-int list_mosaics(void)
+static int list_mosaics(void)
 {
 	struct mosaic *m;
 
@@ -173,12 +174,12 @@ static int update_elements(struct mosaic *m, int argc, char **argv)
 	return 0;
 }
 
-int add_mosaic(int argc, char **argv)
+static int add_mosaic(int argc, char **argv)
 {
 	struct mosaic *m;
 
 	if (argc < 1) {
-		printf("Usage: mosaic add mosaic [name] <elements>\n");
+		printf("Usage: moctl mosaic add [name] <elements>\n");
 		return 1;
 	}
 
@@ -196,12 +197,12 @@ int add_mosaic(int argc, char **argv)
 	return config_update();
 }
 
-int del_mosaic(int argc, char **argv)
+static int del_mosaic(int argc, char **argv)
 {
 	struct mosaic *m;
 
 	if (argc < 1) {
-		printf("Usage: mosaic del mosaic [name]\n");
+		printf("Usage: moctl mosaic del [name]\n");
 		return 1;
 	}
 
@@ -218,12 +219,12 @@ int del_mosaic(int argc, char **argv)
 	return config_update();
 }
 
-int set_mosaic(int argc, char **argv)
+static int change_mosaic(int argc, char **argv)
 {
 	struct mosaic *m;
 
 	if (argc < 1) {
-		printf("Usage: mosaic mset [name] <elements>\n");
+		printf("Usage: moctl mosaic change [name] <elements>\n");
 		return 1;
 	}
 
@@ -237,4 +238,24 @@ int set_mosaic(int argc, char **argv)
 		return 1;
 
 	return config_update();
+}
+
+int do_mosaic(int argc, char **argv)
+{
+	if (argc < 1) {
+		printf("Usage: moctl mosaic [list|add|del|change] ...\n");
+		return 1;
+	}
+
+	if (argv_is(argv[0], "list"))
+		return list_mosaics();
+	if (argv_is(argv[0], "add"))
+		return add_mosaic(argc - 1, argv + 1);
+	if (argv_is(argv[0], "del"))
+		return del_mosaic(argc - 1, argv + 1);
+	if (argv_is(argv[0], "change"))
+		return change_mosaic(argc - 1, argv + 1);
+
+	printf("Unknown mosaic action %s\n", argv[0]);
+	return 1;
 }

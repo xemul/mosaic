@@ -37,11 +37,5 @@ struct mosaic_state {
 
 extern struct mosaic_state *ms;
 
-int list_mosaics(void);
-int list_tesserae(void);
-int add_mosaic(int argc, char **argv);
-int del_mosaic(int argc, char **argv);
-int add_tessera(int argc, char **argv);
-int del_tessera(int argc, char **argv);
-int set_mosaic(int argc, char **argv);
+int do_mosaic(int argc, char **argv);
 #endif

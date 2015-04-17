@@ -8,6 +8,8 @@ struct tess_desc {
 	int (*del)(struct tess_desc *me, struct tessera *t);
 };
 
+int do_tessera(int argc, char **argv);
+
 struct tess_desc *tess_desc_by_type(char *type);
 struct tessera *find_tessera(struct mosaic_state *ms, char *name);
 #endif
