@@ -3,28 +3,16 @@
 #include <string.h>
 #include "mosaic.h"
 #include "config.h"
+#include "util.h"
 
 struct mosaic_state *ms;
 
-static inline int argv_is(char *argv, char *is)
-{
-	while (1) {
-		if (*argv == '\0')
-			return 1;
-		if (*is == '\0')
-			return 0;
-		if (*is != *argv)
-			return 0;
-
-		is++;
-		argv++;
-	}
-}
-
 static int do_list(int argc, char **argv)
 {
-	if (argc == 0)
+	if (argc == 0) {
+		printf("Usage: mosaic list [mosaic|tessera] ...\n");
 		goto out;
+	}
 
 	if (argv_is(argv[0], "mosaic"))
 		return list_mosaics();
@@ -38,8 +26,10 @@ out:
 
 static int do_add(int argc, char **argv)
 {
-	if (argc == 0)
+	if (argc == 0) {
+		printf("Usage: mosaic add [mosaic|tessera] ...\n");
 		goto out;
+	}
 
 	if (argv_is(argv[0], "mosaic"))
 		return add_mosaic(argc - 1, argv + 1);
@@ -59,8 +49,10 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	if (argc < 2)
+	if (argc < 2) {
+		printf("Usage: mosaic [list|add] ...\n");
 		return 1;
+	}
 
 	if (argv_is(argv[1], "list"))
 		return do_list(argc - 2, argv + 2);

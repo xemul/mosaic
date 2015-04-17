@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <yaml.h>
 #include "mosaic.h"
+#include "tessera.h"
 
 #define err(args...)	fprintf(stderr, ##args)
 
@@ -136,18 +137,6 @@ static inline struct tessera *last_tesera(struct mosaic_state *ms)
 	return list_entry(ms->tesserae.prev, struct tessera, sl);
 }
 
-static enum tess_type parse_t_type(char *val)
-{
-	if (!strcmp(val, "btrfs"))
-		return TESSERA_BTRFS;
-	if (!strcmp(val, "overlay"))
-		return TESSERA_OVERLAY;
-	if (!strcmp(val, "dm_thin"))
-		return TESSERA_DMTHIN;
-
-	return TESSERA_UNKNOWN;
-}
-
 static int parse_tessera_value(yaml_parser_t *p, char *key, void *x)
 {
 	struct tessera *t;
@@ -164,8 +153,8 @@ static int parse_tessera_value(yaml_parser_t *p, char *key, void *x)
 	}
 
 	if (!strcmp(key, "type")) {
-		t->t_type = parse_t_type(val);
-		if (t->t_type == TESSERA_UNKNOWN) {
+		t->t_desc = tess_desc_by_type(val);
+		if (!t->t_desc) {
 			err("Unknown tessera type %s\n", val);
 			return -1;
 		}
@@ -186,7 +175,7 @@ static int parse_tessera(yaml_parser_t *p, void *x)
 
 	t = malloc(sizeof(*t));
 	t->t_name = NULL;
-	t->t_type = TESSERA_UNKNOWN;
+	t->t_desc = NULL;
 	list_add_tail(&t->sl, &ms->tesserae);
 
 	return yaml_parse_map_body(p, parse_tessera_value, x);
@@ -399,4 +388,53 @@ out_c:
 	fclose(f);
 out:
 	return ms;
+}
+
+#define UPD_CFG_NAME	".mosaic.conf.new"
+
+int config_update(void)
+{
+	FILE *f;
+	struct tessera *t;
+	struct mosaic *m;
+
+	f = fopen(UPD_CFG_NAME, "w");
+	if (!f) {
+		err("Can't update config");
+		return 1;
+	}
+
+	fprintf(f, "tesserae:\n");
+	list_for_each_entry(t, &ms->tesserae, sl) {
+		fprintf(f, "  - name: %s\n", t->t_name);
+		fprintf(f, "    type: %s\n", t->t_desc->td_name);
+		fprintf(f, "\n");
+	}
+
+	fprintf(f, "mosaics:\n");
+	list_for_each_entry(m, &ms->mosaics, sl) {
+		struct element *e;
+
+		fprintf(f, "  - name: %s\n", m->m_name);
+		fprintf(f, "    elements:\n");
+		list_for_each_entry(e, &m->elements, ml) {
+			fprintf(f, "      - name: %s\n", e->t->t_name);
+			if (e->e_age != AGE_LAST)
+				fprintf(f, "        age: %d\n", e->e_age);
+			if (e->e_at)
+				fprintf(f, "        at: %s\n", e->e_at);
+			if (e->e_options)
+				fprintf(f, "        options: %s\n", e->e_options);
+			fprintf(f, "\n");
+		}
+	}
+
+	fclose(f);
+
+	if (rename(UPD_CFG_NAME, "mosaic.conf")) {
+		perror("Can't rename config");
+		return 1;
+	}
+
+	return 0;
 }

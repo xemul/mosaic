@@ -3,16 +3,11 @@
 
 #include "list.h"
 
-enum tess_type {
-	TESSERA_UNKNOWN,
-	TESSERA_OVERLAY,
-	TESSERA_BTRFS,
-	TESSERA_DMTHIN,
-};
+struct tess_desc;
 
 struct tessera {
 	char *t_name;
-	enum tess_type t_type;
+	struct tess_desc *t_desc;
 	struct list_head sl;
 };
 
