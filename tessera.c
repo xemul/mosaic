@@ -88,3 +88,29 @@ out_t:
 out:
 	return 1;
 }
+
+int del_tessera(int argc, char **argv)
+{
+	struct tessera *t;
+
+	if (argc < 1) {
+		printf("Usage mosaic del tessera [name]\n");
+		goto out;
+	}
+
+	list_for_each_entry(t, &ms->tesserae, sl) {
+		if (strcmp(t->t_name, argv[0]))
+			continue;
+
+		list_del(&t->sl);
+		if (t->t_desc->del)
+			t->t_desc->del(t->t_desc, t);
+		free(t);
+
+		return config_update();
+	}
+
+	printf("Unknown tessera %s\n", argv[0]);
+out:
+	return 1;
+}

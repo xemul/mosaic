@@ -33,3 +33,8 @@ int add_mosaic(int argc, char **argv)
 {
 	return 1;
 }
+
+int del_mosaic(int argc, char **argv)
+{
+	return 1;
+}
