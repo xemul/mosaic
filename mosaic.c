@@ -43,36 +43,9 @@ static struct mosaic *find_mosaic(char *name)
 	return NULL;
 }
 
-static int add_element(struct mosaic *m, char *desc)
+static int set_element(struct element *e, char *aux)
 {
-	struct element *e;
-	struct tessera *t;
-	char *aux;
-
-	/*
-	 * Element description is
-	 *
-	 *  name:age=$age:at=$path:options=$opts
-	 *
-	 * All but name is optional
-	 */
-
-	e = malloc(sizeof(*e));
-	e->e_age = AGE_LAST;
-	e->e_at = NULL;
-	e->e_options = NULL;
-
-	aux = strchr(desc, ':');
-	if (aux)
-		*aux = '\0';
-
-	t = find_tessera(ms, desc);
-	if (!t) {
-		printf("Unknown tessera %s\n", desc);
-		return -1;
-	}
-
-	e->t = t;
+	char *desc;
 
 	while (aux) {
 		char *aux2;
@@ -104,6 +77,43 @@ static int add_element(struct mosaic *m, char *desc)
 		aux = aux2;
 	}
 
+	return 0;
+}
+
+static int add_element(struct mosaic *m, char *desc)
+{
+	struct element *e;
+	struct tessera *t;
+	char *aux;
+
+	/*
+	 * Element description is
+	 *
+	 *  name:age=$age:at=$path:options=$opts
+	 *
+	 * All but name is optional
+	 */
+
+	e = malloc(sizeof(*e));
+	e->e_age = AGE_LAST;
+	e->e_at = NULL;
+	e->e_options = NULL;
+
+	aux = strchr(desc, ':');
+	if (aux)
+		*aux = '\0';
+
+	t = find_tessera(ms, desc);
+	if (!t) {
+		printf("Unknown tessera %s\n", desc);
+		return -1;
+	}
+
+	e->t = t;
+
+	if (set_element(e, aux))
+		return -1;
+
 	list_add_tail(&e->ml, &m->elements);
 	return 0;
 }
@@ -114,6 +124,50 @@ static int maybe_add_elements(struct mosaic *m, int argc, char **argv)
 
 	for (i = 0; i < argc; i++)
 		if (add_element(m, argv[i]))
+			return -1;
+
+	return 0;
+}
+
+static int update_element(struct mosaic *m, char *desc)
+{
+	char *aux;
+	struct element *e;
+
+	aux = strchr(desc, ':');
+	if (aux)
+		*aux = '\0';
+
+	list_for_each_entry(e, &m->elements, ml) {
+		if (strcmp(e->t->t_name, desc))
+			continue;
+
+		if (!aux) {
+			printf("Can't update element to none\n");
+			return 1;
+		}
+
+		if (!strcmp(aux + 1, "del")) {
+			list_del(&e->ml);
+			free(e);
+			return 0;
+		}
+
+		return set_element(e, aux);
+	}
+
+	if (aux)
+		*aux = ':';
+
+	return add_element(m, desc);
+}
+
+static int update_elements(struct mosaic *m, int argc, char **argv)
+{
+	int i;
+
+	for (i = 0; i < argc; i++)
+		if (update_element(m, argv[i]))
 			return -1;
 
 	return 0;
@@ -160,6 +214,27 @@ int del_mosaic(int argc, char **argv)
 	list_del(&m->sl);
 	/* FIXME: del elements when going lib */
 	free(m);
+
+	return config_update();
+}
+
+int set_mosaic(int argc, char **argv)
+{
+	struct mosaic *m;
+
+	if (argc < 1) {
+		printf("Usage: mosaic mset [name] <elements>\n");
+		return 1;
+	}
+
+	m = find_mosaic(argv[0]);
+	if (!m) {
+		printf("Unknown mosaic %s\n", argv[0]);
+		return 1;
+	}
+
+	if (update_elements(m, argc - 1, argv + 1))
+		return 1;
 
 	return config_update();
 }

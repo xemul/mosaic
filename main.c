@@ -71,12 +71,21 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
+	/*
+	 * Basic config management
+	 */
 	if (argv_is(argv[1], "list"))
 		return do_list(argc - 2, argv + 2);
 	if (argv_is(argv[1], "add"))
 		return do_add(argc - 2, argv + 2);
 	if (argv_is(argv[1], "del"))
 		return do_del(argc - 2, argv + 2);
+
+	/*
+	 * Change mosaic parameters
+	 */
+	if (argv_is(argv[1], "mset"))
+		return set_mosaic(argc - 2, argv + 2);
 
 	printf("Unknown action %s\n", argv[1]);
 	return 1;
