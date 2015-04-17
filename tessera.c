@@ -106,22 +106,19 @@ int del_tessera(int argc, char **argv)
 
 	if (argc < 1) {
 		printf("Usage: mosaic del tessera [name]\n");
-		goto out;
+		return 1;
 	}
 
-	list_for_each_entry(t, &ms->tesserae, sl) {
-		if (strcmp(t->t_name, argv[0]))
-			continue;
-
-		list_del(&t->sl);
-		if (t->t_desc->del)
-			t->t_desc->del(t->t_desc, t);
-		free(t);
-
-		return config_update();
+	t = find_tessera(ms, argv[0]);
+	if (!t) {
+		printf("Unknown tessera %s\n", argv[0]);
+		return 1;
 	}
 
-	printf("Unknown tessera %s\n", argv[0]);
-out:
-	return 1;
+	list_del(&t->sl);
+	if (t->t_desc->del)
+		t->t_desc->del(t->t_desc, t);
+	free(t);
+
+	return config_update();
 }

@@ -32,6 +32,17 @@ int list_mosaics(void)
 	return 0;
 }
 
+static struct mosaic *find_mosaic(char *name)
+{
+	struct mosaic *m;
+
+	list_for_each_entry(m, &ms->mosaics, sl)
+		if (!strcmp(m->m_name, name))
+			return m;
+
+	return NULL;
+}
+
 static int add_element(struct mosaic *m, char *desc)
 {
 	struct element *e;
@@ -40,7 +51,10 @@ static int add_element(struct mosaic *m, char *desc)
 
 	/*
 	 * Element description is
-	 * name:age=$age:at=$path:options=$opts
+	 *
+	 *  name:age=$age:at=$path:options=$opts
+	 *
+	 * All but name is optional
 	 */
 
 	e = malloc(sizeof(*e));
@@ -130,5 +144,22 @@ int add_mosaic(int argc, char **argv)
 
 int del_mosaic(int argc, char **argv)
 {
-	return 1;
+	struct mosaic *m;
+
+	if (argc < 1) {
+		printf("Usage: mosaic del mosaic [name]\n");
+		return 1;
+	}
+
+	m = find_mosaic(argv[0]);
+	if (!m) {
+		printf("Unknown mosaic %s\n", argv[0]);
+		return 1;
+	}
+
+	list_del(&m->sl);
+	/* FIXME: del elements when going lib */
+	free(m);
+
+	return config_update();
 }
