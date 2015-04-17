@@ -319,17 +319,6 @@ static int parse_stream(yaml_parser_t *p, void *x)
 			parse_document, x);
 }
 
-static struct tessera *find_tessera(struct mosaic_state *ms, char *name)
-{
-	struct tessera *t;
-
-	list_for_each_entry(t, &ms->tesserae, sl)
-		if (!strcmp(t->t_name, name))
-			return t;
-
-	return NULL;
-}
-
 static int resolve_tesserae(struct mosaic_state *ms)
 {
 	struct mosaic *m;
@@ -416,7 +405,9 @@ int config_update(void)
 		struct element *e;
 
 		fprintf(f, "  - name: %s\n", m->m_name);
-		fprintf(f, "    elements:\n");
+		if (!list_empty(&m->elements))
+			fprintf(f, "    elements:\n");
+
 		list_for_each_entry(e, &m->elements, ml) {
 			fprintf(f, "      - name: %s\n", e->t->t_name);
 			if (e->e_age != AGE_LAST)
@@ -427,6 +418,9 @@ int config_update(void)
 				fprintf(f, "        options: %s\n", e->e_options);
 			fprintf(f, "\n");
 		}
+
+		if (list_empty(&m->elements))
+			fprintf(f, "\n");
 	}
 
 	fclose(f);

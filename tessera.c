@@ -47,6 +47,17 @@ struct tess_desc *tess_desc_by_type(char *type)
 	return NULL;
 }
 
+struct tessera *find_tessera(struct mosaic_state *ms, char *name)
+{
+	struct tessera *t;
+
+	list_for_each_entry(t, &ms->tesserae, sl)
+		if (!strcmp(t->t_name, name))
+			return t;
+
+	return NULL;
+}
+
 static void show_tessera(struct tessera *t)
 {
 	printf("name: %s\n", t->t_name);
@@ -70,7 +81,7 @@ int add_tessera(int argc, char **argv)
 	struct tess_desc *td;
 
 	if (argc < 2) {
-		printf("Usage mosaic add tessera [type] [name] ...\n");
+		printf("Usage: mosaic add tessera [type] [name] ...\n");
 		goto out;
 	}
 
@@ -94,7 +105,7 @@ int del_tessera(int argc, char **argv)
 	struct tessera *t;
 
 	if (argc < 1) {
-		printf("Usage mosaic del tessera [name]\n");
+		printf("Usage: mosaic del tessera [name]\n");
 		goto out;
 	}
 

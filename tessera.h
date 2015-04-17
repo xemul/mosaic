@@ -9,4 +9,5 @@ struct tess_desc {
 };
 
 struct tess_desc *tess_desc_by_type(char *type);
+struct tessera *find_tessera(struct mosaic_state *ms, char *name);
 #endif
