@@ -9,7 +9,9 @@
 
 static int st_check_dir(void)
 {
-	if (!access(STATUS_DIR"/active", X_OK))
+	int fd;
+
+	if (!access(STATUS_DIR"/active", F_OK))
 		return 0;
 
 	if (mount("mosaic.status", STATUS_DIR, "tmpfs", 0, NULL)) {
@@ -21,12 +23,14 @@ static int st_check_dir(void)
 	 * FIXME -- record in mountinfo should be enough
 	 */
 
-	if (creat(STATUS_DIR"/active", 0600)) {
+	fd = creat(STATUS_DIR"/active", 0600);
+	if (fd < 0) {
 		perror("Can't create status dir");
 		umount(STATUS_DIR);
 		return 1;
 	}
 
+	close(fd);
 	return 0;
 }
 
@@ -53,9 +57,10 @@ void st_set_mounted(struct mosaic *m, char *path)
 char *st_get_mounted(struct mosaic *m)
 {
 	FILE *st;
+	char *s;
 
 	if (st_check_dir())
-		return;
+		return "X";
 
 	/*
 	 * FIXME -- not good to report static string back
@@ -64,10 +69,13 @@ char *st_get_mounted(struct mosaic *m)
 	sprintf(st_aux, STATUS_DIR "/m.%s", m->m_name);
 	st = fopen(st_aux, "r");
 	if (!st)
-		return "-";
+		return "no";
 
-	fgets(st_aux, sizeof(st_aux), st);
+	s = fgets(st_aux, sizeof(st_aux), st);
 	fclose(st);
+
+	if (!s)
+		return "no";
 
 	if (st_aux[0] != '-' || st_aux[1] != ' ') {
 		printf("Status for %s is screwed up\n", m->m_name);
