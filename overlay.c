@@ -19,7 +19,9 @@ struct overlay_tessera {
 	char *ovl_location;
 };
 
-static int add_overlay(struct tess_desc *me, char *name, int argc, char **argv)
+struct tess_desc tess_desc_overlay;
+
+static int add_overlay(char *name, int argc, char **argv)
 {
 	struct tessera *t;
 	struct overlay_tessera *ot;
@@ -41,7 +43,7 @@ static int add_overlay(struct tess_desc *me, char *name, int argc, char **argv)
 
 	t = malloc(sizeof(*t));
 	t->t_name = name;
-	t->t_desc = me;
+	t->t_desc = &tess_desc_overlay;
 	t->priv = ot;
 
 	list_add_tail(&t->sl, &ms->tesserae);
@@ -49,7 +51,7 @@ static int add_overlay(struct tess_desc *me, char *name, int argc, char **argv)
 	return 0;
 }
 
-static void del_overlay(struct tess_desc *td, struct tessera *t)
+static void del_overlay(struct tessera *t)
 {
 	struct overlay_tessera *ot = t->priv;
 

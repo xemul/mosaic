@@ -29,7 +29,7 @@ static void usage(void)
 "    m|mount   <name> <location> [<mount-options>]\n"
 "\n"
 "     Element: <name>:<age>:<location>[:options=<mount-options>]\n"
-"              for \"change\" <name>:del to remote\n"
+"              for \"change\" <name>:del to remove\n"
 "\n"
 "   Tessera:\n"
 "    a|add     <name> <type> [<type-options>]\n"

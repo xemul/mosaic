@@ -5,11 +5,21 @@ struct mosaic_state;
 
 struct tess_desc {
 	char *td_name;
-	int (*add)(struct tess_desc *me, char *name, int argc, char **argv);
-	void (*del)(struct tess_desc *me, struct tessera *t);
+	/*
+	 * Add/Del callbacks from cldline
+	 */
+	int (*add)(char *name, int argc, char **argv);
+	void (*del)(struct tessera *t);
+	/*
+	 * Parse/Save callback from/for config
+	 */
 	int (*parse)(struct tessera *t, char *name, char *value);
 	void (*save)(struct tessera *t, FILE *);
+	/*
+	 * Show any information about tessera on the screen
+	 */
 	void (*show)(struct tessera *t);
+
 	int (*mount)(struct tessera *t, int age, char *path, char *options);
 	int (*grow)(struct tessera *t, int old_age, int new_age);
 };

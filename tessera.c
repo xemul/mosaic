@@ -86,7 +86,7 @@ static int add_tessera(int argc, char **argv)
 	if (!td || !td->add)
 		goto out_t;
 
-	if (td->add(td, argv[0], argc - 2, argv + 2))
+	if (td->add(argv[0], argc - 2, argv + 2))
 		return 1;
 
 	return config_update();
@@ -114,7 +114,7 @@ static int del_tessera(int argc, char **argv)
 
 	list_del(&t->sl);
 	if (t->t_desc->del)
-		t->t_desc->del(t->t_desc, t);
+		t->t_desc->del(t);
 	free(t);
 
 	return config_update();
