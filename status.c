@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 #include "mosaic.h"
 #include "status.h"
 
@@ -72,23 +73,28 @@ done:
 	fclose(st);
 }
 
-void st_show_mounted(struct mosaic *m)
+int st_for_each_mounted(struct mosaic *m, bool mod, int (*cb)(struct mosaic *, char *, void *), void *x)
 {
-	FILE *st;
-	char *s;
-	bool mnt = false;
+	FILE *st, *nst = NULL;
+	int ret;
+	char *e;
 
 	if (st_check_dir())
-		return;
-
-	/*
-	 * FIXME -- not good to report static string back
-	 */
+		return -1;
 
 	sprintf(st_aux, STATUS_DIR "/m.%s", m->m_name);
 	st = fopen(st_aux, "r");
 	if (!st)
-		return;
+		return -1;
+
+	if (mod) {
+		sprintf(st_aux, STATUS_DIR "/m.%s.upd", m->m_name);
+		nst = fopen(st_aux, "w");
+		if (!nst) {
+			fclose(st);
+			return -1;
+		}
+	}
 
 	while (fgets(st_aux, sizeof(st_aux), st)) {
 		if (st_aux[0] != '-' || st_aux[1] != ' ') {
@@ -98,16 +104,63 @@ void st_show_mounted(struct mosaic *m)
 			break;
 		}
 
-		if (!mnt) {
-			printf("mounted:\n");
-			mnt = true;
+		e = strchr(st_aux, '\n');
+		*e = '\0';
+
+		ret = cb(m, st_aux + 2, x);
+		if (ret == ST_FAIL) {
+			fclose(st);
+			if (nst) {
+				sprintf(st_aux, STATUS_DIR "/m.%s.upd", m->m_name);
+				fclose(nst);
+				unlink(st_aux);
+			}
+
+			return -1;
 		}
 
-		printf("  %s", st_aux);
+		if (!nst || ret == ST_DROP)
+			continue;
+
+		if (ret == ST_DROP)
+			continue;
+
+		fprintf(nst, "- %s\n", st_aux + 2);
 	}
+
+	fclose(st);
+	if (nst) {
+		char aux2[PATH_MAX];
+
+		fclose(nst);
+		sprintf(st_aux, STATUS_DIR "/m.%s.upd", m->m_name);
+		sprintf(aux2, STATUS_DIR "/m.%s", m->m_name);
+		if (rename(st_aux, aux2))
+			return -1;
+	}
+
+	return 0;
+}
+
+static int show_mounted(struct mosaic *m, char *path, void *_x)
+{
+	int *mnt = _x;
+
+	if (!*mnt) {
+		printf("mounted:\n");
+		*mnt = 1;
+	}
+
+	printf("  - %s\n", path);
+	return 0;
+}
+
+void st_show_mounted(struct mosaic *m)
+{
+	int mnt = 0;
+
+	st_for_each_mounted(m, false, show_mounted, &mnt);
 
 	if (mnt)
 		printf("\n");
-
-	fclose(st);
 }

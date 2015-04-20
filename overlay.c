@@ -21,14 +21,13 @@ struct overlay_tessera {
 
 struct tess_desc tess_desc_overlay;
 
-static int add_overlay(char *name, int argc, char **argv)
+static int add_overlay(struct tessera *t, int argc, char **argv)
 {
-	struct tessera *t;
 	struct overlay_tessera *ot;
 
 	if (argc < 1) {
 		printf("Usage: moctl tessera add <name> overlay <location>\n");
-		return 1;
+		return -1;
 	}
 
 	if (access(argv[0], F_OK) < 0) {
@@ -38,15 +37,8 @@ static int add_overlay(char *name, int argc, char **argv)
 		}
 	}
 
-	ot = malloc(sizeof(*ot));
+	t->priv = ot = malloc(sizeof(*ot));
 	ot->ovl_location = strdup(argv[0]);
-
-	t = malloc(sizeof(*t));
-	t->t_name = name;
-	t->t_desc = &tess_desc_overlay;
-	t->priv = ot;
-
-	list_add_tail(&t->sl, &ms->tesserae);
 
 	return 0;
 }
@@ -54,9 +46,6 @@ static int add_overlay(char *name, int argc, char **argv)
 static void del_overlay(struct tessera *t)
 {
 	struct overlay_tessera *ot = t->priv;
-
-	if (!ot)
-		return;
 
 	free(ot->ovl_location);
 	free(ot);
@@ -68,11 +57,15 @@ static int parse_overlay(struct tessera *t, char *key, char *val)
 
 	if (!ot) {
 		ot = malloc(sizeof(*ot));
+		ot->ovl_location = NULL;
 		t->priv = ot;
 	}
 
+	if (!key)
+		return ot->ovl_location ? 0 : -1;
+
 	if (!strcmp(key, "location")) {
-		ot->ovl_location = strdup(val);
+		ot->ovl_location = val;
 		return 0;
 	}
 
@@ -83,9 +76,6 @@ static void save_overlay(struct tessera *t, FILE *f)
 {
 	struct overlay_tessera *ot = t->priv;
 
-	if (!ot)
-		return;
-
 	fprintf(f, "    location: %s\n", ot->ovl_location);
 }
 
@@ -95,9 +85,6 @@ static void show_overlay(struct tessera *t)
 	DIR *d;
 	struct dirent *de;
 	bool aged = false;
-
-	if (!ot)
-		return;
 
 	printf("location: %s\n", ot->ovl_location);
 

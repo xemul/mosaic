@@ -273,7 +273,7 @@ static int change_mosaic(int argc, char **argv)
 	return config_update();
 }
 
-static int do_umount_mosaic(struct mosaic *m);
+static int do_umount_mosaic_from(struct mosaic *m, char *from, void *chk);
 
 static int do_mount_mosaic_at(struct mosaic *m, char *mp_path, char *options)
 {
@@ -310,14 +310,35 @@ static int do_mount_mosaic_at(struct mosaic *m, char *mp_path, char *options)
 	return 0;
 
 umount:
-	do_umount_mosaic(m);
+	do_umount_mosaic_from(m, mp_path, NULL);
 	return -1;
 }
 
-static int do_umount_mosaic(struct mosaic *m)
+static int do_umount_mosaic_from(struct mosaic *m, char *mp, void *x)
 {
-	printf("NOT IMPLEMENTED\n");
-	return 1;
+	char *chk = x;
+	struct element *e;
+	char path[PATH_MAX];
+	int plen;
+
+	if (chk && strcmp(mp, chk))
+		return ST_OK;
+
+	plen = sprintf(path, "%s/", mp);
+	list_for_each_entry(e, &m->elements, ml) {
+		sprintf(path + plen, "%s", e->e_at);
+		if (umount(path)) {
+			perror("Can't umount");
+			return ST_FAIL;
+		}
+	}
+
+	return ST_DROP;
+}
+
+static int umount_mosaic_from(struct mosaic *m, char *from)
+{
+	return st_for_each_mounted(m, true, do_umount_mosaic_from, from);
 }
 
 static int mount_mosaic(int argc, char **argv)
@@ -343,7 +364,7 @@ static int umount_mosaic(int argc, char **argv)
 	struct mosaic *m;
 
 	if (argc < 1) {
-		printf("Usage: moctl mosaic umount <name>\n"); /* FIXME: location? */
+		printf("Usage: moctl mosaic umount <name> [<locaction>]\n");
 		return 1;
 	}
 
@@ -353,7 +374,7 @@ static int umount_mosaic(int argc, char **argv)
 		return 1;
 	}
 
-	return do_umount_mosaic(m) == 0 ? 0 : -1;
+	return umount_mosaic_from(m, argv[1]) == 0 ? 0 : -1;
 }
 
 int do_mosaic(int argc, char **argv)

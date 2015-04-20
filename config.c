@@ -181,13 +181,19 @@ static int parse_tessera(yaml_parser_t *p, void *x)
 {
 	struct mosaic_state *ms = x;
 	struct tessera *t;
+	int ret;
 
 	t = malloc(sizeof(*t));
 	t->t_name = NULL;
 	t->t_desc = NULL;
 	list_add_tail(&t->sl, &ms->tesserae);
 
-	return yaml_parse_map_body(p, parse_tessera_value, x);
+	ret = yaml_parse_map_body(p, parse_tessera_value, x);
+
+	if (t->t_desc && t->t_desc->parse && t->t_desc->parse(t, NULL, NULL))
+		return -1;
+
+	return ret;
 }
 
 static int parse_tesserae(yaml_parser_t *p, void *x)

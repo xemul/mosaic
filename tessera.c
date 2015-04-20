@@ -76,25 +76,33 @@ static int add_tessera(int argc, char **argv)
 {
 	int i;
 	struct tess_desc *td;
+	struct tessera *t;
+	char *name;
 
 	if (argc < 2) {
 		printf("Usage: moctl tessera add <name> <type> ...\n");
-		goto out;
+		return 1;
 	}
 
 	td = tess_desc_by_type(argv[1]);
-	if (!td || !td->add)
-		goto out_t;
-
-	if (td->add(argv[0], argc - 2, argv + 2))
+	if (!td || !td->add) {
+		printf("Unknown tessera type %s\n", argv[0]);
 		return 1;
+	}
+
+	t = malloc(sizeof(*t));
+	t->t_name = strdup(argv[0]);
+	t->t_desc = td;
+
+	if (td->add(t, argc - 2, argv + 2)) {
+		free(name);
+		free(t);
+		return 1;
+	}
+
+	list_add_tail(&t->sl, &ms->tesserae);
 
 	return config_update();
-
-out_t:
-	printf("Unknown tessera type %s\n", argv[0]);
-out:
-	return 1;
 }
 
 static int del_tessera(int argc, char **argv)
@@ -112,9 +120,15 @@ static int del_tessera(int argc, char **argv)
 		return 1;
 	}
 
+	/*
+	 * FIXME -- what to do with on-disk layout?
+	 */
+
 	list_del(&t->sl);
 	if (t->t_desc->del)
 		t->t_desc->del(t);
+
+	free(t->t_name);
 	free(t);
 
 	return config_update();

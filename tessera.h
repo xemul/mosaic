@@ -8,10 +8,12 @@ struct tess_desc {
 	/*
 	 * Add/Del callbacks from cldline
 	 */
-	int (*add)(char *name, int argc, char **argv);
+	int (*add)(struct tessera *t, int argc, char **argv);
 	void (*del)(struct tessera *t);
 	/*
 	 * Parse/Save callback from/for config
+	 * Last call to parse is with NULL/NULL and is to
+	 * verify that we've read everything from config.
 	 */
 	int (*parse)(struct tessera *t, char *name, char *value);
 	void (*save)(struct tessera *t, FILE *);
