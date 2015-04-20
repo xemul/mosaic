@@ -58,11 +58,26 @@ struct tessera *find_tessera(struct mosaic_state *ms, char *name)
 	return NULL;
 }
 
-static void show_tessera(struct tessera *t)
+static int show_tessera(int argc, char **argv)
 {
-	printf("name: %s\n", t->t_name);
+	struct tessera *t;
+
+	if (argc < 0) {
+		printf("Usage: moctl tessera show [name]\n");
+		return 1;
+	}
+
+	t = find_tessera(ms, argv[0]);
+	if (!t) {
+		printf("Unknown tessera %s\n", argv[0]);
+		return 1;
+	}
+
 	printf("type: %s\n", t->t_desc->td_name);
-	printf("\n");
+	if (t->t_desc->show)
+		t->t_desc->show(t);
+
+	return 0;
 }
 
 static int list_tesserae(void)
@@ -70,7 +85,7 @@ static int list_tesserae(void)
 	struct tessera *t;
 
 	list_for_each_entry(t, &ms->tesserae, sl)
-		show_tessera(t);
+		printf("%s\n", t->t_name);
 
 	return 0;
 }
@@ -126,12 +141,14 @@ static int del_tessera(int argc, char **argv)
 int do_tessera(int argc, char **argv)
 {
 	if (argc < 1) {
-		printf("Usage: moctl tessera [list|add|del] ...\n");
+		printf("Usage: moctl tessera [list|show|add|del] ...\n");
 		return 1;
 	}
 
 	if (argv_is(argv[0], "list"))
 		return list_tesserae();
+	if (argv_is(argv[0], "show"))
+		return show_tessera(argc - 1, argv + 1);
 	if (argv_is(argv[0], "add"))
 		return add_tessera(argc - 1, argv + 1);
 	if (argv_is(argv[0], "del"))

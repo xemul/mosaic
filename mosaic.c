@@ -5,34 +5,6 @@
 #include "tessera.h"
 #include "util.h"
 
-static void show_mosaic(struct mosaic *m)
-{
-	struct element *e;
-
-	printf("name: %s\n", m->m_name);
-	list_for_each_entry(e, &m->elements, ml) {
-		printf("\ttessera: %s\n", e->t->t_name);
-		if (e->e_age == AGE_LAST)
-			printf("\tage:     latest\n");
-		else
-			printf("\tage:     %d\n", e->e_age);
-		printf("\tat:      %s\n", e->e_at ? : "-");
-		printf("\toptions: %s\n", e->e_options ? : "none");
-
-		printf("\n");
-	}
-}
-
-static int list_mosaics(void)
-{
-	struct mosaic *m;
-
-	list_for_each_entry(m, &ms->mosaics, sl)
-		show_mosaic(m);
-
-	return 0;
-}
-
 static struct mosaic *find_mosaic(char *name)
 {
 	struct mosaic *m;
@@ -42,6 +14,43 @@ static struct mosaic *find_mosaic(char *name)
 			return m;
 
 	return NULL;
+}
+
+static int show_mosaic(int argc, char **argv)
+{
+	struct mosaic *m;
+	struct element *e;
+
+	if (argc < 1) {
+		printf("Usage: moctl mosaic show [name]\n");
+		return 1;
+	}
+
+	m = find_mosaic(argv[0]);
+	if (!m) {
+		printf("No such mosaic %s\n", argv[0]);
+		return 1;
+	}
+
+	list_for_each_entry(e, &m->elements, ml) {
+		printf("tessera: %s\n", e->t->t_name);
+		if (e->e_age == AGE_LAST)
+			printf("\tage:     latest\n");
+		else
+			printf("\tage:     %d\n", e->e_age);
+		printf("\tat:      %s\n", e->e_at ? : "-");
+		printf("\toptions: %s\n", e->e_options ? : "none");
+	}
+}
+
+static int list_mosaics(void)
+{
+	struct mosaic *m;
+
+	list_for_each_entry(m, &ms->mosaics, sl)
+		printf("%s\n", m->m_name);
+
+	return 0;
 }
 
 static int set_element(struct element *e, char *aux)
@@ -243,12 +252,14 @@ static int change_mosaic(int argc, char **argv)
 int do_mosaic(int argc, char **argv)
 {
 	if (argc < 1) {
-		printf("Usage: moctl mosaic [list|add|del|change] ...\n");
+		printf("Usage: moctl mosaic [list|show|add|del|change] ...\n");
 		return 1;
 	}
 
 	if (argv_is(argv[0], "list"))
 		return list_mosaics();
+	if (argv_is(argv[0], "show"))
+		return show_mosaic(argc - 1, argv + 1);
 	if (argv_is(argv[0], "add"))
 		return add_mosaic(argc - 1, argv + 1);
 	if (argv_is(argv[0], "del"))
