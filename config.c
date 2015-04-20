@@ -402,7 +402,9 @@ int config_update(void)
 		return 1;
 	}
 
-	fprintf(f, "tesserae:\n");
+	if (!list_empty(&ms->tesserae))
+		fprintf(f, "tesserae:\n");
+
 	list_for_each_entry(t, &ms->tesserae, sl) {
 		fprintf(f, "  - name: %s\n", t->t_name);
 		fprintf(f, "    type: %s\n", t->t_desc->td_name);
@@ -412,7 +414,9 @@ int config_update(void)
 		fprintf(f, "\n");
 	}
 
-	fprintf(f, "mosaics:\n");
+	if (!list_empty(&ms->mosaics))
+		fprintf(f, "mosaics:\n");
+
 	list_for_each_entry(m, &ms->mosaics, sl) {
 		struct element *e;
 
@@ -430,9 +434,6 @@ int config_update(void)
 				fprintf(f, "        options: %s\n", e->e_options);
 			fprintf(f, "\n");
 		}
-
-		if (list_empty(&m->elements))
-			fprintf(f, "\n");
 	}
 
 	fclose(f);
