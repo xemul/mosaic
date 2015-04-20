@@ -39,14 +39,18 @@ static int show_mosaic(int argc, char **argv)
 
 	printf("mounted: %s\n", st_get_mounted(m));
 
+	if (!list_empty(&m->elements))
+		printf("elements:\n");
+
 	list_for_each_entry(e, &m->elements, ml) {
-		printf("tessera: %s\n", e->t->t_name);
+		printf("  - name: %s\n", e->t->t_name);
 		if (e->e_age == 0)
-			printf("\tage:     base\n");
+			printf("    age:     base\n");
 		else
-			printf("\tage:     %d\n", e->e_age);
-		printf("\tat:      %s\n", e->e_at ? : "-");
-		printf("\toptions: %s\n", e->e_options ? : "none");
+			printf("    age:     %d\n", e->e_age);
+		printf("    at:      %s\n", e->e_at ? : "-");
+		printf("    options: %s\n", e->e_options ? : "none");
+		printf("\n");
 	}
 }
 
@@ -60,40 +64,57 @@ static int list_mosaics(void)
 	return 0;
 }
 
-static int set_element(struct element *e, char *aux)
+/*
+ * Element description is
+ *
+ *  name:age:at[:options=$opts]
+ *
+ * Name is trimmed before calling set_element()
+ */
+
+static int set_element(struct element *e, char *desc)
 {
-	char *desc;
+	char *aux;
 
-	while (aux) {
-		char *aux2;
-
-		desc = aux + 1;
-		aux = strchr(desc, '=');
-		if (!aux) {
-			printf("Element format error %s\n", desc);
-			return -1;
-		}
-
-		*aux = '\0';
-		aux++;
-		aux2 = strchr(aux, ':');
-		if (aux2)
-			*aux2 = '\0';
-
-		if (!strcmp(desc, "age"))
-			e->e_age = atoi(aux);
-		else if (!strcmp(desc, "at"))
-			e->e_at = aux;
-		else if (!strcmp(desc, "options"))
-			e->e_options = aux;
-		else {
-			printf("Element format error %s\n", desc);
-			return -1;
-		}
-
-		aux = aux2;
+	/*
+	 * Age
+	 */
+	aux = strchr(desc, ':');
+	if (!aux) {
+		printf("Missing parameter in element\n");
+		return -1;
 	}
 
+	*aux = '\0';
+	e->e_age = atoi(desc);
+
+	/*
+	 * Location
+	 */
+	desc = aux + 1;
+	aux = strchr(desc, ':');
+	if (aux)
+		*aux = '\0';
+
+	e->e_at = desc;
+
+	if (!aux)
+		return 0;
+
+	desc = aux + 1;
+	aux = strchr(desc, '=');
+	if (!aux) {
+		printf("Invalid desc\n");
+		return -1;
+	}
+
+	*aux = '\0';
+	if (strcmp(desc, "options")) {
+		printf("Unknown paramenter %s\n", desc);
+		return -1;
+	}
+
+	e->e_options = desc;
 	return 0;
 }
 
@@ -103,23 +124,18 @@ static int add_element(struct mosaic *m, char *desc)
 	struct tessera *t;
 	char *aux;
 
-	/*
-	 * Element description is
-	 *
-	 *  name:age=$age:at=$path:options=$opts
-	 *
-	 * All but name is optional
-	 */
-
 	e = malloc(sizeof(*e));
 	e->e_age = 0;
 	e->e_at = NULL;
 	e->e_options = NULL;
 
 	aux = strchr(desc, ':');
-	if (aux)
-		*aux = '\0';
+	if (!aux) {
+		printf("Missing parts in element\n");
+		return -1;
+	}
 
+	*aux = '\0';
 	t = find_tessera(ms, desc);
 	if (!t) {
 		printf("Unknown tessera %s\n", desc);
@@ -128,7 +144,7 @@ static int add_element(struct mosaic *m, char *desc)
 
 	e->t = t;
 
-	if (set_element(e, aux))
+	if (set_element(e, aux + 1))
 		return -1;
 
 	list_add_tail(&e->ml, &m->elements);
@@ -152,19 +168,20 @@ static int update_element(struct mosaic *m, char *desc)
 	struct element *e;
 
 	aux = strchr(desc, ':');
-	if (aux)
-		*aux = '\0';
+	if (!aux) {
+		printf("Missing parts in element\n");
+		return -1;
+	}
+
+	*aux = '\0';
 
 	list_for_each_entry(e, &m->elements, ml) {
 		if (strcmp(e->t->t_name, desc))
 			continue;
 
-		if (!aux) {
-			printf("Can't update element to none\n");
-			return 1;
-		}
+		aux++;
 
-		if (!strcmp(aux + 1, "del")) {
+		if (!strcmp(aux, "del")) {
 			list_del(&e->ml);
 			free(e);
 			return 0;

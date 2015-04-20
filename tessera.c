@@ -78,15 +78,15 @@ static int add_tessera(int argc, char **argv)
 	struct tess_desc *td;
 
 	if (argc < 2) {
-		printf("Usage: moctl tessera add [type] [name] ...\n");
+		printf("Usage: moctl tessera add <name> <type> ...\n");
 		goto out;
 	}
 
-	td = tess_desc_by_type(argv[0]);
+	td = tess_desc_by_type(argv[1]);
 	if (!td || !td->add)
 		goto out_t;
 
-	if (td->add(td, argv[1], argc - 2, argv + 2))
+	if (td->add(td, argv[0], argc - 2, argv + 2))
 		return 1;
 
 	return config_update();
@@ -184,10 +184,11 @@ static int do_grow_tessera(struct tessera *t, int base_age, int new_age)
 static int grow_tessera(int argc, char **argv)
 {
 	struct tessera *t;
-	int base_age = 0, new_age = 1;
+	int base_age = 0, new_age;
+	char *aux;
 
 	if (argc < 2) {
-		printf("Usage: moctl tessera grow [name] <base-age:[new-age]>\n");
+		printf("Usage: moctl tessera grow <name> <new-age>[:<base-age>]n");
 		return 1;
 	}
 
@@ -197,17 +198,13 @@ static int grow_tessera(int argc, char **argv)
 		return 1;
 	}
 
-	if (argc >= 2) {
-		char *aux;
-
-		aux = strchr(argv[1], ':');
-		if (aux) {
-			*aux = '\0';
-			new_age = atoi(aux + 1);
-		}
-
-		base_age = atoi(argv[1]);
+	aux = strchr(argv[1], ':');
+	if (aux) {
+		*aux = '\0';
+		base_age = atoi(aux + 1);
 	}
+
+	new_age = atoi(argv[1]);
 
 	return do_grow_tessera(t, base_age, new_age);
 }

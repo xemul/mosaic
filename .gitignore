@@ -1,0 +1,5 @@
+*.o
+mosaic.conf
+tags
+moctl
+.*

@@ -8,6 +8,37 @@
 
 struct mosaic_state *ms;
 
+static void usage(void)
+{
+	printf(
+"Usage: moctl <object> <action> [<options>]\n"
+"\n"
+" * Objects:\n"
+"    m|mosaic\n"
+"    t|tessera\n"
+"\n"
+" * Actions:\n"
+"   Common:\n"
+"    l|list\n"
+"    s|show    <name>\n"
+"\n"
+"   Mosaic:\n"
+"    a|add     <name> [<elements>]\n"
+"    d|del     <name>\n"
+"    c|change  <name> [<elements>]\n"
+"    m|mount   <name> <location> [<mount-options>]\n"
+"\n"
+"     Element: <name>:<age>:<location>[:options=<mount-options>]\n"
+"              for \"change\" <name>:del to remote\n"
+"\n"
+"   Tessera:\n"
+"    a|add     <name> <type> [<type-options>]\n"
+"    d|del     <name>\n"
+"    m|mount   <name>:<age> <location> [<mount-options>]\n"
+"    g|grow    <name> <new-age>[:<base-age>]\n"
+);
+}
+
 int main(int argc, char **argv)
 {
 	ms = mosaic_parse_config("mosaic.conf");
@@ -17,7 +48,7 @@ int main(int argc, char **argv)
 	}
 
 	if (argc < 2) {
-		printf("Usage: moctl [mosaic|tessera] ...\n");
+		usage();
 		return 1;
 	}
 
