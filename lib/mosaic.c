@@ -12,6 +12,8 @@
 #include "status.h"
 #include "config.h"
 
+#include "uapi/mosaic.h"
+
 struct mosaic *mosaic_find_by_name(char *name)
 {
 	struct mosaic *m;

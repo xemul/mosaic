@@ -1,10 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "uapi/mosaic.h"
+
+/*
+ * FIXME -- below is not the part of UAPI
+ */
 #include "mosaic.h"
 #include "tessera.h"
-#include "config.h"
-#include "util.h"
 #include "status.h"
 
 static inline int argv_is(char *argv, char *is)

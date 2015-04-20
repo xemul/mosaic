@@ -29,15 +29,4 @@ struct tess_desc {
 int do_mount_tessera(struct tessera *t, int age, char *at, char *options);
 struct tess_desc *tess_desc_by_type(char *type);
 struct tessera *find_tessera(struct mosaic_state *ms, char *name);
-
-/*
- * For UAPI
- */
-
-int mosaic_iterate_tesserae(int (*cb)(struct tessera *, void *), void *x);
-struct tessera *mosaic_find_tessera(char *name);
-int mosaic_add_tessera(char *type, char *name, int n_opts, char **opts);
-int mosaic_del_tessera(struct tessera *t);
-int mosaic_mount_tessera(struct tessera *t, int age, char *at, char *options);
-int mosaic_grow_tessera(struct tessera *t, int age, int from_age);
 #endif
