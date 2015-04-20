@@ -163,6 +163,15 @@ static int parse_tessera_value(yaml_parser_t *p, char *key, void *x)
 		return 0;
 	}
 
+	if (t->t_desc && t->t_desc->parse) {
+		/*
+		 * FIXME -- if type goes after other options,
+		 * why do we need to fail?
+		 */
+		if (!t->t_desc->parse(t, key, val))
+			return 0;
+	}
+
 	err("Unknown tessera field %s\n", key);
 	free(val);
 	return -1;
@@ -397,6 +406,9 @@ int config_update(void)
 	list_for_each_entry(t, &ms->tesserae, sl) {
 		fprintf(f, "  - name: %s\n", t->t_name);
 		fprintf(f, "    type: %s\n", t->t_desc->td_name);
+		if (t->t_desc->save)
+			t->t_desc->save(t, f);
+
 		fprintf(f, "\n");
 	}
 

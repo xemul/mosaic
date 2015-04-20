@@ -9,6 +9,7 @@ struct tessera {
 	char *t_name;
 	struct tess_desc *t_desc;
 	struct list_head sl;
+	void *priv;
 };
 
 struct element {

@@ -5,7 +5,9 @@ struct tessera;
 struct tess_desc {
 	char *td_name;
 	int (*add)(struct tess_desc *me, char *name, int argc, char **argv);
-	int (*del)(struct tess_desc *me, struct tessera *t);
+	void (*del)(struct tess_desc *me, struct tessera *t);
+	int (*parse)(struct tessera *t, char *name, char *value);
+	void (*save)(struct tessera *t, FILE *);
 	void (*show)(struct tessera *t);
 	int (*mount)(struct tessera *t, int age, char *path, char *options);
 };
