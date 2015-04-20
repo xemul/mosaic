@@ -1,6 +1,7 @@
 #ifndef __MOSAIC_TESSERA_H__
 #define __MOSAIC_TESSERA_H__
 struct tessera;
+struct mosaic_state;
 
 struct tess_desc {
 	char *td_name;

@@ -2,6 +2,7 @@ OBJS =
 OBJS += main.o
 OBJS += mosaic.o
 OBJS += tessera.o
+OBJS += overlay.o
 OBJS += config.o
 OBJS += status.o
 
