@@ -27,6 +27,13 @@ static int add_overlay(struct tess_desc *me, char *name, int argc, char **argv)
 		return 1;
 	}
 
+	if (access(argv[0], F_OK) < 0) {
+		if (mkdir(argv[0], 0600) < 0) {
+			perror("Can't make dir for base");
+			return -1;
+		}
+	}
+
 	ot = malloc(sizeof(*ot));
 	ot->ovl_location = strdup(argv[0]);
 
@@ -174,7 +181,7 @@ static int mount_overlay(struct tessera *t, int age, char *path, char *options)
 	char l_path[PATH_MAX];
 	int plen;
 
-	plen = sprintf(path, "%s", ot->ovl_location);
+	plen = sprintf(l_path, "%s", ot->ovl_location);
 	if (mount_overlay_delta(t, age, l_path, plen))
 		return -1;
 
