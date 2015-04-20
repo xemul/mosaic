@@ -1,9 +1,14 @@
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <limits.h>
+#include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include "mosaic.h"
 #include "tessera.h"
 #include "util.h"
+#include "status.h"
 
 static struct mosaic *find_mosaic(char *name)
 {
@@ -31,6 +36,8 @@ static int show_mosaic(int argc, char **argv)
 		printf("No such mosaic %s\n", argv[0]);
 		return 1;
 	}
+
+	printf("mounted: %s\n", st_get_mounted(m));
 
 	list_for_each_entry(e, &m->elements, ml) {
 		printf("tessera: %s\n", e->t->t_name);
@@ -249,10 +256,96 @@ static int change_mosaic(int argc, char **argv)
 	return config_update();
 }
 
+static int do_umount_mosaic(struct mosaic *m);
+
+static int do_mount_mosaic_at(struct mosaic *m, char *mp_path)
+{
+	struct stat buf;
+	struct element *el;
+	char path[PATH_MAX];
+	int plen;
+
+	if (stat(mp_path, &buf)) {
+		printf("Can't stat %s\n", mp_path);
+		return -1;
+	}
+
+	if (!S_ISDIR(buf.st_mode)) {
+		printf("Can't mount mosaic on non-directory\n");
+		return -1;
+	}
+
+	plen = sprintf(path, "%s/", mp_path);
+
+	list_for_each_entry(el, &m->elements, ml) {
+		struct tessera *t = el->t;
+
+		if (!t->t_desc->mount) {
+			printf("Mounting of %s is not supported\n",
+					t->t_desc->td_name);
+			goto umount;
+		}
+
+		sprintf(path + plen, "%s", el->e_at);
+		if (t->t_desc->mount(t, el->e_age, path, el->e_options))
+			goto umount;
+	}
+
+	st_set_mounted(m, mp_path);
+
+	return 0;
+
+umount:
+	do_umount_mosaic(m);
+	return -1;
+}
+
+static int do_umount_mosaic(struct mosaic *m)
+{
+	printf("NOT IMPLEMENTED\n");
+	return 1;
+}
+
+static int mount_mosaic(int argc, char **argv)
+{
+	struct mosaic *m;
+
+	if (argc < 2) {
+		printf("Usage: moctl mosaic mount [name] [location] ...\n");
+		return 1;
+	}
+
+	m = find_mosaic(argv[0]);
+	if (!m) {
+		printf("Unknown mosaic %s\n", argv[0]);
+		return 1;
+	}
+
+	return do_mount_mosaic_at(m, argv[1]) == 0 ? 0 : -1;
+}
+
+static int umount_mosaic(int argc, char **argv)
+{
+	struct mosaic *m;
+
+	if (argc < 1) {
+		printf("Usage: moctl mosaic mount [name]\n");
+		return 1;
+	}
+
+	m = find_mosaic(argv[0]);
+	if (!m) {
+		printf("Unknown mosaic %s\n", argv[0]);
+		return 1;
+	}
+
+	return do_umount_mosaic(m) == 0 ? 0 : -1;
+}
+
 int do_mosaic(int argc, char **argv)
 {
 	if (argc < 1) {
-		printf("Usage: moctl mosaic [list|show|add|del|change] ...\n");
+		printf("Usage: moctl mosaic [list|show|add|del|change|mount|umount] ...\n");
 		return 1;
 	}
 
@@ -266,6 +359,10 @@ int do_mosaic(int argc, char **argv)
 		return del_mosaic(argc - 1, argv + 1);
 	if (argv_is(argv[0], "change"))
 		return change_mosaic(argc - 1, argv + 1);
+	if (argv_is(argv[0], "mount"))
+		return mount_mosaic(argc - 1, argv + 1);
+	if (argv_is(argv[0], "umount"))
+		return umount_mosaic(argc - 1, argv + 1);
 
 	printf("Unknown mosaic action %s\n", argv[0]);
 	return 1;

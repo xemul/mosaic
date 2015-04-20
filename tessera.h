@@ -7,6 +7,7 @@ struct tess_desc {
 	int (*add)(struct tess_desc *me, char *name, int argc, char **argv);
 	int (*del)(struct tess_desc *me, struct tessera *t);
 	void (*show)(struct tessera *t);
+	int (*mount)(struct tessera *t, int age, char *path, char *options);
 };
 
 int do_tessera(int argc, char **argv);

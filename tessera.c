@@ -22,9 +22,16 @@ static int add_overlay(struct tess_desc *me, char *name, int argc, char **argv)
 	return 0;
 }
 
+static int mount_overlay(struct tessera *t, int age, char *path, char *options)
+{
+	printf("NOT IMPLEMENTED\n");
+	return 1;
+}
+
 static struct tess_desc tess_desc_overlay = {
 	.td_name = "overlay",
 	.add = add_overlay,
+	.mount = mount_overlay,
 };
 
 static struct tess_desc tess_desc_btrfs = {
@@ -62,7 +69,7 @@ static int show_tessera(int argc, char **argv)
 {
 	struct tessera *t;
 
-	if (argc < 0) {
+	if (argc < 1) {
 		printf("Usage: moctl tessera show [name]\n");
 		return 1;
 	}
