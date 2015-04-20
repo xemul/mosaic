@@ -25,7 +25,7 @@ static int add_overlay(struct tess_desc *me, char *name, int argc, char **argv)
 	struct overlay_tessera *ot;
 
 	if (argc < 1) {
-		printf("Usage: moctl tessera add overlay [name] [location]\n");
+		printf("Usage: moctl tessera add <name> overlay <location>\n");
 		return 1;
 	}
 
@@ -211,6 +211,11 @@ static int mount_overlay(struct tessera *t, int age, char *path, char *options)
 	struct overlay_tessera *ot = t->priv;
 	char l_path[PATH_MAX];
 	int plen;
+
+	if (options) {
+		printf("Mount options are not yet supported\n");
+		return -1;
+	}
 
 	plen = sprintf(l_path, "%s", ot->ovl_location);
 	if (mount_overlay_delta(t, age, l_path, plen))

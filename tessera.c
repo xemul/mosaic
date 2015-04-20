@@ -45,7 +45,7 @@ static int show_tessera(int argc, char **argv)
 	struct tessera *t;
 
 	if (argc < 1) {
-		printf("Usage: moctl tessera show [name]\n");
+		printf("Usage: moctl tessera show <name>\n");
 		return 1;
 	}
 
@@ -102,7 +102,7 @@ static int del_tessera(int argc, char **argv)
 	struct tessera *t;
 
 	if (argc < 1) {
-		printf("Usage: moctl tessera del [name]\n");
+		printf("Usage: moctl tessera del <name>\n");
 		return 1;
 	}
 
@@ -139,7 +139,7 @@ static int mount_tessera(int argc, char **argv)
 	char *options = NULL, *aux;
 
 	if (argc < 2) {
-		printf("Usage: moctl tessera mount [name]:[age] [location] <options>\n");
+		printf("Usage: moctl tessera mount <name>:<age> <location> [<options>]\n");
 		return 1;
 	}
 
@@ -188,7 +188,7 @@ static int grow_tessera(int argc, char **argv)
 	char *aux;
 
 	if (argc < 2) {
-		printf("Usage: moctl tessera grow <name> <new-age>[:<base-age>]n");
+		printf("Usage: moctl tessera grow <name> <new-age>[:<base-age>]\n");
 		return 1;
 	}
 
@@ -212,7 +212,7 @@ static int grow_tessera(int argc, char **argv)
 int do_tessera(int argc, char **argv)
 {
 	if (argc < 1) {
-		printf("Usage: moctl tessera [list|show|add|del|mount|grow] ...\n");
+		printf("Usage: moctl tessera <list|show|add|del|mount|grow> ...\n");
 		return 1;
 	}
 

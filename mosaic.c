@@ -27,7 +27,7 @@ static int show_mosaic(int argc, char **argv)
 	struct element *e;
 
 	if (argc < 1) {
-		printf("Usage: moctl mosaic show [name]\n");
+		printf("Usage: moctl mosaic show <name>\n");
 		return 1;
 	}
 
@@ -212,7 +212,7 @@ static int add_mosaic(int argc, char **argv)
 	struct mosaic *m;
 
 	if (argc < 1) {
-		printf("Usage: moctl mosaic add [name] <elements>\n");
+		printf("Usage: moctl mosaic add <name> [<elements>]\n");
 		return 1;
 	}
 
@@ -235,7 +235,7 @@ static int del_mosaic(int argc, char **argv)
 	struct mosaic *m;
 
 	if (argc < 1) {
-		printf("Usage: moctl mosaic del [name]\n");
+		printf("Usage: moctl mosaic del <name>\n");
 		return 1;
 	}
 
@@ -257,7 +257,7 @@ static int change_mosaic(int argc, char **argv)
 	struct mosaic *m;
 
 	if (argc < 1) {
-		printf("Usage: moctl mosaic change [name] <elements>\n");
+		printf("Usage: moctl mosaic change <name> [<elements>]\n");
 		return 1;
 	}
 
@@ -275,12 +275,17 @@ static int change_mosaic(int argc, char **argv)
 
 static int do_umount_mosaic(struct mosaic *m);
 
-static int do_mount_mosaic_at(struct mosaic *m, char *mp_path)
+static int do_mount_mosaic_at(struct mosaic *m, char *mp_path, char *options)
 {
 	struct stat buf;
 	struct element *el;
 	char path[PATH_MAX];
 	int plen;
+
+	if (options) {
+		printf("Mount options not yet supported\n");
+		return -1;
+	}
 
 	if (stat(mp_path, &buf)) {
 		printf("Can't stat %s\n", mp_path);
@@ -320,7 +325,7 @@ static int mount_mosaic(int argc, char **argv)
 	struct mosaic *m;
 
 	if (argc < 2) {
-		printf("Usage: moctl mosaic mount [name] [location] ...\n");
+		printf("Usage: moctl mosaic mount <name> <location> [<options>]n");
 		return 1;
 	}
 
@@ -330,7 +335,7 @@ static int mount_mosaic(int argc, char **argv)
 		return 1;
 	}
 
-	return do_mount_mosaic_at(m, argv[1]) == 0 ? 0 : -1;
+	return do_mount_mosaic_at(m, argv[1], argv[2]) == 0 ? 0 : -1;
 }
 
 static int umount_mosaic(int argc, char **argv)
@@ -338,7 +343,7 @@ static int umount_mosaic(int argc, char **argv)
 	struct mosaic *m;
 
 	if (argc < 1) {
-		printf("Usage: moctl mosaic mount [name]\n");
+		printf("Usage: moctl mosaic umount <name>\n"); /* FIXME: location? */
 		return 1;
 	}
 
@@ -354,7 +359,7 @@ static int umount_mosaic(int argc, char **argv)
 int do_mosaic(int argc, char **argv)
 {
 	if (argc < 1) {
-		printf("Usage: moctl mosaic [list|show|add|del|change|mount|umount] ...\n");
+		printf("Usage: moctl mosaic <list|show|add|del|change|mount|umount> ...\n");
 		return 1;
 	}
 
