@@ -1,4 +1,5 @@
 #include <sys/mount.h>
+#include <fcntl.h>
 #include <limits.h>
 #include <unistd.h>
 #include <stdio.h>

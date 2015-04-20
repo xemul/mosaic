@@ -91,7 +91,7 @@ static int yaml_parse_map_body(yaml_parser_t *p, int (*parse_value)(yaml_parser_
 			break;
 		}
 
-		ret = parse_value(p, e.data.scalar.value, x);
+		ret = parse_value(p, (char *)e.data.scalar.value, x);
 		yaml_event_delete(&e);
 
 		if (ret)
@@ -112,7 +112,7 @@ static char *yaml_parse_scalar(yaml_parser_t *p)
 	if (!yaml_parser_parse(p, &e))
 		return NULL;
 	if (e.type == YAML_SCALAR_EVENT)
-		ret = strdup(e.data.scalar.value);
+		ret = strdup((char *)e.data.scalar.value);
 	yaml_event_delete(&e);
 	return ret;
 }
@@ -388,7 +388,6 @@ static struct mosaic_state *mosaic_parse_config(char *cfg_file)
 		ms = NULL;
 	}
 
-out_e:
 	yaml_parser_delete(&parser);
 out_c:
 	fclose(f);

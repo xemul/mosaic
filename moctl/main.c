@@ -5,6 +5,7 @@
 #include "tessera.h"
 #include "config.h"
 #include "util.h"
+#include "status.h"
 
 static inline int argv_is(char *argv, char *is)
 {
@@ -319,11 +320,6 @@ static int show_tessera(int argc, char **argv)
 
 static int add_tessera(int argc, char **argv)
 {
-	int i;
-	struct tess_desc *td;
-	struct tessera *t;
-	char *name;
-
 	if (argc < 2) {
 		printf("Usage: moctl tessera add <name> <type> ...\n");
 		return 1;

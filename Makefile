@@ -1,17 +1,25 @@
-OBJS =
-OBJS += main.o
-OBJS += mosaic.o
-OBJS += tessera.o
-OBJS += overlay.o
-OBJS += config.o
-OBJS += status.o
+SUBS =
+SUBS += lib
+SUBS += moctl
 
+DIR = $(shell pwd)
+CFLAGS = -I$(DIR)/include/ -Wall -Werror
 CC = gcc
 
-all: moctl
+export CFLAGS
+export CC
 
-moctl: $(OBJS)
-	$(CC) $^ -o $@ -lyaml
+all: $(SUBS)
 
-%.o: %.c
-	$(CC) $< -o $@ -c
+lib:
+	make -C lib/
+
+moctl:
+	make -C moctl/
+
+clean:
+	make -C lib/ clean
+	make -C moctl/ clean
+
+.PHONY: all clean $(SUBS)
+.DEFAULT_GOAL: all

@@ -1,5 +1,6 @@
 #include <sys/mount.h>
 #include <sys/vfs.h>
+#include <sys/stat.h>
 #include <limits.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -92,7 +93,7 @@ static void show_overlay(struct tessera *t)
 	if (!d)
 		return;
 
-	while (de = readdir(d)) {
+	while ((de = readdir(d)) != NULL) {
 		if (de->d_name[0] == '.')
 			continue;
 
@@ -257,7 +258,7 @@ cleanup:
 			unlink(path);
 	}
 
-	sprintf(path + plen, "");
+	*(path + plen) = '\0';
 	rmdir(path);
 	return -1;
 }

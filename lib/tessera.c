@@ -13,7 +13,7 @@ int mosaic_iterate_tesserae(int (*cb)(struct tessera *, void *), void *x)
 	int ret = 0;
 
 	list_for_each_entry(t, &ms->tesserae, sl)
-		if (ret = cb(t, x))
+		if ((ret = cb(t, x)) != 0)
 			break;
 
 	return ret;

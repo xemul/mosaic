@@ -1,5 +1,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/mount.h>
 #include <limits.h>
 #include <unistd.h>
 #include <string.h>
@@ -9,6 +10,7 @@
 #include "tessera.h"
 #include "util.h"
 #include "status.h"
+#include "config.h"
 
 struct mosaic *mosaic_find_by_name(char *name)
 {
@@ -94,7 +96,7 @@ int mosaic_iterate(int (*cb)(struct mosaic *m, void *x), void *x)
 	int ret = 0;
 
 	list_for_each_entry(m, &ms->mosaics, sl)
-		if (ret = cb(m, x))
+		if ((ret = cb(m, x)) != 0)
 			break;
 
 	return ret;
@@ -106,7 +108,7 @@ int mosaic_iterate_elements(struct mosaic *m, int (*cb)(struct mosaic *, struct 
 	int ret = 0;
 
 	list_for_each_entry(e, &m->elements, ml)
-		if (ret = cb(m, e, x))
+		if ((ret = cb(m, e, x)) != 0)
 			break;
 
 	return ret;
@@ -156,7 +158,6 @@ int mosaic_set_element(struct mosaic *m, char *name, int age, char *at, char *op
 		e->t = t;
 	}
 
-found:
 	e->e_age = age;
 	e->e_at = strdup(at);
 	e->e_options = NULL;
