@@ -70,7 +70,7 @@ int mosaic_mount(struct mosaic *m, char *mp_path, char *options)
 
 	list_for_each_entry(el, &m->elements, ml) {
 		sprintf(path + plen, "%s", el->e_at);
-		if (do_mount_tessera_at(el->t, el->e_age, path, el->e_options))
+		if (do_mount_tessera(el->t, el->e_age, path, el->e_options))
 			goto umount;
 	}
 
@@ -148,7 +148,7 @@ int mosaic_set_element(struct mosaic *m, char *name, int age, char *at, char *op
 	} else {
 		struct tessera *t;
 
-		t = find_tessera(ms, name);
+		t = mosaic_find_tessera(name);
 		if (!t)
 			return -1;
 

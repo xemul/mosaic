@@ -39,6 +39,10 @@ static void usage(void)
 );
 }
 
+/*
+ * Mosaic CLI
+ */
+
 static int print_mosaic(struct mosaic *m, void *x)
 {
 	printf("%s\n", m->m_name);
@@ -159,7 +163,7 @@ static int add_mosaic(int argc, char **argv)
 	if (set_elements(m, argc - 1, argv + 1))
 		return 1;
 
-	return mosaic_add(m);
+	return mosaic_add(m) == 0 ? 0 : 1;
 }
 
 static int change_mosaic(int argc, char **argv)
@@ -180,7 +184,7 @@ static int change_mosaic(int argc, char **argv)
 	if (set_elements(m, argc - 1, argv + 1))
 		return 1;
 
-	return mosaic_update(m);
+	return mosaic_update(m) == 0 ? 0 : 1;
 }
 
 static int del_mosaic(int argc, char **argv)
@@ -198,7 +202,7 @@ static int del_mosaic(int argc, char **argv)
 		return 1;
 	}
 
-	return mosaic_del(m);
+	return mosaic_del(m) == 0 ? 0 : 1;
 }
 
 static int mount_mosaic(int argc, char **argv)
@@ -263,6 +267,156 @@ static int do_mosaic(int argc, char **argv)
 	return 1;
 }
 
+/*
+ * Tessera CLI
+ */
+
+static int print_tessera(struct tessera *t, void *x)
+{
+	printf("%s\n", t->t_name);
+	return 0;
+}
+
+static int list_tesserae(void)
+{
+	return mosaic_iterate_tesserae(print_tessera, NULL);
+}
+
+static int show_tessera(int argc, char **argv)
+{
+	struct tessera *t;
+
+	if (argc < 1) {
+		printf("Usage: moctl tessera show <name>\n");
+		return 1;
+	}
+
+	t = mosaic_find_tessera(argv[0]);
+	if (!t) {
+		printf("Unknown tessera %s\n", argv[0]);
+		return 1;
+	}
+
+	printf("type: %s\n", t->t_desc->td_name);
+	if (t->t_desc->show)
+		t->t_desc->show(t);
+
+	return 0;
+}
+
+static int add_tessera(int argc, char **argv)
+{
+	int i;
+	struct tess_desc *td;
+	struct tessera *t;
+	char *name;
+
+	if (argc < 2) {
+		printf("Usage: moctl tessera add <name> <type> ...\n");
+		return 1;
+	}
+
+	return mosaic_add_tessera(argv[1], argv[0], argc - 2, argv + 2) == 0 ? 0 : 1;
+}
+
+static int del_tessera(int argc, char **argv)
+{
+	struct tessera *t;
+
+	if (argc < 1) {
+		printf("Usage: moctl tessera del <name>\n");
+		return 1;
+	}
+
+	t = mosaic_find_tessera(argv[0]);
+	if (!t) {
+		printf("Unknown tessera %s\n", argv[0]);
+		return 1;
+	}
+
+	return mosaic_del_tessera(t) == 0 ? 0 : 1;
+}
+
+static int mount_tessera(int argc, char **argv)
+{
+	struct tessera *t;
+	int age = 0;
+	char *options = NULL, *aux;
+
+	if (argc < 2) {
+		printf("Usage: moctl tessera mount <name>:<age> <location> [<options>]\n");
+		return 1;
+	}
+
+	aux = strchr(argv[0], ':');
+	if (aux) {
+		*aux = '\0';
+		age = atoi(aux + 1);
+	}
+
+	if (argc >= 3)
+		options = argv[2];
+
+	t = mosaic_find_tessera(argv[0]);
+	if (!t) {
+		printf("Unknown tessera %s\n", argv[0]);
+		return 1;
+	}
+
+	return mosaic_mount_tessera(t, age, argv[1], options) == 0 ? 0 : 1;
+}
+
+static int grow_tessera(int argc, char **argv)
+{
+	struct tessera *t;
+	int base_age = 0, new_age;
+	char *aux;
+
+	if (argc < 2) {
+		printf("Usage: moctl tessera grow <name> <new-age>[:<base-age>]\n");
+		return 1;
+	}
+
+	t = mosaic_find_tessera(argv[0]);
+	if (!t) {
+		printf("Unknown tessera %s\n", argv[0]);
+		return 1;
+	}
+
+	aux = strchr(argv[1], ':');
+	if (aux) {
+		*aux = '\0';
+		base_age = atoi(aux + 1);
+	}
+
+	new_age = atoi(argv[1]);
+
+	return mosaic_grow_tessera(t, new_age, base_age) == 0 ? 0 : 1;
+}
+
+static int do_tessera(int argc, char **argv)
+{
+	if (argc < 1) {
+		printf("Usage: moctl tessera <list|show|add|del|mount|grow> ...\n");
+		return 1;
+	}
+
+	if (argv_is(argv[0], "list"))
+		return list_tesserae();
+	if (argv_is(argv[0], "show"))
+		return show_tessera(argc - 1, argv + 1);
+	if (argv_is(argv[0], "add"))
+		return add_tessera(argc - 1, argv + 1);
+	if (argv_is(argv[0], "del"))
+		return del_tessera(argc - 1, argv + 1);
+	if (argv_is(argv[0], "mount"))
+		return mount_tessera(argc - 1, argv + 1);
+	if (argv_is(argv[0], "grow"))
+		return grow_tessera(argc - 1, argv + 1);
+
+	printf("Unknown mosaic action %s\n", argv[0]);
+	return 1;
+}
 int main(int argc, char **argv)
 {
 	ms = mosaic_parse_config("mosaic.conf");
