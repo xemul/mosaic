@@ -37,7 +37,7 @@ static int show_mosaic(int argc, char **argv)
 		return 1;
 	}
 
-	printf("mounted: %s\n", st_get_mounted(m));
+	st_show_mounted(m);
 
 	if (!list_empty(&m->elements))
 		printf("elements:\n");
@@ -325,7 +325,7 @@ static int mount_mosaic(int argc, char **argv)
 	struct mosaic *m;
 
 	if (argc < 2) {
-		printf("Usage: moctl mosaic mount <name> <location> [<options>]n");
+		printf("Usage: moctl mosaic mount <name> <location> [<options>]\n");
 		return 1;
 	}
 

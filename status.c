@@ -2,6 +2,7 @@
 #include <limits.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include "mosaic.h"
 #include "status.h"
 
@@ -45,22 +46,40 @@ void st_set_mounted(struct mosaic *m, char *path)
 
 	/*
 	 * FIXME -- this is YAML, but it's handled manually
-	 * FIXME 2 -- several mounts
+	 * FIXME -- locking
 	 */
 
 	sprintf(st_aux, STATUS_DIR "/m.%s", m->m_name);
-	st = fopen(st_aux, "w");
+	st = fopen(st_aux, "a+");
+	if (!st)
+		goto skip;
+
+	while (fgets(st_aux, sizeof(st_aux), st)) {
+		if (st_aux[0] != '-' || st_aux[1] != ' ') {
+			/* BUG */
+			printf("Fatal. State file screwed up.\n");
+			goto done;
+		}
+
+		if (!strcmp(st_aux + 2, path))
+			/* already there */
+			goto done;
+	}
+
+skip:
 	fprintf(st, "- %s\n", path);
+done:
 	fclose(st);
 }
 
-char *st_get_mounted(struct mosaic *m)
+void st_show_mounted(struct mosaic *m)
 {
 	FILE *st;
 	char *s;
+	bool mnt = false;
 
 	if (st_check_dir())
-		return "X";
+		return;
 
 	/*
 	 * FIXME -- not good to report static string back
@@ -69,18 +88,26 @@ char *st_get_mounted(struct mosaic *m)
 	sprintf(st_aux, STATUS_DIR "/m.%s", m->m_name);
 	st = fopen(st_aux, "r");
 	if (!st)
-		return "no";
+		return;
 
-	s = fgets(st_aux, sizeof(st_aux), st);
-	fclose(st);
+	while (fgets(st_aux, sizeof(st_aux), st)) {
+		if (st_aux[0] != '-' || st_aux[1] != ' ') {
+			/* BUG */
+			printf("Fatal. State file screwed up.\n");
+			fclose(st);
+			break;
+		}
 
-	if (!s)
-		return "no";
+		if (!mnt) {
+			printf("mounted:\n");
+			mnt = true;
+		}
 
-	if (st_aux[0] != '-' || st_aux[1] != ' ') {
-		printf("Status for %s is screwed up\n", m->m_name);
-		return "X";
+		printf("  %s", st_aux);
 	}
 
-	return st_aux + 2;
+	if (mnt)
+		printf("\n");
+
+	fclose(st);
 }
