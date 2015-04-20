@@ -10,7 +10,7 @@
 #include "util.h"
 #include "status.h"
 
-static struct mosaic *find_mosaic(char *name)
+struct mosaic *mosaic_find_by_name(char *name)
 {
 	struct mosaic *m;
 
@@ -21,261 +21,30 @@ static struct mosaic *find_mosaic(char *name)
 	return NULL;
 }
 
-static int show_mosaic(int argc, char **argv)
+static int do_umount_mosaic_from(struct mosaic *m, char *mp, void *x)
 {
-	struct mosaic *m;
+	char *chk = x;
 	struct element *e;
+	char path[PATH_MAX];
+	int plen;
 
-	if (argc < 1) {
-		printf("Usage: moctl mosaic show <name>\n");
-		return 1;
-	}
+	if (chk && strcmp(mp, chk))
+		return ST_OK;
 
-	m = find_mosaic(argv[0]);
-	if (!m) {
-		printf("No such mosaic %s\n", argv[0]);
-		return 1;
-	}
-
-	st_show_mounted(m);
-
-	if (!list_empty(&m->elements))
-		printf("elements:\n");
-
+	plen = sprintf(path, "%s/", mp);
 	list_for_each_entry(e, &m->elements, ml) {
-		printf("  - name: %s\n", e->t->t_name);
-		if (e->e_age == 0)
-			printf("    age:     base\n");
-		else
-			printf("    age:     %d\n", e->e_age);
-		printf("    at:      %s\n", e->e_at ? : "-");
-		printf("    options: %s\n", e->e_options ? : "none");
-		printf("\n");
-	}
-}
-
-static int list_mosaics(void)
-{
-	struct mosaic *m;
-
-	list_for_each_entry(m, &ms->mosaics, sl)
-		printf("%s\n", m->m_name);
-
-	return 0;
-}
-
-/*
- * Element description is
- *
- *  name:age:at[:options=$opts]
- *
- * Name is trimmed before calling set_element()
- */
-
-static int set_element(struct element *e, char *desc)
-{
-	char *aux;
-
-	/*
-	 * Age
-	 */
-	aux = strchr(desc, ':');
-	if (!aux) {
-		printf("Missing parameter in element\n");
-		return -1;
-	}
-
-	*aux = '\0';
-	e->e_age = atoi(desc);
-
-	/*
-	 * Location
-	 */
-	desc = aux + 1;
-	aux = strchr(desc, ':');
-	if (aux)
-		*aux = '\0';
-
-	e->e_at = desc;
-
-	if (!aux)
-		return 0;
-
-	desc = aux + 1;
-	aux = strchr(desc, '=');
-	if (!aux) {
-		printf("Invalid desc\n");
-		return -1;
-	}
-
-	*aux = '\0';
-	if (strcmp(desc, "options")) {
-		printf("Unknown paramenter %s\n", desc);
-		return -1;
-	}
-
-	e->e_options = desc;
-	return 0;
-}
-
-static int add_element(struct mosaic *m, char *desc)
-{
-	struct element *e;
-	struct tessera *t;
-	char *aux;
-
-	e = malloc(sizeof(*e));
-	e->e_age = 0;
-	e->e_at = NULL;
-	e->e_options = NULL;
-
-	aux = strchr(desc, ':');
-	if (!aux) {
-		printf("Missing parts in element\n");
-		return -1;
-	}
-
-	*aux = '\0';
-	t = find_tessera(ms, desc);
-	if (!t) {
-		printf("Unknown tessera %s\n", desc);
-		return -1;
-	}
-
-	e->t = t;
-
-	if (set_element(e, aux + 1))
-		return -1;
-
-	list_add_tail(&e->ml, &m->elements);
-	return 0;
-}
-
-static int maybe_add_elements(struct mosaic *m, int argc, char **argv)
-{
-	int i;
-
-	for (i = 0; i < argc; i++)
-		if (add_element(m, argv[i]))
-			return -1;
-
-	return 0;
-}
-
-static int update_element(struct mosaic *m, char *desc)
-{
-	char *aux;
-	struct element *e;
-
-	aux = strchr(desc, ':');
-	if (!aux) {
-		printf("Missing parts in element\n");
-		return -1;
-	}
-
-	*aux = '\0';
-
-	list_for_each_entry(e, &m->elements, ml) {
-		if (strcmp(e->t->t_name, desc))
-			continue;
-
-		aux++;
-
-		if (!strcmp(aux, "del")) {
-			list_del(&e->ml);
-			free(e);
-			return 0;
+		sprintf(path + plen, "%s", e->e_at);
+		if (umount(path)) {
+			perror("Can't umount");
+			return ST_FAIL;
 		}
-
-		return set_element(e, aux);
 	}
 
-	if (aux)
-		*aux = ':';
-
-	return add_element(m, desc);
+	return ST_DROP;
 }
 
-static int update_elements(struct mosaic *m, int argc, char **argv)
-{
-	int i;
 
-	for (i = 0; i < argc; i++)
-		if (update_element(m, argv[i]))
-			return -1;
-
-	return 0;
-}
-
-static int add_mosaic(int argc, char **argv)
-{
-	struct mosaic *m;
-
-	if (argc < 1) {
-		printf("Usage: moctl mosaic add <name> [<elements>]\n");
-		return 1;
-	}
-
-	m = malloc(sizeof(*m));
-	m->m_name = argv[0];
-	INIT_LIST_HEAD(&m->elements);
-
-	if (maybe_add_elements(m, argc - 1, argv + 1)) {
-		free(m);
-		return 1;
-	}
-
-	list_add_tail(&m->sl, &ms->mosaics);
-
-	return config_update();
-}
-
-static int del_mosaic(int argc, char **argv)
-{
-	struct mosaic *m;
-
-	if (argc < 1) {
-		printf("Usage: moctl mosaic del <name>\n");
-		return 1;
-	}
-
-	m = find_mosaic(argv[0]);
-	if (!m) {
-		printf("Unknown mosaic %s\n", argv[0]);
-		return 1;
-	}
-
-	list_del(&m->sl);
-	/* FIXME: del elements when going lib */
-	free(m);
-
-	return config_update();
-}
-
-static int change_mosaic(int argc, char **argv)
-{
-	struct mosaic *m;
-
-	if (argc < 1) {
-		printf("Usage: moctl mosaic change <name> [<elements>]\n");
-		return 1;
-	}
-
-	m = find_mosaic(argv[0]);
-	if (!m) {
-		printf("Unknown mosaic %s\n", argv[0]);
-		return 1;
-	}
-
-	if (update_elements(m, argc - 1, argv + 1))
-		return 1;
-
-	return config_update();
-}
-
-static int do_umount_mosaic_from(struct mosaic *m, char *from, void *chk);
-
-static int do_mount_mosaic_at(struct mosaic *m, char *mp_path, char *options)
+int mosaic_mount(struct mosaic *m, char *mp_path, char *options)
 {
 	struct stat buf;
 	struct element *el;
@@ -314,91 +83,142 @@ umount:
 	return -1;
 }
 
-static int do_umount_mosaic_from(struct mosaic *m, char *mp, void *x)
-{
-	char *chk = x;
-	struct element *e;
-	char path[PATH_MAX];
-	int plen;
-
-	if (chk && strcmp(mp, chk))
-		return ST_OK;
-
-	plen = sprintf(path, "%s/", mp);
-	list_for_each_entry(e, &m->elements, ml) {
-		sprintf(path + plen, "%s", e->e_at);
-		if (umount(path)) {
-			perror("Can't umount");
-			return ST_FAIL;
-		}
-	}
-
-	return ST_DROP;
-}
-
-static int umount_mosaic_from(struct mosaic *m, char *from)
+int mosaic_umount(struct mosaic *m, char *from)
 {
 	return st_for_each_mounted(m, true, do_umount_mosaic_from, from);
 }
 
-static int mount_mosaic(int argc, char **argv)
+int mosaic_iterate(int (*cb)(struct mosaic *m, void *x), void *x)
+{
+	struct mosaic *m;
+	int ret = 0;
+
+	list_for_each_entry(m, &ms->mosaics, sl)
+		if (ret = cb(m, x))
+			break;
+
+	return ret;
+}
+
+int mosaic_iterate_elements(struct mosaic *m, int (*cb)(struct mosaic *, struct element *, void *), void *x)
+{
+	struct element *e;
+	int ret = 0;
+
+	list_for_each_entry(e, &m->elements, ml)
+		if (ret = cb(m, e, x))
+			break;
+
+	return ret;
+}
+
+struct mosaic *mosaic_new(char *name)
 {
 	struct mosaic *m;
 
-	if (argc < 2) {
-		printf("Usage: moctl mosaic mount <name> <location> [<options>]\n");
-		return 1;
+	m = malloc(sizeof(*m));
+	if (m) {
+		m->m_name = strdup(name);
+		INIT_LIST_HEAD(&m->elements);
+
 	}
 
-	m = find_mosaic(argv[0]);
-	if (!m) {
-		printf("Unknown mosaic %s\n", argv[0]);
-		return 1;
-	}
-
-	return do_mount_mosaic_at(m, argv[1], argv[2]) == 0 ? 0 : -1;
+	return m;
 }
 
-static int umount_mosaic(int argc, char **argv)
+static struct element *find_element(struct mosaic *m, char *name)
 {
-	struct mosaic *m;
+	struct element *e;
 
-	if (argc < 1) {
-		printf("Usage: moctl mosaic umount <name> [<locaction>]\n");
-		return 1;
-	}
+	list_for_each_entry(e, &m->elements, ml)
+		if (!strcmp(e->t->t_name, name))
+			return e;
 
-	m = find_mosaic(argv[0]);
-	if (!m) {
-		printf("Unknown mosaic %s\n", argv[0]);
-		return 1;
-	}
-
-	return umount_mosaic_from(m, argv[1]) == 0 ? 0 : -1;
+	return NULL;
 }
 
-int do_mosaic(int argc, char **argv)
+int mosaic_set_element(struct mosaic *m, char *name, int age, char *at, char *opt)
 {
-	if (argc < 1) {
-		printf("Usage: moctl mosaic <list|show|add|del|change|mount|umount> ...\n");
-		return 1;
+	struct element *e;
+
+	e = find_element(m, name);
+	if (e) {
+		free(e->e_at);
+		free(e->e_options);
+	} else {
+		struct tessera *t;
+
+		t = find_tessera(ms, name);
+		if (!t)
+			return -1;
+
+		e = malloc(sizeof(*e));
+		e->t = t;
 	}
 
-	if (argv_is(argv[0], "list"))
-		return list_mosaics();
-	if (argv_is(argv[0], "show"))
-		return show_mosaic(argc - 1, argv + 1);
-	if (argv_is(argv[0], "add"))
-		return add_mosaic(argc - 1, argv + 1);
-	if (argv_is(argv[0], "del"))
-		return del_mosaic(argc - 1, argv + 1);
-	if (argv_is(argv[0], "change"))
-		return change_mosaic(argc - 1, argv + 1);
-	if (argv_is(argv[0], "mount"))
-		return mount_mosaic(argc - 1, argv + 1);
-	if (argv_is(argv[0], "umount"))
-		return umount_mosaic(argc - 1, argv + 1);
+found:
+	e->e_age = age;
+	e->e_at = strdup(at);
+	e->e_options = NULL;
 
-	printf("Unknown mosaic action %s\n", argv[0]);
-	return 1;
+	if (opt) {
+		char *a;
+
+		a = strchr(opt, '=');
+		if (!a || strncmp(opt, "options", a - opt)) {
+			free(e->e_at);
+			free(e);
+			return -1;
+		}
+
+		e->e_options = strdup(a + 1);
+	}
+
+	list_add_tail(&e->ml, &m->elements);
+	return 0;
+}
+
+int mosaic_del_element(struct mosaic *m, char *name)
+{
+	struct element *e;
+
+	e = find_element(m, name);
+	if (!e)
+		return -1;
+
+	list_del(&e->ml);
+	free(e->e_at);
+	free(e->e_options);
+	free(e);
+
+	return 0;
+}
+
+int mosaic_add(struct mosaic *m)
+{
+	list_add_tail(&m->sl, &ms->mosaics);
+	return config_update();
+}
+
+int mosaic_update(struct mosaic *m)
+{
+	return config_update();
+}
+
+int mosaic_del(struct mosaic *m)
+{
+	struct element *e, *n;
+
+	/* FIXME -- what if mounted? */
+
+	list_for_each_entry_safe(e, n, &m->elements, ml) {
+		free(e->e_options);
+		free(e->e_at);
+		free(e);
+	}
+
+	list_del(&m->sl);
+	free(m);
+
+	return config_update();
 }
