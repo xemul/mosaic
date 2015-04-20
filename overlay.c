@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <dirent.h>
+#include <stdbool.h>
 #include "mosaic.h"
 #include "tessera.h"
 #include "overlay.h"
@@ -88,11 +90,40 @@ static void save_overlay(struct tessera *t, FILE *f)
 static void show_overlay(struct tessera *t)
 {
 	struct overlay_tessera *ot = t->priv;
+	DIR *d;
+	struct dirent *de;
+	bool aged = false;
 
 	if (!ot)
 		return;
 
 	printf("location: %s\n", ot->ovl_location);
+
+	d = opendir(ot->ovl_location);
+	if (!d)
+		return;
+
+	while (de = readdir(d)) {
+		if (de->d_name[0] == '.')
+			continue;
+
+		if (!strcmp(de->d_name, "base"))
+			continue;
+
+		if (strncmp(de->d_name, "age-", 4))
+			/* FIXME -- what? */
+			continue;
+
+
+		if (!aged) {
+			printf("ages:\n");
+			aged = true;
+		}
+
+		printf("  - %s\n", de->d_name + 4);
+	}
+
+	closedir(d);
 }
 
 /*

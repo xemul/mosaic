@@ -42,7 +42,7 @@ static int show_mosaic(int argc, char **argv)
 	list_for_each_entry(e, &m->elements, ml) {
 		printf("tessera: %s\n", e->t->t_name);
 		if (e->e_age == 0)
-			printf("\tage:     latest\n");
+			printf("\tage:     base\n");
 		else
 			printf("\tage:     %d\n", e->e_age);
 		printf("\tat:      %s\n", e->e_at ? : "-");
