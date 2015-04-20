@@ -1,3 +1,4 @@
+#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -81,10 +82,22 @@ static void show_overlay(struct tessera *t)
 	printf("location: %s\n", ot->ovl_location);
 }
 
+/*
+ * Overlay location layout:
+ *
+ * location
+ *   base       -> base delta
+ *   age-N
+ *     current  -> for upperdir
+ *     work     -> for workdir
+ *     parent   -> symlink on parent age
+ *     root     -> for mountpoint
+ */
+
 static int mount_overlay(struct tessera *t, int age, char *path, char *options)
 {
 	printf("NOT IMPLEMENTED\n");
-	return 1;
+	return -1;
 }
 
 static struct tess_desc tess_desc_overlay = {
@@ -208,10 +221,61 @@ static int del_tessera(int argc, char **argv)
 	return config_update();
 }
 
+int do_mount_tessera_at(struct tessera *t, int age, char *path, char *options)
+{
+	if (!t->t_desc->mount) {
+		printf("Mounting of %s is not supported\n",
+				t->t_desc->td_name);
+		return -1;
+	}
+
+	return t->t_desc->mount(t, age, path, options);
+}
+
+static int mount_tessera(int argc, char **argv)
+{
+	struct tessera *t;
+	struct stat buf;
+	int age = 0;
+	char *options = NULL, *aux;
+
+	if (argc < 2) {
+		printf("Usage: moctl tessera mount [name]:[age] [location] <options>\n");
+		return 1;
+	}
+
+	aux = strchr(argv[0], ':');
+	if (aux) {
+		*aux = '\0';
+		age = atoi(aux + 1);
+	}
+
+	if (argc >= 3)
+		options = argv[2];
+
+	if (stat(argv[1], &buf)) {
+		printf("Can't stat %s\n", argv[1]);
+		return 1;
+	}
+
+	if (!S_ISDIR(buf.st_mode)) {
+		printf("Can't mount mosaic on non-directory\n");
+		return 1;
+	}
+
+	t = find_tessera(ms, argv[0]);
+	if (!t) {
+		printf("Unknown tessera %s\n", argv[0]);
+		return 1;
+	}
+
+	return do_mount_tessera_at(t, age, argv[1], options);
+}
+
 int do_tessera(int argc, char **argv)
 {
 	if (argc < 1) {
-		printf("Usage: moctl tessera [list|show|add|del] ...\n");
+		printf("Usage: moctl tessera [list|show|add|del|mount] ...\n");
 		return 1;
 	}
 
@@ -223,6 +287,8 @@ int do_tessera(int argc, char **argv)
 		return add_tessera(argc - 1, argv + 1);
 	if (argv_is(argv[0], "del"))
 		return del_tessera(argc - 1, argv + 1);
+	if (argv_is(argv[0], "mount"))
+		return mount_tessera(argc - 1, argv + 1);
 
 	printf("Unknown mosaic action %s\n", argv[0]);
 	return 1;

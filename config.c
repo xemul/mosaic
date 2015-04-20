@@ -241,7 +241,7 @@ static int parse_element(yaml_parser_t *p, void *x)
 
 	e = malloc(sizeof(*e));
 	e->t = NULL;
-	e->e_age = AGE_LAST;
+	e->e_age = 0;
 	e->e_at = NULL;
 	e->e_options = NULL;
 	list_add_tail(&e->ml, &m->elements);
@@ -426,7 +426,7 @@ int config_update(void)
 
 		list_for_each_entry(e, &m->elements, ml) {
 			fprintf(f, "      - name: %s\n", e->t->t_name);
-			if (e->e_age != AGE_LAST)
+			if (e->e_age != 0)
 				fprintf(f, "        age: %d\n", e->e_age);
 			if (e->e_at)
 				fprintf(f, "        at: %s\n", e->e_at);

@@ -13,6 +13,7 @@ struct tess_desc {
 };
 
 int do_tessera(int argc, char **argv);
+int do_mount_tessera_at(struct tessera *t, int age, char *path, char *options);
 
 struct tess_desc *tess_desc_by_type(char *type);
 struct tessera *find_tessera(struct mosaic_state *ms, char *name);

@@ -23,8 +23,6 @@ struct element {
 	struct list_head ml;
 };
 
-#define AGE_LAST	(-1)
-
 struct mosaic {
 	char *m_name;
 	struct list_head elements; /* ties element.ml */

@@ -41,7 +41,7 @@ static int show_mosaic(int argc, char **argv)
 
 	list_for_each_entry(e, &m->elements, ml) {
 		printf("tessera: %s\n", e->t->t_name);
-		if (e->e_age == AGE_LAST)
+		if (e->e_age == 0)
 			printf("\tage:     latest\n");
 		else
 			printf("\tage:     %d\n", e->e_age);
@@ -112,7 +112,7 @@ static int add_element(struct mosaic *m, char *desc)
 	 */
 
 	e = malloc(sizeof(*e));
-	e->e_age = AGE_LAST;
+	e->e_age = 0;
 	e->e_at = NULL;
 	e->e_options = NULL;
 
@@ -278,16 +278,8 @@ static int do_mount_mosaic_at(struct mosaic *m, char *mp_path)
 	plen = sprintf(path, "%s/", mp_path);
 
 	list_for_each_entry(el, &m->elements, ml) {
-		struct tessera *t = el->t;
-
-		if (!t->t_desc->mount) {
-			printf("Mounting of %s is not supported\n",
-					t->t_desc->td_name);
-			goto umount;
-		}
-
 		sprintf(path + plen, "%s", el->e_at);
-		if (t->t_desc->mount(t, el->e_age, path, el->e_options))
+		if (do_mount_tessera_at(el->t, el->e_age, path, el->e_options))
 			goto umount;
 	}
 
