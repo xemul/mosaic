@@ -163,8 +163,8 @@ static int mount_overlay_delta(struct tessera *t, int age, char *l_path, int l_o
 	if (mount_overlay_delta(t, atoi(aux), l_path, l_off))
 		return -1;
 
-	sprintf(aux, "upperdir=%s/data,workdir=%s/work,lowerdir=%s/",
-			ot->ovl_location, ot->ovl_location, l_path);
+	sprintf(aux, "upperdir=%s/age-%d/data,workdir=%s/age-%d/work,lowerdir=%s/",
+			ot->ovl_location, age, ot->ovl_location, age, l_path);
 	sprintf(l_path + l_off, "/age-%d/root", age);
 
 	if (mount("none", l_path, "overlay", 0, aux)) {
@@ -193,6 +193,50 @@ static int mount_overlay(struct tessera *t, int age, char *path, char *options)
 	return 0;
 }
 
+static int grow_overlay(struct tessera *t, int base_age, int new_age)
+{
+	struct overlay_tessera *ot = t->priv;
+	char path[PATH_MAX], aux[32];
+	int plen, i;
+	char *subs[] = { "/data", "/work", "/root", ".parent", NULL, };
+
+	plen = sprintf(path, "%s/age-%d", ot->ovl_location, new_age);
+	if (mkdir(path, 0600)) {
+		perror("Can't make snapshot");
+		return -1;
+	}
+
+	for (i = 0; subs[i] != NULL; i++) {
+		int ret;
+
+		sprintf(path + plen, "/%s", subs[i] + 1);
+		if (subs[i][0] == '/')
+			ret = mkdir(path, 0600);
+		else {
+			sprintf(aux, "%d", base_age);
+			ret = symlink(aux, path);
+		}
+
+		if (ret)
+			goto cleanup;
+	}
+
+	return 0;
+
+cleanup:
+	for (i = 0; subs[i] != NULL; i++) {
+		sprintf(path + plen, "/%s", subs[i] + 1);
+		if (subs[i][0] == '/')
+			rmdir(path);
+		else
+			unlink(path);
+	}
+
+	sprintf(path + plen, "");
+	rmdir(path);
+	return -1;
+}
+
 struct tess_desc tess_desc_overlay = {
 	.td_name = "overlay",
 	.add = add_overlay,
@@ -201,4 +245,5 @@ struct tess_desc tess_desc_overlay = {
 	.save = save_overlay,
 	.show = show_overlay,
 	.mount = mount_overlay,
+	.grow = grow_overlay,
 };

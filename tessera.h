@@ -11,6 +11,7 @@ struct tess_desc {
 	void (*save)(struct tessera *t, FILE *);
 	void (*show)(struct tessera *t);
 	int (*mount)(struct tessera *t, int age, char *path, char *options);
+	int (*grow)(struct tessera *t, int old_age, int new_age);
 };
 
 int do_tessera(int argc, char **argv);

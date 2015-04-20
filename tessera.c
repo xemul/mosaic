@@ -171,10 +171,51 @@ static int mount_tessera(int argc, char **argv)
 	return do_mount_tessera_at(t, age, argv[1], options);
 }
 
+static int do_grow_tessera(struct tessera *t, int base_age, int new_age)
+{
+	if (!t->t_desc->grow) {
+		printf("Growing is not supported for %s\n", t->t_desc->td_name);
+		return 1;
+	}
+
+	return t->t_desc->grow(t, base_age, new_age);
+}
+
+static int grow_tessera(int argc, char **argv)
+{
+	struct tessera *t;
+	int base_age = 0, new_age = 1;
+
+	if (argc < 2) {
+		printf("Usage: moctl tessera grow [name] <base-age:[new-age]>\n");
+		return 1;
+	}
+
+	t = find_tessera(ms, argv[0]);
+	if (!t) {
+		printf("Unknown tessera %s\n", argv[0]);
+		return 1;
+	}
+
+	if (argc >= 2) {
+		char *aux;
+
+		aux = strchr(argv[1], ':');
+		if (aux) {
+			*aux = '\0';
+			new_age = atoi(aux + 1);
+		}
+
+		base_age = atoi(argv[1]);
+	}
+
+	return do_grow_tessera(t, base_age, new_age);
+}
+
 int do_tessera(int argc, char **argv)
 {
 	if (argc < 1) {
-		printf("Usage: moctl tessera [list|show|add|del|mount] ...\n");
+		printf("Usage: moctl tessera [list|show|add|del|mount|grow] ...\n");
 		return 1;
 	}
 
@@ -188,6 +229,8 @@ int do_tessera(int argc, char **argv)
 		return del_tessera(argc - 1, argv + 1);
 	if (argv_is(argv[0], "mount"))
 		return mount_tessera(argc - 1, argv + 1);
+	if (argv_is(argv[0], "grow"))
+		return grow_tessera(argc - 1, argv + 1);
 
 	printf("Unknown mosaic action %s\n", argv[0]);
 	return 1;
