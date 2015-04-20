@@ -1,6 +1,11 @@
 #ifndef __MOSAIC_CONFIG_H__
 #define __MOSAIC_CONFIG_H__
-struct mosaic_state;
-struct mosaic_state *mosaic_parse_config(char *cfg_file);
+extern struct mosaic_state *ms;
 int config_update(void);
+
+/*
+ * For UAPI
+ */
+
+int mosaic_load_config(void);
 #endif

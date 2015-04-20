@@ -34,8 +34,6 @@ struct mosaic_state {
 	struct list_head mosaics;  /* ties mosaic.sl */
 };
 
-extern struct mosaic_state *ms;
-
 /*
  * This is for UAPI
  */

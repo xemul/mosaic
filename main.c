@@ -6,7 +6,20 @@
 #include "config.h"
 #include "util.h"
 
-struct mosaic_state *ms;
+static inline int argv_is(char *argv, char *is)
+{
+	while (1) {
+		if (*argv == '\0')
+			return 1;
+		if (*is == '\0')
+			return 0;
+		if (*is != *argv)
+			return 0;
+
+		is++;
+		argv++;
+	}
+}
 
 static void usage(void)
 {
@@ -419,9 +432,8 @@ static int do_tessera(int argc, char **argv)
 }
 int main(int argc, char **argv)
 {
-	ms = mosaic_parse_config("mosaic.conf");
-	if (!ms) {
-		fprintf(stderr, "Error loading config file\n");
+	if (mosaic_load_config()) {
+		printf("Error loading config file\n");
 		return 1;
 	}
 

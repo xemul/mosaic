@@ -5,6 +5,8 @@
 #include "mosaic.h"
 #include "tessera.h"
 
+struct mosaic_state *ms;
+
 #define err(args...)	fprintf(stderr, ##args)
 
 /******************************************************
@@ -356,7 +358,7 @@ static int resolve_tesserae(struct mosaic_state *ms)
 	return 0;
 }
 
-struct mosaic_state *mosaic_parse_config(char *cfg_file)
+static struct mosaic_state *mosaic_parse_config(char *cfg_file)
 {
 	FILE *f;
 	yaml_parser_t parser;
@@ -392,6 +394,15 @@ out_c:
 	fclose(f);
 out:
 	return ms;
+}
+
+int mosaic_load_config(void)
+{
+	ms = mosaic_parse_config("mosaic.conf");
+	if (!ms)
+		return -1;
+
+	return 0;
 }
 
 #define UPD_CFG_NAME	".mosaic.conf.new"

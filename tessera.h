@@ -8,7 +8,7 @@ struct tess_desc {
 	/*
 	 * Add/Del callbacks from cldline
 	 */
-	int (*add)(struct tessera *t, int argc, char **argv);
+	int (*add)(struct tessera *t, int n_opts, char **opts);
 	void (*del)(struct tessera *t);
 	/*
 	 * Parse/Save callback from/for config

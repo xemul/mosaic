@@ -21,24 +21,24 @@ struct overlay_tessera {
 
 struct tess_desc tess_desc_overlay;
 
-static int add_overlay(struct tessera *t, int argc, char **argv)
+static int add_overlay(struct tessera *t, int n_opts, char **opts)
 {
 	struct overlay_tessera *ot;
 
-	if (argc < 1) {
+	if (n_opts < 1) {
 		printf("Usage: moctl tessera add <name> overlay <location>\n");
 		return -1;
 	}
 
-	if (access(argv[0], F_OK) < 0) {
-		if (mkdir(argv[0], 0600) < 0) {
+	if (access(opts[0], F_OK) < 0) {
+		if (mkdir(opts[0], 0600) < 0) {
 			perror("Can't make dir for base");
 			return -1;
 		}
 	}
 
 	t->priv = ot = malloc(sizeof(*ot));
-	ot->ovl_location = strdup(argv[0]);
+	ot->ovl_location = strdup(opts[0]);
 
 	return 0;
 }
