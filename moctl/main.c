@@ -73,6 +73,13 @@ static int list_mosaics(void)
 
 static int print_element(struct mosaic *m, struct element *e, void *x)
 {
+	int *pr = x;
+
+	if (!*pr) {
+		*pr = 1;
+		printf("elements:\n");
+	}
+
 	printf("  - name: %s\n", e->t->t_name);
 	if (e->e_age == 0)
 		printf("    age:     base\n");
@@ -88,6 +95,7 @@ static int print_element(struct mosaic *m, struct element *e, void *x)
 static int show_mosaic(int argc, char **argv)
 {
 	struct mosaic *m;
+	int printed;
 
 	if (argc < 1) {
 		printf("Usage: moctl mosaic show <name>\n");
@@ -102,10 +110,8 @@ static int show_mosaic(int argc, char **argv)
 
 	st_show_mounted(m);
 
-	if (!list_empty(&m->elements))
-		printf("elements:\n");
-
-	return mosaic_iterate_elements(m, print_element, NULL);
+	printed = 0;
+	return mosaic_iterate_elements(m, print_element, &printed);
 }
 
 static int set_elements(struct mosaic *m, int argc, char **argv)
