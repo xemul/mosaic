@@ -431,13 +431,13 @@ static int do_tessera(int argc, char **argv)
 }
 int main(int argc, char **argv)
 {
-	if (mosaic_load_config()) {
-		printf("Error loading config file\n");
+	if (argc < 2) {
+		usage();
 		return 1;
 	}
 
-	if (argc < 2) {
-		usage();
+	if (mosaic_load_config()) {
+		printf("Error loading config file\n");
 		return 1;
 	}
 
