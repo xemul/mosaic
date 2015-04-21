@@ -100,7 +100,7 @@ int mosaic_add_tessera(char *type, char *name, int n_opts, char **opts)
 	t->t_desc = td;
 
 	if (td->add(t, n_opts, opts)) {
-		free(name);
+		free(t->t_name);
 		free(t);
 		return -1;
 	}
