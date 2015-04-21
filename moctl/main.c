@@ -117,7 +117,7 @@ static int set_elements(struct mosaic *m, int argc, char **argv)
 		char *at, *ed, *aux;
 
 		/* Name */
-		aux = strchr(argv[1], ':');
+		aux = strchr(argv[i], ':');
 		if (!aux)
 			goto err;
 
@@ -127,7 +127,7 @@ static int set_elements(struct mosaic *m, int argc, char **argv)
 		ed = aux + 1;
 
 		if (!strcmp(ed, "del")) {
-			if (mosaic_del_element(m, argv[1]))
+			if (mosaic_del_element(m, argv[i]))
 				return 1;
 
 			continue;
