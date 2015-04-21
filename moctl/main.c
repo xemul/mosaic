@@ -8,7 +8,6 @@
  */
 #include "mosaic.h"
 #include "tessera.h"
-#include "status.h"
 
 static inline int argv_is(char *argv, char *is)
 {
@@ -71,6 +70,19 @@ static int list_mosaics(void)
 	return mosaic_iterate(print_mosaic, NULL);
 }
 
+static int print_mounted(struct mosaic *m, char *path, void *x)
+{
+	int *pr = x;
+
+	if (!*pr) {
+		*pr = 1;
+		printf("mounted:\n");
+	}
+
+	printf("  - %s\n", path);
+	return 0;
+}
+
 static int print_element(struct mosaic *m, struct element *e, void *x)
 {
 	int *pr = x;
@@ -108,7 +120,8 @@ static int show_mosaic(int argc, char **argv)
 		return 1;
 	}
 
-	st_show_mounted(m);
+	printed = 0;
+	mosaic_iterate_mounted(m, print_mounted, &printed);
 
 	printed = 0;
 	return mosaic_iterate_elements(m, print_element, &printed);

@@ -74,14 +74,10 @@ done:
 	fclose(st);
 }
 
-#define ST_OK	0
-#define ST_FAIL	-1
-#define ST_DROP	1  /* drop this entry from status file */
-
-static int st_for_each_mounted(struct mosaic *m, bool mod, int (*cb)(struct mosaic *, char *, void *), void *x)
+static int st_for_each_mounted(struct mosaic *m, int (*cb)(struct mosaic *, char *, void *), void *x)
 {
-	FILE *st, *nst = NULL;
-	int ret;
+	FILE *st;
+	int ret = 0;
 	char *e;
 
 	if (st_check_dir())
@@ -92,18 +88,10 @@ static int st_for_each_mounted(struct mosaic *m, bool mod, int (*cb)(struct mosa
 	if (!st)
 		return -1;
 
-	if (mod) {
-		sprintf(st_aux, STATUS_DIR "/m.%s.upd", m->m_name);
-		nst = fopen(st_aux, "w");
-		if (!nst) {
-			fclose(st);
-			return -1;
-		}
-	}
-
 	while (fgets(st_aux, sizeof(st_aux), st)) {
 		if (st_aux[0] != '-' || st_aux[1] != ' ') {
 			/* BUG */
+			ret = -1;
 			printf("Fatal. State file screwed up.\n");
 			fclose(st);
 			break;
@@ -113,87 +101,65 @@ static int st_for_each_mounted(struct mosaic *m, bool mod, int (*cb)(struct mosa
 		*e = '\0';
 
 		ret = cb(m, st_aux + 2, x);
-		if (ret == ST_FAIL) {
-			fclose(st);
-			if (nst) {
-				sprintf(st_aux, STATUS_DIR "/m.%s.upd", m->m_name);
-				fclose(nst);
-				unlink(st_aux);
-			}
-
-			return -1;
-		}
-
-		if (!nst || ret == ST_DROP)
-			continue;
-
-		if (ret == ST_DROP)
-			continue;
-
-		fprintf(nst, "- %s\n", st_aux + 2);
+		if (ret != 0)
+			break;
 	}
 
 	fclose(st);
-	if (nst) {
-		char aux2[PATH_MAX];
-
-		fclose(nst);
-		sprintf(st_aux, STATUS_DIR "/m.%s.upd", m->m_name);
-		sprintf(aux2, STATUS_DIR "/m.%s", m->m_name);
-		if (rename(st_aux, aux2))
-			return -1;
-	}
-
-	return 0;
+	return ret;
 }
 
 struct st_umount_ctx {
 	char *path;
 	int (*cb)(struct mosaic *, char *p);
+	FILE *nst;
 };
 
 static int umount_one(struct mosaic *m, char *path, void *x)
 {
 	struct st_umount_ctx *uc = x;
 
-	if (uc->path && strcmp(uc->path, path))
-		return ST_OK;
+	if (uc->path && strcmp(uc->path, path)) {
+		fprintf(uc->nst, "- %s\n", path);
+		return 0;
+	}
 
 	if (uc->cb(m, path))
-		return ST_FAIL;
+		return -1;
 
-	return ST_DROP;
+	return 0;
 }
 
 int st_umount(struct mosaic *m, char *path, int (*cb)(struct mosaic *, char *p))
 {
-	struct st_umount_ctx uc = {
-		.path = path,
-		.cb = cb,
-	};
+	struct st_umount_ctx uc;
+	FILE *nst;
+	int ret;
 
-	return st_for_each_mounted(m, true, umount_one, &uc);
+	sprintf(st_aux, STATUS_DIR "/m.%s.upd", m->m_name);
+	nst = fopen(st_aux, "w");
+	if (!nst)
+		return -1;
+
+	uc.path = path;
+	uc.cb = cb;
+	uc.nst = nst;
+	ret = st_for_each_mounted(m, umount_one, &uc);
+
+	fclose(nst);
+	sprintf(st_aux, STATUS_DIR "/m.%s.upd", m->m_name);
+
+	if (!ret) {
+		char aux2[PATH_MAX];
+		sprintf(aux2, STATUS_DIR "/m.%s", m->m_name);
+		ret = rename(st_aux, aux2);
+	} else
+		unlink(st_aux);
+
+	return ret;
 }
 
-static int show_mounted(struct mosaic *m, char *path, void *_x)
+int mosaic_iterate_mounted(struct mosaic *m, int (*cb)(struct mosaic *, char *, void *), void *x)
 {
-	int *mnt = _x;
-
-	if (!*mnt) {
-		printf("mounted:\n");
-		*mnt = 1;
-	}
-
-	printf("  - %s\n", path);
-	return 0;
-}
-
-void st_show_mounted(struct mosaic *m)
-{
-	int mnt = 0;
-
-	st_for_each_mounted(m, false, show_mounted, &mnt);
-
-	if (mnt)
-		printf("\n");
+	return st_for_each_mounted(m, cb, x);
 }

@@ -9,6 +9,7 @@ struct element;
 int mosaic_iterate(int (*cb)(struct mosaic *, void *), void *);
 struct mosaic *mosaic_find_by_name(char *name);
 int mosaic_iterate_elements(struct mosaic *, int (*cb)(struct mosaic *, struct element *, void *), void *);
+int mosaic_iterate_mounted(struct mosaic *, int (*cb)(struct mosaic *, char *mp, void *), void *);
 
 struct mosaic *mosaic_new(char *name);
 int mosaic_set_element(struct mosaic *m, char *name, int age, char *at, char *opt);
