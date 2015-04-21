@@ -74,7 +74,11 @@ done:
 	fclose(st);
 }
 
-int st_for_each_mounted(struct mosaic *m, bool mod, int (*cb)(struct mosaic *, char *, void *), void *x)
+#define ST_OK	0
+#define ST_FAIL	-1
+#define ST_DROP	1  /* drop this entry from status file */
+
+static int st_for_each_mounted(struct mosaic *m, bool mod, int (*cb)(struct mosaic *, char *, void *), void *x)
 {
 	FILE *st, *nst = NULL;
 	int ret;
@@ -141,6 +145,34 @@ int st_for_each_mounted(struct mosaic *m, bool mod, int (*cb)(struct mosaic *, c
 	}
 
 	return 0;
+}
+
+struct st_umount_ctx {
+	char *path;
+	int (*cb)(struct mosaic *, char *p);
+};
+
+static int umount_one(struct mosaic *m, char *path, void *x)
+{
+	struct st_umount_ctx *uc = x;
+
+	if (uc->path && strcmp(uc->path, path))
+		return ST_OK;
+
+	if (uc->cb(m, path))
+		return ST_FAIL;
+
+	return ST_DROP;
+}
+
+int st_umount(struct mosaic *m, char *path, int (*cb)(struct mosaic *, char *p))
+{
+	struct st_umount_ctx uc = {
+		.path = path,
+		.cb = cb,
+	};
+
+	return st_for_each_mounted(m, true, umount_one, &uc);
 }
 
 static int show_mounted(struct mosaic *m, char *path, void *_x)

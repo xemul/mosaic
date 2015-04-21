@@ -25,26 +25,22 @@ struct mosaic *mosaic_find_by_name(char *name)
 	return NULL;
 }
 
-static int do_umount_mosaic_from(struct mosaic *m, char *mp, void *x)
+static int do_mosaic_umount(struct mosaic *m, char *mp)
 {
-	char *chk = x;
 	struct element *e;
 	char path[PATH_MAX];
 	int plen;
-
-	if (chk && strcmp(mp, chk))
-		return ST_OK;
 
 	plen = sprintf(path, "%s/", mp);
 	list_for_each_entry(e, &m->elements, ml) {
 		sprintf(path + plen, "%s", e->e_at);
 		if (umount(path)) {
 			perror("Can't umount");
-			return ST_FAIL;
+			return -1;
 		}
 	}
 
-	return ST_DROP;
+	return 0;
 }
 
 
@@ -83,13 +79,13 @@ int mosaic_mount(struct mosaic *m, char *mp_path, char *options)
 	return 0;
 
 umount:
-	do_umount_mosaic_from(m, mp_path, NULL);
+	do_mosaic_umount(m, mp_path);
 	return -1;
 }
 
 int mosaic_umount(struct mosaic *m, char *from)
 {
-	return st_for_each_mounted(m, true, do_umount_mosaic_from, from);
+	return st_umount(m, from, do_mosaic_umount);
 }
 
 int mosaic_iterate(int (*cb)(struct mosaic *m, void *x), void *x)
