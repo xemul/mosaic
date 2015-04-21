@@ -158,6 +158,7 @@ int mosaic_set_element(struct mosaic *m, char *name, int age, char *at, char *op
 
 		e = malloc(sizeof(*e));
 		e->t = t;
+		INIT_LIST_HEAD(&e->ml);
 	}
 
 	e->e_age = age;
@@ -177,7 +178,9 @@ int mosaic_set_element(struct mosaic *m, char *name, int age, char *at, char *op
 		e->e_options = strdup(a + 1);
 	}
 
-	list_add_tail(&e->ml, &m->elements);
+	if (list_empty(&e->ml))
+		list_add_tail(&e->ml, &m->elements);
+
 	return 0;
 }
 
