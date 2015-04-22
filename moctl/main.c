@@ -172,8 +172,10 @@ static int set_elements(struct mosaic *m, int argc, char **argv)
 		else
 			ed = NULL;
 
-		if (mosaic_set_element(m, argv[i], age, at, ed))
+		if (mosaic_set_element(m, argv[i], age, at, ed)) {
+			printf("Error setting element\n");
 			return 1;
+		}
 	}
 
 	return 0;

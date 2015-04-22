@@ -56,6 +56,31 @@ umount "$m_dir" || fail "Umount a (2)"
 
 echo "* Test mosaic construction out of aged tesserae"
 
+$moctl "mosaic" "add" "m0" "t.a:0:t" \
+		|| fail "M-Add 0"
+
+$moctl "mosaic" "add" "m1" "t.a:1:t" \
+		|| fail "M-Add 1"
+
+mkdir "$m_dir/t"
+
+$moctl "mosaic" "mount" "m0" "$m_dir" \
+		|| fail "M-Mount 0"
+
+fgrep "V0" "$m_dir/t/file-a" \
+		|| fail "Old file in m0"
+$moctl "mosaic" "umount" "m0" \
+		|| fail "M-Umount 0"
+
+$moctl "mosaic" "mount" "m1" "$m_dir" \
+		|| fail "M-Mount 1"
+fgrep "V1" "$m_dir/t/file-a" \
+		|| fail "New file in m0"
+$moctl "mosaic" "umount" "m1" \
+		|| fail "M-Umount 1"
+
+rmdir "$m_dir/t"
+
 $moctl "tessera" "del" "t.a" \
 		|| fail "T-Del"
 
