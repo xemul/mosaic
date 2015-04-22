@@ -54,10 +54,10 @@ fgrep "V0" "$m_dir/file-a" \
 		|| fail "Old data in base"
 umount "$m_dir" || fail "Umount a (2)"
 
-#FIXME -- not cleaned root-mount is still there
-umount "$t_location/a/age-1/root"
-
 echo "* Test mosaic construction out of aged tesserae"
+
+$moctl "tessera" "del" "t.a" \
+		|| fail "T-Del"
 
 clean
 echo "All tests passed"

@@ -44,9 +44,13 @@ static int add_overlay(struct tessera *t, int n_opts, char **opts)
 	return 0;
 }
 
+static void umount_deltas(struct tessera *t);
+
 static void del_overlay(struct tessera *t)
 {
 	struct overlay_tessera *ot = t->priv;
+
+	umount_deltas(t);
 
 	free(ot->ovl_location);
 	free(ot);
@@ -80,18 +84,16 @@ static void save_overlay(struct tessera *t, FILE *f)
 	fprintf(f, "    location: %s\n", ot->ovl_location);
 }
 
-static void show_overlay(struct tessera *t)
+static int iterate_ages(struct tessera *t, int (*cb)(struct tessera *t, char *age_d, void *), void *x)
 {
 	struct overlay_tessera *ot = t->priv;
 	DIR *d;
 	struct dirent *de;
-	bool aged = false;
-
-	printf("location: %s\n", ot->ovl_location);
+	int ret = 0;
 
 	d = opendir(ot->ovl_location);
 	if (!d)
-		return;
+		return -1;
 
 	while ((de = readdir(d)) != NULL) {
 		if (de->d_name[0] == '.')
@@ -104,16 +106,36 @@ static void show_overlay(struct tessera *t)
 			/* FIXME -- what? */
 			continue;
 
-
-		if (!aged) {
-			printf("ages:\n");
-			aged = true;
-		}
-
-		printf("  - %s\n", de->d_name + 4);
+		ret = cb(t, de->d_name, x);
+		if (ret)
+			break;
 	}
 
 	closedir(d);
+
+	return ret;
+}
+
+static int show_age(struct tessera *t, char *age_d, void *x)
+{
+	int *p = x;
+
+	if (!*p) {
+		*p = 1;
+		printf("ages:\n");
+	}
+
+	printf("  - %s\n", age_d + 4);
+	return 0;
+}
+
+static void show_overlay(struct tessera *t)
+{
+	struct overlay_tessera *ot = t->priv;
+	int p = 0;
+
+	printf("location: %s\n", ot->ovl_location);
+	iterate_ages(t, show_age, &p);
 }
 
 /*
@@ -194,6 +216,35 @@ static int mount_overlay_delta(struct tessera *t, int age, char *l_path, int l_o
 	}
 
 	return 0;
+}
+
+struct umount_ctx {
+	char *path;
+	int p_off;
+};
+
+static int umount_overlay_delta(struct tessera *t, char *age_d, void *x)
+{
+	struct umount_ctx *uc = x;
+
+	sprintf(uc->path + uc->p_off, "%s/root", age_d);
+	umount(uc->path);
+
+	return 0;
+}
+
+static void umount_deltas(struct tessera *t)
+{
+	struct overlay_tessera *ot = t->priv;
+	char path[PATH_MAX];
+	struct umount_ctx uc;
+
+	uc.path = path;
+	uc.p_off = sprintf(path, "%s/", ot->ovl_location);
+	iterate_ages(t, umount_overlay_delta, &uc);
+
+	sprintf(path + uc.p_off, "base");
+	umount(path);
 }
 
 static int mount_overlay(struct tessera *t, int age, char *path, char *options)
