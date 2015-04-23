@@ -322,9 +322,23 @@ static int list_tesserae(void)
 	return mosaic_iterate_tesserae(print_tessera, NULL);
 }
 
+static int show_age(struct tessera *t, int age, void *x)
+{
+	int *p = x;
+
+	if (!*p) {
+		*p = 1;
+		printf("ages:\n");
+	}
+
+	printf("  - %d\n", age);
+	return 0;
+}
+
 static int show_tessera(int argc, char **argv)
 {
 	struct tessera *t;
+	int printed;
 
 	if (argc < 1) {
 		printf("Usage: moctl tessera show <name>\n");
@@ -336,6 +350,9 @@ static int show_tessera(int argc, char **argv)
 		printf("Unknown tessera %s\n", argv[0]);
 		return 1;
 	}
+
+	printed = 0;
+	mosaic_iterate_ages_t(t, show_age, &printed);
 
 	printf("type: %s\n", t->t_desc->td_name);
 	if (t->t_desc->show)

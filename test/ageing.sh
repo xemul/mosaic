@@ -41,6 +41,9 @@ $moctl "tessera" "umount" "t.a" \
 
 $moctl "tessera" "grow" "t.a" "1" \
 		|| fail "T-Grow 1"
+$moctl "tessera" "show" "t.a" | fgrep -A1 "ages:" | fgrep "1" \
+		|| fail "T-Show age 1"
+
 $moctl "tessera" "mount" "t.a:1" $m_dir \
 		|| fail "T-Mount a:1"
 fgrep "V0" "$m_dir/file-a" \

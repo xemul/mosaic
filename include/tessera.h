@@ -24,6 +24,7 @@ struct tess_desc {
 
 	int (*mount)(struct tessera *t, int age, char *path, char *options);
 	int (*grow)(struct tessera *t, int old_age, int new_age);
+	int (*iter_ages)(struct tessera *, int (*cb)(struct tessera *, int, void *), void *);
 };
 
 int do_mount_tessera(struct tessera *t, int age, char *at, char *options);

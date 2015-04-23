@@ -84,7 +84,7 @@ static void save_overlay(struct tessera *t, FILE *f)
 	fprintf(f, "    location: %s\n", ot->ovl_location);
 }
 
-static int iterate_ages(struct tessera *t, int (*cb)(struct tessera *t, char *age_d, void *), void *x)
+static int iterate_ages(struct tessera *t, int (*cb)(struct tessera *t, int age, void *), void *x)
 {
 	struct overlay_tessera *ot = t->priv;
 	DIR *d;
@@ -106,7 +106,7 @@ static int iterate_ages(struct tessera *t, int (*cb)(struct tessera *t, char *ag
 			/* FIXME -- what? */
 			continue;
 
-		ret = cb(t, de->d_name, x);
+		ret = cb(t, atoi(de->d_name + 4), x);
 		if (ret)
 			break;
 	}
@@ -116,26 +116,10 @@ static int iterate_ages(struct tessera *t, int (*cb)(struct tessera *t, char *ag
 	return ret;
 }
 
-static int show_age(struct tessera *t, char *age_d, void *x)
-{
-	int *p = x;
-
-	if (!*p) {
-		*p = 1;
-		printf("ages:\n");
-	}
-
-	printf("  - %s\n", age_d + 4);
-	return 0;
-}
-
 static void show_overlay(struct tessera *t)
 {
 	struct overlay_tessera *ot = t->priv;
-	int p = 0;
-
 	printf("location: %s\n", ot->ovl_location);
-	iterate_ages(t, show_age, &p);
 }
 
 /*
@@ -223,11 +207,11 @@ struct umount_ctx {
 	int p_off;
 };
 
-static int umount_overlay_delta(struct tessera *t, char *age_d, void *x)
+static int umount_overlay_delta(struct tessera *t, int age, void *x)
 {
 	struct umount_ctx *uc = x;
 
-	sprintf(uc->path + uc->p_off, "%s/root", age_d);
+	sprintf(uc->path + uc->p_off, "age-%d/root", age);
 	umount(uc->path);
 
 	return 0;
@@ -323,4 +307,5 @@ struct tess_desc tess_desc_overlay = {
 	.show = show_overlay,
 	.mount = mount_overlay,
 	.grow = grow_overlay,
+	.iter_ages = iterate_ages,
 };

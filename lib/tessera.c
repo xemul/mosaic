@@ -142,3 +142,11 @@ int mosaic_del_tessera(struct tessera *t)
 
 	return config_update();
 }
+
+int mosaic_iterate_ages_t(struct tessera *t, int (*cb)(struct tessera *, int age, void *), void *x)
+{
+	if (!t->t_desc->iter_ages)
+		return -1;
+
+	return t->t_desc->iter_ages(t, cb, x);
+}
