@@ -38,6 +38,11 @@ $moctl "tessera" "add" "t.b" $tess_type "$t_location/b" \
 $moctl "tessera" "mount" "t.a" $m_dir \
 		|| fail "T-Mount a"
 
+$moctl "tessera" "del" "t.a" \
+		&& fail "T-Del mounted"
+$moctl "tessera" "show" "t.a" | fgrep -A1 "mounted" | fgrep "$m_dir" \
+		|| fail "T-Show mounted"
+
 touch "$m_dir/file-a" || fail "Touch a"
 $moctl "tessera" "umount" "t.a" \
 		|| fail "T-Umount a"
@@ -61,6 +66,10 @@ $moctl "mosaic" "mount" "m1" "$m_dir" \
 		|| fail "File-a in mosaic"
 [ -f "$m_dir/mt-b/file-b" ] \
 		|| fail "File-b in mosaic"
+
+# Mounted mosaic should be undeletable
+$moctl "mosaic" "del" "m1" \
+		&& fail "M-Del mounted"
 
 $moctl "mosaic" "show" "m1" | fgrep -A1 "mounted:" | fgrep "$m_dir" \
 		|| fail "M-Show mounted"

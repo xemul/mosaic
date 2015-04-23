@@ -127,26 +127,35 @@ int mosaic_add_tessera(char *type, char *name, int n_opts, char **opts)
 	return config_update();
 }
 
-int mosaic_del_tessera(struct tessera *t)
-{   
-	/*
-	 * FIXME -- what to do with on-disk layout?
-	 */
-
-	list_del(&t->sl);
-	if (t->t_desc->del)
-		t->t_desc->del(t);
-
-	free(t->t_name);
-	free(t);
-
-	return config_update();
-}
-
 int mosaic_iterate_ages_t(struct tessera *t, int (*cb)(struct tessera *, int age, void *), void *x)
 {
 	if (!t->t_desc->iter_ages)
 		return -1;
 
 	return t->t_desc->iter_ages(t, cb, x);
+}
+
+int mosaic_del_tessera(struct tessera *t)
+{
+	struct tess_desc *td = t->t_desc;
+
+	/*
+	 * FIXME -- what to do with on-disk layout?
+	 * FIXME -- this ages iteration is not nice, would
+	 * (probably) be better to keep mounted state for
+	 * all ages in one status file.
+	 */
+
+	if (td->iter_ages &&
+			td->iter_ages(t, st_is_mounted_t, NULL))
+		return -1;
+
+	list_del(&t->sl);
+	if (td->del)
+		td->del(t);
+
+	free(t->t_name);
+	free(t);
+
+	return config_update();
 }

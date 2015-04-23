@@ -119,6 +119,7 @@ struct umount_ctx {
 
 	int (*cb)(char *, void *x);
 	void *cb_arg;
+	int empty;
 };
 
 static int umount_one(char *path, void *x)
@@ -126,6 +127,7 @@ static int umount_one(char *path, void *x)
 	struct umount_ctx *uc = x;
 
 	if (uc->path && strcmp(uc->path, path)) {
+		uc->empty = 0;
 		fprintf(uc->nst, "- %s\n", path);
 		return 0;
 	}
@@ -151,6 +153,7 @@ static int do_umount(char *id, char *path, int (*cb)(char *, void *), void *x)
 	uc.nst = nst;
 	uc.cb = cb;
 	uc.cb_arg = x;
+	uc.empty = 1;
 
 	ret = st_for_each_mounted(id, umount_one, &uc);
 
@@ -159,8 +162,14 @@ static int do_umount(char *id, char *path, int (*cb)(char *, void *), void *x)
 
 	if (!ret) {
 		char aux2[PATH_MAX];
+
 		sprintf(aux2, STATUS_DIR "/%s", id);
-		ret = rename(st_aux, aux2);
+
+		if (uc.empty) {
+			unlink(st_aux);
+			ret = unlink(aux2);
+		} else
+			ret = rename(st_aux, aux2);
 	} else
 		unlink(st_aux);
 
@@ -177,6 +186,14 @@ void st_set_mounted(struct mosaic *m, char *path)
 
 	sprintf(id, "mos.%s", m->m_name);
 	set_mounted(id, path);
+}
+
+int st_is_mounted(struct mosaic *m)
+{
+	char path[PATH_MAX];
+
+	sprintf(path, STATUS_DIR "/mos.%s", m->m_name);
+	return access(path, F_OK) == 0 ? 1 : 0;
 }
 
 struct m_iter_ctx {
@@ -235,6 +252,14 @@ void st_set_mounted_t(struct tessera *t, int age, char *path)
 
 	sprintf(id, "tes.%s.%d", t->t_name, age);
 	set_mounted(id, path);
+}
+
+int st_is_mounted_t(struct tessera *t, int age, void *x)
+{
+	char path[PATH_MAX];
+
+	sprintf(path, STATUS_DIR "/tes.%s.%d", t->t_name, age);
+	return access(path, F_OK) == 0 ? 1 : 0;
 }
 
 struct t_iter_ctx {

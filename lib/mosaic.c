@@ -141,6 +141,9 @@ int mosaic_set_element(struct mosaic *m, char *name, int age, char *at, char *op
 {
 	struct element *e;
 
+	if (st_is_mounted(m))
+		return -1;
+
 	e = find_element(m, name);
 	if (e) {
 		free(e->e_at);
@@ -184,6 +187,9 @@ int mosaic_del_element(struct mosaic *m, char *name)
 {
 	struct element *e;
 
+	if (st_is_mounted(m))
+		return -1;
+
 	e = find_element(m, name);
 	if (!e)
 		return -1;
@@ -211,7 +217,8 @@ int mosaic_del(struct mosaic *m)
 {
 	struct element *e, *n;
 
-	/* FIXME -- what if mounted? */
+	if (st_is_mounted(m))
+		return -1;
 
 	list_for_each_entry_safe(e, n, &m->elements, ml) {
 		free(e->e_options);
