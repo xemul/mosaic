@@ -40,6 +40,8 @@ struct tess_desc *tess_desc_by_type(char *type)
 		return &tess_desc_btrfs;
 	if (!strcmp(type, "dm_thin"))
 		return &tess_desc_dmthin;
+	if (!strcmp(type, "plain"))
+		return &tess_desc_plain;
 
 	return NULL;
 }
