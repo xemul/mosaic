@@ -1,6 +1,5 @@
 * tessera state -- all ages in one file
 * locking (states and config)
-* bind-mount tessera (internal? and external)
 * int age -> string id/version/whatever
 * ages management (del/merge)
 * mount options
