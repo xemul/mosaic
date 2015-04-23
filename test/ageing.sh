@@ -36,7 +36,8 @@ $moctl "tessera" "mount" "t.a" $m_dir \
 		|| fail "T-Mount a"
 echo "V0" > "$m_dir/file-a" \
 		|| fail "Touch a"
-umount "$m_dir" || fail "Umount a"
+$moctl "tessera" "umount" "t.a" \
+		|| fail "T-Umount a"
 
 $moctl "tessera" "grow" "t.a" "1" \
 		|| fail "T-Grow 1"
@@ -46,13 +47,15 @@ fgrep "V0" "$m_dir/file-a" \
 		|| fail "Old data in grow"
 echo "V1" > "$m_dir/file-a" \
 		|| fail "Update t-data"
-umount "$m_dir" || fail "Umount a:1"
+$moctl "tessera" "umount" "t.a:1" \
+		|| fail "Umount a:1"
 
 $moctl "tessera" "mount" "t.a" $m_dir \
 		|| fail "T-Mount a (2)"
 fgrep "V0" "$m_dir/file-a" \
 		|| fail "Old data in base"
-umount "$m_dir" || fail "Umount a (2)"
+$moctl "tessera" "umount" "t.a" \
+		|| fail "T-Umount a (2)"
 
 echo "* Test mosaic construction out of aged tesserae"
 

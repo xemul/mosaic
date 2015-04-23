@@ -10,6 +10,10 @@
 
 #define STATUS_DIR	"mosaic.status"
 
+/*
+ * Generic "ID" level
+ */
+
 static int st_check_dir(void)
 {
 	int fd;
@@ -39,7 +43,7 @@ static int st_check_dir(void)
 
 static char st_aux[PATH_MAX];
 
-void st_set_mounted(struct mosaic *m, char *path)
+static void set_mounted(char *id, char *path)
 {
 	FILE *st;
 
@@ -51,7 +55,7 @@ void st_set_mounted(struct mosaic *m, char *path)
 	 * FIXME -- locking
 	 */
 
-	sprintf(st_aux, STATUS_DIR "/m.%s", m->m_name);
+	sprintf(st_aux, STATUS_DIR "/%s", id);
 	st = fopen(st_aux, "a+");
 	if (!st)
 		goto skip;
@@ -74,7 +78,7 @@ done:
 	fclose(st);
 }
 
-static int st_for_each_mounted(struct mosaic *m, int (*cb)(struct mosaic *, char *, void *), void *x)
+static int st_for_each_mounted(char *id, int (*cb)(char *, void *), void *x)
 {
 	FILE *st;
 	int ret = 0;
@@ -83,7 +87,7 @@ static int st_for_each_mounted(struct mosaic *m, int (*cb)(struct mosaic *, char
 	if (st_check_dir())
 		return -1;
 
-	sprintf(st_aux, STATUS_DIR "/m.%s", m->m_name);
+	sprintf(st_aux, STATUS_DIR "/%s", id);
 	st = fopen(st_aux, "r");
 	if (!st)
 		return -1;
@@ -100,7 +104,7 @@ static int st_for_each_mounted(struct mosaic *m, int (*cb)(struct mosaic *, char
 		e = strchr(st_aux, '\n');
 		*e = '\0';
 
-		ret = cb(m, st_aux + 2, x);
+		ret = cb(st_aux + 2, x);
 		if (ret != 0)
 			break;
 	}
@@ -109,49 +113,53 @@ static int st_for_each_mounted(struct mosaic *m, int (*cb)(struct mosaic *, char
 	return ret;
 }
 
-struct st_umount_ctx {
+struct umount_ctx {
 	char *path;
-	int (*cb)(struct mosaic *, char *p);
 	FILE *nst;
+
+	int (*cb)(char *, void *x);
+	void *cb_arg;
 };
 
-static int umount_one(struct mosaic *m, char *path, void *x)
+static int umount_one(char *path, void *x)
 {
-	struct st_umount_ctx *uc = x;
+	struct umount_ctx *uc = x;
 
 	if (uc->path && strcmp(uc->path, path)) {
 		fprintf(uc->nst, "- %s\n", path);
 		return 0;
 	}
 
-	if (uc->cb(m, path))
+	if (uc->cb(path, uc->cb_arg))
 		return -1;
 
 	return 0;
 }
 
-int st_umount(struct mosaic *m, char *path, int (*cb)(struct mosaic *, char *p))
+static int do_umount(char *id, char *path, int (*cb)(char *, void *), void *x)
 {
-	struct st_umount_ctx uc;
+	struct umount_ctx uc;
 	FILE *nst;
 	int ret;
 
-	sprintf(st_aux, STATUS_DIR "/m.%s.upd", m->m_name);
+	sprintf(st_aux, STATUS_DIR "/.%s.upd", id);
 	nst = fopen(st_aux, "w");
 	if (!nst)
 		return -1;
 
 	uc.path = path;
-	uc.cb = cb;
 	uc.nst = nst;
-	ret = st_for_each_mounted(m, umount_one, &uc);
+	uc.cb = cb;
+	uc.cb_arg = x;
+
+	ret = st_for_each_mounted(id, umount_one, &uc);
 
 	fclose(nst);
-	sprintf(st_aux, STATUS_DIR "/m.%s.upd", m->m_name);
+	sprintf(st_aux, STATUS_DIR "/.%s.upd", id);
 
 	if (!ret) {
 		char aux2[PATH_MAX];
-		sprintf(aux2, STATUS_DIR "/m.%s", m->m_name);
+		sprintf(aux2, STATUS_DIR "/%s", id);
 		ret = rename(st_aux, aux2);
 	} else
 		unlink(st_aux);
@@ -159,7 +167,121 @@ int st_umount(struct mosaic *m, char *path, int (*cb)(struct mosaic *, char *p))
 	return ret;
 }
 
+/*
+ * Mosaic level
+ */
+
+void st_set_mounted(struct mosaic *m, char *path)
+{
+	char id[512];
+
+	sprintf(id, "mos.%s", m->m_name);
+	set_mounted(id, path);
+}
+
+struct m_iter_ctx {
+	struct mosaic *m;
+	union {
+		int (*cb_x)(struct mosaic *, char *, void *);
+		int (*cb)(struct mosaic *, char *);
+	};
+	void *cb_arg;
+};
+
+static int mosaic_iter_one(char *path, void *x)
+{
+	struct m_iter_ctx *i = x;
+	return i->cb_x(i->m, path, i->cb_arg);
+}
+
 int mosaic_iterate_mounted(struct mosaic *m, int (*cb)(struct mosaic *, char *, void *), void *x)
 {
-	return st_for_each_mounted(m, cb, x);
+	char id[512];
+	struct m_iter_ctx i;
+
+	i.m = m;
+	i.cb_x = cb;
+	i.cb_arg = x;
+
+	sprintf(id, "mos.%s", m->m_name);
+	return st_for_each_mounted(id, mosaic_iter_one, &i);
+}
+
+static int umount_mosaic(char *path, void *x)
+{
+	struct m_iter_ctx *i = x;
+	return i->cb(i->m, path);
+}
+
+int st_umount(struct mosaic *m, char *from, int (*cb)(struct mosaic *, char *p))
+{
+	char id[512];
+	struct m_iter_ctx i;
+
+	i.m = m;
+	i.cb = cb;
+
+	sprintf(id, "mos.%s", m->m_name);
+	return do_umount(id, from, umount_mosaic, &i);
+}
+
+/*
+ * Tessera level
+ */
+
+void st_set_mounted_t(struct tessera *t, int age, char *path)
+{
+	char id[512];
+
+	sprintf(id, "tes.%s.%d", t->t_name, age);
+	set_mounted(id, path);
+}
+
+struct t_iter_ctx {
+	struct tessera *t;
+	int age;
+	union {
+		int (*cb_x)(struct tessera *, int, char *, void *);
+		int (*cb)(struct tessera *, int, char *);
+	};
+	void *cb_arg;
+};
+
+static int tessera_iter_one(char *path, void *x)
+{
+	struct t_iter_ctx *i = x;
+	return i->cb_x(i->t, i->age, path, i->cb_arg);
+}
+
+int mosaic_iterate_mounted_t(struct tessera *t, int age, int (*cb)(struct tessera *, int age, char *, void *), void *x)
+{
+	char id[512];
+	struct t_iter_ctx i;
+
+	i.t = t;
+	i.age = age;
+	i.cb_x = cb;
+	i.cb_arg = x;
+
+	sprintf(id, "tes.%s.%d", t->t_name, age);
+	return st_for_each_mounted(id, tessera_iter_one, &i);
+}
+
+static int umount_tessera(char *path, void *x)
+{
+	struct t_iter_ctx *i = x;
+	return i->cb(i->t, i->age, path);
+}
+
+int st_umount_t(struct tessera *t, int age, char *from, int (*cb)(struct tessera *, int, char *))
+{
+	char id[512];
+	struct t_iter_ctx i;
+
+	i.t = t;
+	i.age = age;
+	i.cb = cb;
+
+	sprintf(id, "tes.%s.%d", t->t_name, age);
+	return do_umount(id, from, umount_tessera, &i);
 }

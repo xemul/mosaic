@@ -43,6 +43,7 @@ static void usage(void)
 "    d|del     <name>\n"
 "    c|change  <name> [<elements>]\n"
 "    m|mount   <name> <location> [<mount-options>]\n"
+"    u|umount  <name> [<location>]\n"
 "\n"
 "     Element: <name>:<age>:<location>[:options=<mount-options>]\n"
 "              for \"change\" <name>:del to remove\n"
@@ -51,6 +52,7 @@ static void usage(void)
 "    a|add     <name> <type> [<type-options>]\n"
 "    d|del     <name>\n"
 "    m|mount   <name>:<age> <location> [<mount-options>]\n"
+"    u|umount  <name>:<age> [<location>]\n"
 "    g|grow    <name> <new-age>[:<base-age>]\n"
 );
 }
@@ -399,6 +401,32 @@ static int mount_tessera(int argc, char **argv)
 	return mosaic_mount_tessera(t, age, argv[1], options) == 0 ? 0 : 1;
 }
 
+static int umount_tessera(int argc, char **argv)
+{
+	struct tessera *t;
+	int age = 0;
+	char *aux;
+
+	if (argc < 1) {
+		printf("Usage: moctl tessera umount <name>:<age> [<location>]\n");
+		return 1;
+	}
+
+	aux = strchr(argv[0], ':');
+	if (aux) {
+		*aux = '\0';
+		age = atoi(aux + 1);
+	}
+
+	t = mosaic_find_tessera(argv[0]);
+	if (!t) {
+		printf("Unknown tessera %s\n", argv[0]);
+		return 1;
+	}
+
+	return mosaic_umount_tessera(t, age, argv[1]) == 0 ? 0 : 1;
+}
+
 static int grow_tessera(int argc, char **argv)
 {
 	struct tessera *t;
@@ -444,6 +472,8 @@ static int do_tessera(int argc, char **argv)
 		return del_tessera(argc - 1, argv + 1);
 	if (argv_is(argv[0], "mount"))
 		return mount_tessera(argc - 1, argv + 1);
+	if (argv_is(argv[0], "umount"))
+		return umount_tessera(argc - 1, argv + 1);
 	if (argv_is(argv[0], "grow"))
 		return grow_tessera(argc - 1, argv + 1);
 

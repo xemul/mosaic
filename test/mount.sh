@@ -39,13 +39,15 @@ $moctl "tessera" "mount" "t.a" $m_dir \
 		|| fail "T-Mount a"
 
 touch "$m_dir/file-a" || fail "Touch a"
-umount "$m_dir" || fail "Umount a"
+$moctl "tessera" "umount" "t.a" \
+		|| fail "T-Umount a"
 
 $moctl "tessera" "mount" "t.b" $m_dir \
 		|| fail "T-Mount b"
 
 touch "$m_dir/file-b" || fail "Touch b"
-umount "$m_dir" || fail "Umount b"
+$moctl "tessera" "umount" "t.b" \
+		|| fail "T-Umount b"
 
 echo "* Check mosaic mounting (based on tesseras)"
 mkdir "$m_dir/mt-a" "$m_dir/mt-b"
@@ -59,6 +61,9 @@ $moctl "mosaic" "mount" "m1" "$m_dir" \
 		|| fail "File-a in mosaic"
 [ -f "$m_dir/mt-b/file-b" ] \
 		|| fail "File-b in mosaic"
+
+$moctl "mosaic" "show" "m1" | fgrep -A1 "mounted:" | fgrep "$m_dir" \
+		|| fail "M-Show mounted"
 
 $moctl "mosaic" "umount" "m1" || fail "M-Umount"
 

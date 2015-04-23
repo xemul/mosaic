@@ -1,4 +1,5 @@
 #include <sys/stat.h>
+#include <sys/mount.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,6 +7,7 @@
 #include "tessera.h"
 #include "config.h"
 #include "util.h"
+#include "status.h"
 
 int mosaic_iterate_tesserae(int (*cb)(struct tessera *, void *), void *x)
 {
@@ -60,6 +62,7 @@ struct tessera *mosaic_find_tessera(char *name)
 int mosaic_mount_tessera(struct tessera *t, int age, char *path, char *options)
 {
 	struct stat buf;
+	int ret;
 
 	if (stat(path, &buf))
 		return -1;
@@ -67,7 +70,21 @@ int mosaic_mount_tessera(struct tessera *t, int age, char *path, char *options)
 	if (!S_ISDIR(buf.st_mode))
 		return -1;
 
-	return do_mount_tessera(t, age, path, options);
+	ret = do_mount_tessera(t, age, path, options);
+	if (!ret)
+		st_set_mounted_t(t, age, path);
+
+	return ret;
+}
+
+static int do_umount_tessera(struct tessera *t, int age, char *path)
+{
+	return umount(path);
+}
+
+int mosaic_umount_tessera(struct tessera *t, int age, char *path)
+{
+	return st_umount_t(t, age, path, do_umount_tessera);
 }
 
 int do_mount_tessera(struct tessera *t, int age, char *path, char *options)

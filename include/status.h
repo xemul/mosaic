@@ -4,6 +4,8 @@
 
 struct mosaic;
 void st_set_mounted(struct mosaic *, char *path);
+void st_set_mounted_t(struct tessera *t, int age, char *path);
 
 int st_umount(struct mosaic *m, char *path, int (*cb)(struct mosaic *, char *));
+int st_umount_t(struct tessera *t, int age, char *path, int (*cb)(struct tessera *t, int age, char *));
 #endif
