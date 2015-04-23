@@ -51,12 +51,10 @@ echo "V1" > "$m_dir/file-a" \
 
 $moctl "tessera" "show" "t.a" > "t.a.show"
 "$yamlck" "t.a.show" || fail "T-Show ages mounted in yaml"
-cat "t.a.show" | fgrep -A1 "ages" | fgrep "1" || fail "T-Show age 1"
+cat "t.a.show" | fgrep "age: 1" || fail "T-Show age 1"
 cat "t.a.show" | fgrep -A1 "mounted" | fgrep "$m_dir" || fail "T-Show mounted age 1"
 rm -f "t.a.show"
 
-$moctl "tessera" "show" "t.a" | fgrep -A1 "ages:" | fgrep "1" \
-		|| fail "T-Show age 1"
 $moctl "tessera" "umount" "t.a:1" \
 		|| fail "Umount a:1"
 

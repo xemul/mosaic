@@ -91,6 +91,10 @@ static int iterate_ages(struct tessera *t, int (*cb)(struct tessera *t, int age,
 	struct dirent *de;
 	int ret = 0;
 
+	ret = cb(t, 0, x);
+	if (ret)
+		return ret;
+
 	d = opendir(ot->ovl_location);
 	if (!d)
 		return -1;
@@ -211,7 +215,11 @@ static int umount_overlay_delta(struct tessera *t, int age, void *x)
 {
 	struct umount_ctx *uc = x;
 
-	sprintf(uc->path + uc->p_off, "age-%d/root", age);
+	if (age == 0)
+		sprintf(uc->path + uc->p_off, "base");
+	else
+		sprintf(uc->path + uc->p_off, "age-%d/root", age);
+
 	umount(uc->path);
 
 	return 0;
@@ -226,9 +234,6 @@ static void umount_deltas(struct tessera *t)
 	uc.path = path;
 	uc.p_off = sprintf(path, "%s/", ot->ovl_location);
 	iterate_ages(t, umount_overlay_delta, &uc);
-
-	sprintf(path + uc.p_off, "base");
-	umount(path);
 }
 
 static int mount_overlay(struct tessera *t, int age, char *path, char *options)
