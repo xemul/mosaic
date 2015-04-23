@@ -20,8 +20,6 @@ struct overlay_tessera {
 	char *ovl_location;
 };
 
-struct tess_desc tess_desc_overlay;
-
 static int add_overlay(struct tessera *t, int n_opts, char **opts)
 {
 	struct overlay_tessera *ot;

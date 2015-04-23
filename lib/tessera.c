@@ -22,6 +22,7 @@ int mosaic_iterate_tesserae(int (*cb)(struct tessera *, void *), void *x)
 }
 
 extern struct tess_desc tess_desc_overlay;
+extern struct tess_desc tess_desc_plain;
 
 static struct tess_desc tess_desc_btrfs = {
 	.td_name = "btrfs",

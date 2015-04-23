@@ -4,6 +4,7 @@ OBJS += config.o
 OBJS += mosaic.o
 OBJS += tessera.o
 OBJS += overlay.o
+OBJS += plain.o
 OBJS += status.o
 
 all: $(TGT)
