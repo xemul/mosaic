@@ -2,9 +2,7 @@
 
 set -x
 
-export LD_LIBRARY_PATH=$(pwd)/../lib/
-moctl="../moctl/moctl"
-yamlck="./chk-yaml.py"
+. env.sh
 t_location="tess.loc"
 m_dir="mnt"
 tess_type="overlay"
@@ -15,11 +13,6 @@ clean() {
 	rmdir "mosaic.status"
 	rmdir "$m_dir"
 	rm -rf "$t_location"
-}
-
-fail() {
-	echo "FAIL:" $*
-	exit 1
 }
 
 clean
