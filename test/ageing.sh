@@ -41,8 +41,6 @@ $moctl "tessera" "umount" "t.a" \
 
 $moctl "tessera" "grow" "t.a" "1" \
 		|| fail "T-Grow 1"
-$moctl "tessera" "show" "t.a" | fgrep -A1 "ages:" | fgrep "1" \
-		|| fail "T-Show age 1"
 
 $moctl "tessera" "mount" "t.a:1" $m_dir \
 		|| fail "T-Mount a:1"
@@ -50,6 +48,15 @@ fgrep "V0" "$m_dir/file-a" \
 		|| fail "Old data in grow"
 echo "V1" > "$m_dir/file-a" \
 		|| fail "Update t-data"
+
+$moctl "tessera" "show" "t.a" > "t.a.show"
+"$yamlck" "t.a.show" || fail "T-Show ages mounted in yaml"
+cat "t.a.show" | fgrep -A1 "ages" | fgrep "1" || fail "T-Show age 1"
+cat "t.a.show" | fgrep -A1 "mounted" | fgrep "$m_dir" || fail "T-Show mounted age 1"
+rm -f "t.a.show"
+
+$moctl "tessera" "show" "t.a" | fgrep -A1 "ages:" | fgrep "1" \
+		|| fail "T-Show age 1"
 $moctl "tessera" "umount" "t.a:1" \
 		|| fail "Umount a:1"
 

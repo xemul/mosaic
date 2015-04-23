@@ -322,7 +322,20 @@ static int list_tesserae(void)
 	return mosaic_iterate_tesserae(print_tessera, NULL);
 }
 
-static int show_age(struct tessera *t, int age, void *x)
+static int print_mounted_t(struct tessera *t, int age, char *mp, void *x)
+{
+	int *p = x;
+
+	if (*p == 1) {
+		*p = 2;
+		printf("    mounted:\n");
+	}
+
+	printf("      - %s\n", mp);
+	return 0;
+}
+
+static int print_age(struct tessera *t, int age, void *x)
 {
 	int *p = x;
 
@@ -331,7 +344,9 @@ static int show_age(struct tessera *t, int age, void *x)
 		printf("ages:\n");
 	}
 
-	printf("  - %d\n", age);
+	printf("  - age: %d\n", age);
+	mosaic_iterate_mounted_t(t, age, print_mounted_t, p);
+
 	return 0;
 }
 
@@ -352,7 +367,7 @@ static int show_tessera(int argc, char **argv)
 	}
 
 	printed = 0;
-	mosaic_iterate_ages_t(t, show_age, &printed);
+	mosaic_iterate_ages_t(t, print_age, &printed);
 
 	printf("type: %s\n", t->t_desc->td_name);
 	if (t->t_desc->show)
