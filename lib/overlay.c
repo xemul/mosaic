@@ -265,6 +265,11 @@ static int grow_overlay(struct tessera *t, int base_age, int new_age)
 	int plen, i;
 	char *subs[] = { "/data", "/work", "/root", ".parent", NULL, };
 
+	/*
+	 * FIXME -- this checks only pure mount, in-mosaic
+	 * mount should also block this
+	 */
+
 	if (st_is_mounted_t(t, base_age, NULL))
 		return -1;
 
