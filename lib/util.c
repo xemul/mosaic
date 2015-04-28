@@ -1,4 +1,5 @@
 #include <sys/mount.h>
+#include <stdlib.h>
 #include <string.h>
 #include "util.h"
 
@@ -26,4 +27,36 @@ int parse_mount_opts(char *opt, int *m_flags)
 	}
 
 	return 0;
+}
+
+#define SECTOR_SHIFT	(9)
+
+unsigned long parse_blk_size(char *str)
+{
+	char *end;
+	unsigned long ret;
+
+	ret = strtoul(str, &end, 10);
+	switch (*end) {
+	case 'k':
+	case 'K':
+		ret <<= 10;
+		break;
+	case 'm':
+	case 'M':
+		ret <<= 20;
+		break;
+	case 'g':
+	case 'G':
+		ret <<= 30;
+		break;
+	case 's':
+		/* sectors */
+		ret <<= SECTOR_SHIFT;
+		break;
+	default:
+		return 0;
+	}
+
+	return ret;
 }
