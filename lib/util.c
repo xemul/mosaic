@@ -29,8 +29,6 @@ int parse_mount_opts(char *opt, int *m_flags)
 	return 0;
 }
 
-#define SECTOR_SHIFT	(9)
-
 unsigned long parse_blk_size(char *str)
 {
 	char *end;
@@ -53,6 +51,8 @@ unsigned long parse_blk_size(char *str)
 	case 's':
 		/* sectors */
 		ret <<= SECTOR_SHIFT;
+		break;
+	case '\0':
 		break;
 	default:
 		return 0;
