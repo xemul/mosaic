@@ -2,7 +2,6 @@
 * locking (states and config)
 * int age -> string id/version/whatever
 * ages management (del/merge)
-* mount options
 * moar tests
 * documentation file
 * dmthin type
@@ -11,3 +10,5 @@
 * update mosaic elements when mounted
 * do not delete tesserae that are in mosaic
 * logging
+* on-line ovl growing
+* space management (quota)
