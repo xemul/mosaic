@@ -130,11 +130,14 @@ static void show_overlay(struct tessera *t)
  *
  * location/
  *   base/     -> base delta
+ *     data/   -> with contents
+ *     wlock   -> write locked
  *   age-N/
  *     data/   -> for upperdir
  *     work/   -> for workdir
  *     parent  -> symlink on parent age
  *     root/   -> for mountpoint
+ *     wlock   -> write locked
  */
 
 static int mount_overlay_delta(struct tessera *t, int age, char *l_path, int l_off)
@@ -144,11 +147,19 @@ static int mount_overlay_delta(struct tessera *t, int age, char *l_path, int l_o
 	struct statfs buf;
 
 	if (age == 0) {
-		sprintf(l_path + l_off, "/base");
+		l_off += sprintf(l_path + l_off, "/base");
 
 		if (access(l_path, F_OK) < 0) {
 			if (mkdir(l_path, 0600) < 0) {
 				perror("Can't make dir for base");
+				return -1;
+			}
+		}
+
+		sprintf(l_path + l_off, "/data");
+		if (access(l_path, F_OK) < 0) {
+			if (mkdir(l_path, 0600) < 0) {
+				perror("Can't make dir for data");
 				return -1;
 			}
 		}
@@ -215,10 +226,9 @@ static int umount_overlay_delta(struct tessera *t, int age, void *x)
 	struct umount_ctx *uc = x;
 
 	if (age == 0)
-		sprintf(uc->path + uc->p_off, "base");
-	else
-		sprintf(uc->path + uc->p_off, "age-%d/root", age);
+		return 0;
 
+	sprintf(uc->path + uc->p_off, "age-%d/root", age);
 	umount(uc->path);
 
 	return 0;
