@@ -12,6 +12,7 @@
 #include "tessera.h"
 #include "overlay.h"
 #include "status.h"
+#include "util.h"
 
 #ifndef OVERLAYFS_SUPER_MAGIC
 #define OVERLAYFS_SUPER_MAGIC 0x794c7630
@@ -249,21 +250,22 @@ static int mount_overlay(struct tessera *t, int age, char *path, char *options)
 {
 	struct overlay_tessera *ot = t->priv;
 	char l_path[PATH_MAX];
-	int plen;
+	int plen, m_flags;
 
-	if (options) {
-		printf("Mount options are not yet supported\n");
+	if (parse_mount_opts(options, &m_flags))
 		return -1;
-	}
 
 	plen = sprintf(l_path, "%s", ot->ovl_location);
 	if (mount_overlay_delta(t, age, l_path, plen))
 		return -1;
 
-	if (mount(l_path, path, NULL, MS_BIND, NULL) < 0) {
+	if (mount(l_path, path, NULL, MS_BIND | m_flags, NULL) < 0) {
 		perror("Can't bind mount overlay");
 		return -1;
 	}
+
+	if (m_flags & MS_RDONLY)
+		mount(NULL, path, NULL, MS_BIND|MS_REMOUNT|MS_RDONLY, NULL);
 
 	return 0;
 }

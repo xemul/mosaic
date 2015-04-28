@@ -6,6 +6,7 @@ OBJS += tessera.o
 OBJS += overlay.o
 OBJS += plain.o
 OBJS += status.o
+OBJS += util.o
 
 all: $(TGT)
 
