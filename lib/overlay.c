@@ -11,6 +11,7 @@
 #include "mosaic.h"
 #include "tessera.h"
 #include "overlay.h"
+#include "status.h"
 
 #ifndef OVERLAYFS_SUPER_MAGIC
 #define OVERLAYFS_SUPER_MAGIC 0x794c7630
@@ -263,6 +264,9 @@ static int grow_overlay(struct tessera *t, int base_age, int new_age)
 	char path[PATH_MAX], aux[32];
 	int plen, i;
 	char *subs[] = { "/data", "/work", "/root", ".parent", NULL, };
+
+	if (st_is_mounted_t(t, base_age, NULL))
+		return -1;
 
 	plen = sprintf(path, "%s/age-%d", ot->ovl_location, new_age);
 	if (mkdir(path, 0600)) {
