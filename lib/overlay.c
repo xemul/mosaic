@@ -141,7 +141,7 @@ static void show_overlay(struct tessera *t)
  *     wlock   -> write locked
  */
 
-static int mount_overlay_delta(struct tessera *t, int age, char *l_path, int l_off)
+static int mount_overlay_delta(struct tessera *t, int age, char *l_path, int l_off, int *top_ro)
 {
 	struct overlay_tessera *ot = t->priv;
 	char aux[4096];
@@ -155,6 +155,11 @@ static int mount_overlay_delta(struct tessera *t, int age, char *l_path, int l_o
 				perror("Can't make dir for base");
 				return -1;
 			}
+		}
+
+		if (top_ro) {
+			sprintf(l_path + l_off, "/wlock");
+			*top_ro = (access(l_path, F_OK) == 0);
 		}
 
 		sprintf(l_path + l_off, "/data");
@@ -202,11 +207,17 @@ static int mount_overlay_delta(struct tessera *t, int age, char *l_path, int l_o
 	/*
 	 * Check parent mount and ask for it into l_path
 	 */
-	if (mount_overlay_delta(t, atoi(aux), l_path, l_off))
+	if (mount_overlay_delta(t, atoi(aux), l_path, l_off, NULL))
 		return -1;
 
 	sprintf(aux, "upperdir=%s/age-%d/data,workdir=%s/age-%d/work,lowerdir=%s/",
 			ot->ovl_location, age, ot->ovl_location, age, l_path);
+
+	if (top_ro) {
+		sprintf(l_path + l_off, "/age-%d/wlock", age);
+		*top_ro = (access(l_path, F_OK) == 0);
+	}
+
 	sprintf(l_path + l_off, "/age-%d/root", age);
 
 	if (mount("none", l_path, "overlay", 0, aux)) {
@@ -250,13 +261,16 @@ static int mount_overlay(struct tessera *t, int age, char *path, char *options)
 {
 	struct overlay_tessera *ot = t->priv;
 	char l_path[PATH_MAX];
-	int plen, m_flags;
+	int plen, m_flags, ro;
 
 	if (parse_mount_opts(options, &m_flags))
 		return -1;
 
 	plen = sprintf(l_path, "%s", ot->ovl_location);
-	if (mount_overlay_delta(t, age, l_path, plen))
+	if (mount_overlay_delta(t, age, l_path, plen, &ro))
+		return -1;
+
+	if (ro && !(m_flags & MS_RDONLY))
 		return -1;
 
 	if (mount(l_path, path, NULL, MS_BIND | m_flags, NULL) < 0) {
@@ -305,6 +319,14 @@ static int grow_overlay(struct tessera *t, int base_age, int new_age)
 		if (ret)
 			goto cleanup;
 	}
+
+	if (base_age)
+		sprintf(path, "%s/age-%d/wlock", ot->ovl_location, base_age);
+	else
+		sprintf(path, "%s/base/wlock", ot->ovl_location);
+
+	if (mknod(path, S_IFREG | 0600, 0))
+		goto cleanup;
 
 	return 0;
 
