@@ -3,13 +3,16 @@
 set -x
 
 . env.sh
-t_location="tess.loc"
+
+clean_ts() {
+	echo "No tesserae storage"
+}
 
 clean() {
 	rm -f "mosaic.conf"
 	umount "mosaic.status"
 	rmdir "mosaic.status"
-	rm -rf "$t_location"
+	clean_ts
 }
 
 clean
@@ -21,13 +24,14 @@ echo "... PASS"
 run_tests() {
 	touch "mosaic.conf"
 	mkdir "mosaic.status"
-	mkdir "$t_location"
+	prep_ts
 
 	echo "* Check tessera mgmt functionality"
 	$moctl "tessera" "list" \
 			|| fail "T-List empty"
 
-	$moctl "tessera" "add" "tess.a.n" $tess_type "$t_location/tess.a.dir" \
+	t_args=$(new_ts_args "a")
+	$moctl "tessera" "add" "tess.a.n" $tess_type $t_args \
 			|| fail "T-Add"
 
 	$moctl "tessera" "list" | $yamlck \
@@ -37,10 +41,9 @@ run_tests() {
 
 	$moctl "tessera" "show" "tess.a.n" | $yamlck \
 			|| fail "T-Show in yaml"
-	$moctl "tessera" "show" "tess.a.n" | fgrep "tess.a.dir" \
-			|| fail "T-Show tess.n"
 
-	$moctl "tessera" "add" "temp.n" $tess_type "$t_location/x.dir" \
+	t_args=$(new_ts_args "temp")
+	$moctl "tessera" "add" "temp.n" $tess_type $t_args \
 			|| fail "T-Add temp"
 	$moctl "tessera" "del" "temp.n" \
 			|| fail "T-Del"
@@ -92,12 +95,16 @@ run_tests() {
 	clean
 }
 
-echo "###### Running tests for overlay"
-tess_type="overlay"
+#echo "###### Running tests for overlay"
+#. ovl.sh
+#run_tests
+
+echo "###### Running tests for thin"
+. thin.sh
 run_tests
 
-echo "###### Running tests for plain"
-tess_type="plain"
-run_tests
+#echo "###### Running tests for plain"
+#. plain.sh
+#run_tests
 
 echo "All tests passed"
