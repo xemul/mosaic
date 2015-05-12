@@ -32,6 +32,11 @@ struct thin_map_search {
 	int max_id;
 };
 
+struct thin_map_walk {
+	int (*cb)(struct thin_map *tm, void *x);
+	void *x;
+};
+
 static int parse_map_elem(yaml_parser_t *p, char *key, void *x)
 {
 	struct thin_map *tm = x;
@@ -64,7 +69,7 @@ static int parse_map_elem(yaml_parser_t *p, char *key, void *x)
 
 static int parse_map(yaml_parser_t *p, void *x)
 {
-	struct thin_map_search *tms = x;
+	struct thin_map_walk *tmw = x;
 	struct thin_map tm;
 	int ret;
 
@@ -72,20 +77,29 @@ static int parse_map(yaml_parser_t *p, void *x)
 	if (ret < 0)
 		return ret;
 
-	if (!strcmp(tms->m.tess, tm.tess) && (tms->m.age == tm.age)) {
+	if (tmw->cb(&tm, tmw->x))
+		return -1;
+
+	free(tm.tess);
+	return 0;
+}
+
+static int get_map_id(struct thin_map *tm, void *x)
+{
+	struct thin_map_search *tms = x;
+
+	if (!strcmp(tms->m.tess, tm->tess) && (tms->m.age == tm->age)) {
 		if (tms->m.vol_id != -1)
 			printf("BUG: double map mapping for %s:%d\n",
 					tms->m.tess, tms->m.age);
 
-		tms->m.vol_id = tm.vol_id;
+		tms->m.vol_id = tm->vol_id;
 	}
 
-	if (tms->max_id < tm.vol_id)
-		tms->max_id = tm.vol_id;
+	if (tms->max_id < tm->vol_id)
+		tms->max_id = tm->vol_id;
 
-	free(tm.tess);
-
-	return ret;
+	return 0;
 }
 
 static int parse_maps(yaml_parser_t *p, void *x)
@@ -114,6 +128,10 @@ int thin_get_id(char *dev_name, char *tess_name, int age, bool new)
 		},
 		.max_id = -1,
 	};
+	struct thin_map_walk tmw = {
+		.cb = get_map_id,
+		.x = &tms,
+	};
 
 	if (!yaml_parser_initialize(&p))
 		goto out;
@@ -124,7 +142,7 @@ int thin_get_id(char *dev_name, char *tess_name, int age, bool new)
 		goto out_p;
 
 	yaml_parser_set_input_file(&p, mapf);
-	ret = yaml_parse_all(&p, parse_maps_file, &tms);
+	ret = yaml_parse_all(&p, parse_maps_file, &tmw);
 	if (ret)
 		goto out_f;
 
