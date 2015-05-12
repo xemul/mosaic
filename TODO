@@ -13,4 +13,3 @@
 * on-line ovl growing
 * space management (quota)
 * free tessera with contents
-* many tesserae in one dm_thin pool
