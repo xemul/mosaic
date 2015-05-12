@@ -70,13 +70,28 @@ static int add_thin(struct tessera *t, int n_opts, char **opts)
 	return 0;
 }
 
-static void del_thin(struct tessera *t)
+static int del_pool(struct thin_map *tm, void *x)
 {
+	struct tessera *t = x;
 	struct thin_tessera *tt = t->priv;
 	char cmd[1024];
 
-	sprintf(cmd, "dmsetup remove mosaic-%s-0", t->t_name);
+	if (strcmp(tm->tess, t->t_name))
+		return 0;
+
+	sprintf(cmd, "dmsetup remove mosaic-%s-%d", t->t_name, tm->age);
 	system(cmd);
+	sprintf(cmd, "dmsetup message %s 0 \"delete %d\"", tt->thin_dev, tm->vol_id);
+	system(cmd);
+
+	return 0;
+}
+
+static void del_thin(struct tessera *t)
+{
+	struct thin_tessera *tt = t->priv;
+
+	thin_walk_ids(tt->thin_dev, del_pool, t);
 
 	free(tt->thin_dev);
 	free(tt->thin_fs);
