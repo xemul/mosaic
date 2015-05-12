@@ -2,5 +2,12 @@
 #define __DM_THIN_ID_H__
 #include <stdbool.h>
 int thin_get_id(char *dev, char *tess, int age, bool new);
-int thin_walk_ids(char *dev, int (*cb)(char *t, int age, int vol, void *), void *);
+
+struct thin_map {
+	char *tess;
+	int age;
+	int vol_id;
+};
+
+int thin_walk_ids(char *dev, int (*cb)(struct thin_map *, void *), void *);
 #endif

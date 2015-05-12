@@ -21,12 +21,6 @@ void dev_map_file_name(char *dev, char *file)
 			*aux = '_';
 }
 
-struct thin_map {
-	char *tess;
-	int age;
-	int vol_id;
-};
-
 struct thin_map_search {
 	struct thin_map m;
 	int max_id;
@@ -172,7 +166,28 @@ out:
 	return ret;
 }
 
-int thin_walk_ids(char *dev, int (*cb)(char *t, int age, int vol, void *), void *x)
+int thin_walk_ids(char *dev, int (*cb)(struct thin_map *, void *), void *x)
 {
-	return -1;
+	int ret = -1;
+	char m_path[1024];
+	FILE *mapf;
+	yaml_parser_t p;
+	struct thin_map_walk tmw = { .cb = cb, .x = x, };
+
+	if (!yaml_parser_initialize(&p))
+		goto out;
+
+	dev_map_file_name(dev, m_path);
+	mapf = fopen(m_path, "r");
+	if (!mapf)
+		goto out_p;
+
+	yaml_parser_set_input_file(&p, mapf);
+	ret = yaml_parse_all(&p, parse_maps_file, &tmw);
+
+	fclose(mapf);
+out_p:
+	yaml_parser_delete(&p);
+out:
+	return ret;
 }

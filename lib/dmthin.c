@@ -191,14 +191,14 @@ struct iag {
 	void *arg;
 };
 
-static int thin_age(char *t_name, int age, int vol_id, void *x)
+static int thin_age(struct thin_map *tm, void *x)
 {
 	struct iag *i = x;
 
-	if (strcmp(t_name, i->t->t_name))
+	if (strcmp(tm->tess, i->t->t_name))
 		return 0;
 
-	if (i->cb(i->t, age, i->arg))
+	if (i->cb(i->t, tm->age, i->arg))
 		return -1;
 
 	return 0;
