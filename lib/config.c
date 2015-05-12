@@ -93,7 +93,7 @@ static int parse_tessera(yaml_parser_t *p, void *x)
 
 static int parse_tesserae(yaml_parser_t *p, void *x)
 {
-	return yaml_parse_block_seq(p, "tessera", YAML_MAPPING_START_EVENT, YAML_MAPPING_END_EVENT,
+	return yaml_parse_block_seq(p, YAML_MAPPING_START_EVENT, YAML_MAPPING_END_EVENT,
 			parse_tessera, x);
 }
 
@@ -152,7 +152,7 @@ static int parse_element(yaml_parser_t *p, void *x)
 
 static int parse_elements(yaml_parser_t *p, void *x)
 {
-	return yaml_parse_block_seq(p, "element", YAML_MAPPING_START_EVENT, YAML_MAPPING_END_EVENT,
+	return yaml_parse_block_seq(p, YAML_MAPPING_START_EVENT, YAML_MAPPING_END_EVENT,
 			parse_element, x);
 }
 
@@ -195,7 +195,7 @@ static int parse_mosaic(yaml_parser_t *p, void *x)
 
 static int parse_mosaics(yaml_parser_t *p, void *x)
 {
-	return yaml_parse_block_seq(p, "mosaic", YAML_MAPPING_START_EVENT, YAML_MAPPING_END_EVENT,
+	return yaml_parse_block_seq(p, YAML_MAPPING_START_EVENT, YAML_MAPPING_END_EVENT,
 			parse_mosaic, x);
 }
 

@@ -50,7 +50,7 @@ err:
 /*
  * Helper to parse list of bs:be blocks
  */
-int yaml_parse_block_seq(yaml_parser_t *p, char *typ, int bs, int be,
+int yaml_parse_block_seq(yaml_parser_t *p, int bs, int be,
 		int (*element)(yaml_parser_t *, void *), void *x)
 {
 	int ret;
