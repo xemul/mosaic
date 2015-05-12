@@ -3,16 +3,19 @@
 set -x
 
 . env.sh
-t_location="tess.loc"
-m_dir="mnt"
-tess_type="overlay"
+
+m_dir="mnt/"
+
+clean_ts() {
+	echo "No tesserae storage"
+}
 
 clean() {
 	rm -f "mosaic.conf"
 	umount "mosaic.status"
 	rmdir "mosaic.status"
 	rmdir "$m_dir"
-	rm -rf "$t_location"
+	clean_ts
 }
 
 clean
@@ -20,13 +23,16 @@ clean
 run_tests() {
 	touch "mosaic.conf"
 	mkdir "mosaic.status"
-	mkdir "$t_location"
 	mkdir "$m_dir"
+	prep_ts
 
 	echo "* Check tessera mounting"
-	$moctl "tessera" "add" "t.a" $tess_type "$t_location/a" \
+	t_args=$(new_ts_args "a")
+	$moctl "tessera" "add" "t.a" $tess_type $t_args \
 			|| fail "T-Add a"
-	$moctl "tessera" "add" "t.b" $tess_type "$t_location/b" \
+
+	t_args=$(new_ts_args "b")
+	$moctl "tessera" "add" "t.b" $tess_type $t_args \
 			|| fail "T-Add b"
 
 	$moctl "tessera" "mount" "t.a" $m_dir \
@@ -75,17 +81,25 @@ run_tests() {
 	[ -f "$m_dir/mt-b/file-b" ] \
 			&& fail "File-b not in mosaic"
 
-	rmdir "$m_dir/mt-a" "$m_dir/mt-b"
+	# clean
 
+	rmdir "$m_dir/mt-a" "$m_dir/mt-b"
+	$moctl "m" "del" "m1"
+	$moctl "t" "del" "t.a"
+	$moctl "t" "del" "t.b"
 	clean
 }
 
 echo "###### Running tests for overlay"
-tess_type="overlay"
+. ovl.sh
+run_tests
+
+echo "###### Running tests for thin"
+. thin.sh
 run_tests
 
 echo "###### Running tests for plain"
-tess_type="plain"
+. plain.sh
 run_tests
 
 echo "All tests passed"
