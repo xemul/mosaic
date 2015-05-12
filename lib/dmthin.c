@@ -185,12 +185,31 @@ static int grow_thin(struct tessera *t, int base_age, int new_age)
 	return 0;
 }
 
+struct iag {
+	int (*cb)(struct tessera *t, int age, void *);
+	struct tessera *t;
+	void *arg;
+};
+
+static int thin_age(char *t_name, int age, int vol_id, void *x)
+{
+	struct iag *i = x;
+
+	if (strcmp(t_name, i->t->t_name))
+		return 0;
+
+	if (i->cb(i->t, age, i->arg))
+		return -1;
+
+	return 0;
+}
+
 static int iterate_ages(struct tessera *t, int (*cb)(struct tessera *t, int age, void *), void *x)
 {
-	/*
-	 * FIXME -- keep track of thin volume IDs somewhere
-	 */
-	return cb(t, 0, x);
+	struct thin_tessera *tt = t->priv;
+	struct iag i = { .cb = cb, .t = t, .arg = x, };
+
+	return thin_walk_ids(tt->thin_dev, thin_age, &i);
 }
 
 

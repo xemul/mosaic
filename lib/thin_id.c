@@ -153,3 +153,8 @@ out_p:
 out:
 	return ret;
 }
+
+int thin_walk_ids(char *dev, int (*cb)(char *t, int age, int vol, void *), void *x)
+{
+	return -1;
+}
