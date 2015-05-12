@@ -11,5 +11,5 @@
 * logging
 * on-line ovl growing
 * space management (quota)
-* free tessera with contents
+* free tessera with contents (thin does so, ovl and plain -- no)
 * cache config files' data in memory (pure lib case)
