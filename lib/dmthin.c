@@ -73,6 +73,10 @@ static int add_thin(struct tessera *t, int n_opts, char **opts)
 static void del_thin(struct tessera *t)
 {
 	struct thin_tessera *tt = t->priv;
+	char cmd[1024];
+
+	sprintf(cmd, "dmsetup remove mosaic-%s-0", t->t_name);
+	system(cmd);
 
 	free(tt->thin_dev);
 	free(tt->thin_fs);

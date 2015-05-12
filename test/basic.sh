@@ -92,19 +92,22 @@ run_tests() {
 	$moctl "mosaic" "show" "mos.a.n" | fgrep "tess.a.n" \
 			&& fail "M-Show deleted elem"
 
+	# clean
+	$moctl "t" "del" "tess.a.n"
+
 	clean
 }
 
-#echo "###### Running tests for overlay"
-#. ovl.sh
-#run_tests
+echo "###### Running tests for overlay"
+. ovl.sh
+run_tests
 
 echo "###### Running tests for thin"
 . thin.sh
 run_tests
 
-#echo "###### Running tests for plain"
-#. plain.sh
-#run_tests
+echo "###### Running tests for plain"
+. plain.sh
+run_tests
 
 echo "All tests passed"
