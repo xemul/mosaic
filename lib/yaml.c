@@ -109,3 +109,31 @@ char *yaml_parse_scalar(yaml_parser_t *p)
 	return ret;
 }
 
+struct ypd {
+	int (*doc)(yaml_parser_t *, void *);
+	void *x;
+};
+
+static int parse_document(yaml_parser_t *p, void *_x)
+{
+	struct ypd *x = _x;
+
+	return x->doc(p, x->x);
+}
+
+static int parse_stream(yaml_parser_t *p, void *x)
+{
+	return yaml_parse_block(p, YAML_DOCUMENT_START_EVENT, YAML_DOCUMENT_END_EVENT,
+			parse_document, x);
+}
+
+int yaml_parse_all(yaml_parser_t *p, int (*doc)(yaml_parser_t *, void *), void *x)
+{
+	struct ypd _x = {
+		.doc = doc,
+		.x = x,
+	};
+
+	return yaml_parse_block(p, YAML_STREAM_START_EVENT, YAML_STREAM_END_EVENT,
+			parse_stream, &_x);
+}

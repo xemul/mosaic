@@ -223,12 +223,6 @@ static int parse_document(yaml_parser_t *p, void *x)
 			parse_top, x);
 }
 
-static int parse_stream(yaml_parser_t *p, void *x)
-{
-	return yaml_parse_block(p, YAML_DOCUMENT_START_EVENT, YAML_DOCUMENT_END_EVENT,
-			parse_document, x);
-}
-
 static int resolve_tesserae(struct mosaic_state *ms)
 {
 	struct mosaic *m;
@@ -271,8 +265,7 @@ static struct mosaic_state *mosaic_parse_config(char *cfg_file)
 
 	yaml_parser_set_input_file(&parser, f);
 
-	ret = yaml_parse_block(&parser, YAML_STREAM_START_EVENT, YAML_STREAM_END_EVENT,
-			parse_stream, ms);
+	ret = yaml_parse_all(&parser, parse_document, ms);
 	if (!ret)
 		ret = resolve_tesserae(ms);
 
