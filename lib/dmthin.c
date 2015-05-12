@@ -5,6 +5,7 @@
 #include "util.h"
 #include "mosaic.h"
 #include "tessera.h"
+#include "thin_id.h"
 
 struct thin_tessera {
 	char *thin_dev;
@@ -15,18 +16,23 @@ struct thin_tessera {
 static int thin_init_base(char *t_name, char *dev, char *fs, unsigned long sz)
 {
 	char cmd[1024];
+	int id;
 
 	/*
 	 * FIXME -- as a prototype system() is used.
 	 * Would be nice to rewrite this using libdevicemapper
 	 */
 
-	sprintf(cmd, "dmsetup message %s 0 \"create_thin 0\"", dev);
+	id = thin_get_id(dev, t_name, 0);
+	if (id < 0)
+		return -1;
+
+	sprintf(cmd, "dmsetup message %s 0 \"create_thin %d\"", dev, id);
 	if (system(cmd))
 		return -1;
 
-	sprintf(cmd, "dmsetup create mosaic-%s-0 --table \"0 %lu thin %s 0\"",
-			t_name, sz >> SECTOR_SHIFT, dev);
+	sprintf(cmd, "dmsetup create mosaic-%s-0 --table \"0 %lu thin %s %d\"",
+			t_name, sz >> SECTOR_SHIFT, dev, id);
 	if (system(cmd))
 		return -1;
 

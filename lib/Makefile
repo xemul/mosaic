@@ -5,9 +5,11 @@ OBJS += mosaic.o
 OBJS += tessera.o
 OBJS += overlay.o
 OBJS += dmthin.o
+OBJS += thin_id.o
 OBJS += plain.o
 OBJS += status.o
 OBJS += util.o
+OBJS += yaml.o
 
 all: $(TGT)
 
