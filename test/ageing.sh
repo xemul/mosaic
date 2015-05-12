@@ -95,9 +95,9 @@ run_tests() {
 			|| fail "T-Del"
 }
 
-# echo "###### Running tests for overlay"
-# . ovl.sh
-# run_tests
+echo "###### Running tests for overlay"
+. ovl.sh
+run_tests
 
 echo "###### Running tests for thin"
 . thin.sh
