@@ -23,7 +23,7 @@ static int thin_init_base(char *t_name, char *dev, char *fs, unsigned long sz)
 	 * Would be nice to rewrite this using libdevicemapper
 	 */
 
-	id = thin_get_id(dev, t_name, 0);
+	id = thin_get_id(dev, t_name, 0, true);
 	if (id < 0)
 		return -1;
 
@@ -146,21 +146,43 @@ static int mount_thin(struct tessera *t, int age, char *path, char *options)
 {
 	char dev[1024];
 	struct thin_tessera *tt = t->priv;
+	int m_flags;
 
-	if (age != 0)
+	if (parse_mount_opts(options, &m_flags))
 		return -1;
-
-	if (options) {
-		printf("Mount options are not yet supported\n");
-		return -1;
-	}
 
 	/*
 	 * FIXME -- device is added on ->add, not on config load
 	 */
 
-	sprintf(dev, "/dev/mapper/mosaic-%s-0", t->t_name);
-	return mount(dev, path, tt->thin_fs, 0, NULL);
+	sprintf(dev, "/dev/mapper/mosaic-%s-%d", t->t_name, age);
+	return mount(dev, path, tt->thin_fs, m_flags, NULL);
+}
+
+static int grow_thin(struct tessera *t, int base_age, int new_age)
+{
+	struct thin_tessera *tt = t->priv;
+	int base_id, id;
+	char cmd[1024];
+
+	base_id = thin_get_id(tt->thin_dev, t->t_name, base_age, false);
+	if (base_id < 0)
+		return -1;
+
+	id = thin_get_id(tt->thin_dev, t->t_name, new_age, true);
+	if (id < 0)
+		return -1;
+
+	sprintf(cmd, "dmsetup message %s 0 \"create_snap %d %d\"", tt->thin_dev, id, base_id);
+	if (system(cmd))
+		return -1;
+
+	sprintf(cmd, "dmsetup create mosaic-%s-%d --table \"0 %lu thin %s %d\"",
+			t->t_name, new_age, tt->thin_age_size >> SECTOR_SHIFT, tt->thin_dev, id);
+	if (system(cmd))
+		return -1;
+
+	return 0;
 }
 
 static int iterate_ages(struct tessera *t, int (*cb)(struct tessera *t, int age, void *), void *x)
@@ -180,5 +202,6 @@ struct tess_desc tess_desc_thin = {
 	.save = save_thin,
 	.show = show_thin,
 	.mount = mount_thin,
+	.grow = grow_thin,
 	.iter_ages = iterate_ages,
 };

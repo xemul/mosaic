@@ -4,7 +4,6 @@
 * ages management (del/merge)
 * moar tests
 * documentation file
-* dmthin type
 * ephemeral tesserae
 * config file and state dir placement
 * update mosaic elements when mounted
@@ -13,3 +12,4 @@
 * on-line ovl growing
 * space management (quota)
 * free tessera with contents
+* cache config files' data in memory (pure lib case)

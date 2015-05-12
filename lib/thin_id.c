@@ -100,7 +100,7 @@ static int parse_maps_file(yaml_parser_t *p, void *x)
 			parse_maps, x);
 }
 
-int thin_get_id(char *dev_name, char *tess_name, int age)
+int thin_get_id(char *dev_name, char *tess_name, int age, bool new)
 {
 	char m_path[1024];
 	FILE *mapf;
@@ -133,10 +133,18 @@ int thin_get_id(char *dev_name, char *tess_name, int age)
 		goto out_f;
 	}
 
-	ret = tms.max_id + 1;
-	fprintf(mapf, "- tessera: %s\n", tess_name);
-	fprintf(mapf, "  age: %d\n", age);
-	fprintf(mapf, "  vol_id: %d\n", ret);
+	if (new) {
+		if (tms.m.vol_id > 0) {
+			ret = -1;
+			goto out_f;
+		}
+
+		ret = tms.max_id + 1;
+		fprintf(mapf, "- tessera: %s\n", tess_name);
+		fprintf(mapf, "  age: %d\n", age);
+		fprintf(mapf, "  vol_id: %d\n", ret);
+	} else
+		ret = tms.m.vol_id; /* -1 in case of error */
 
 out_f:
 	fclose(mapf);
