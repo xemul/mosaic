@@ -38,7 +38,7 @@ int mosaic_grow_tessera(struct tessera *t, int age, int from_age);
 
 
 /*
- * Config
+ * Misc
  */
-int mosaic_load_config(void);
+int mosaic_init(void);
 #endif

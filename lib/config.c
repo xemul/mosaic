@@ -282,7 +282,7 @@ out:
 	return ms;
 }
 
-int mosaic_load_config(void)
+int mosaic_init(void)
 {
 	ms = mosaic_parse_config("mosaic.conf");
 	if (!ms)

@@ -519,7 +519,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	if (mosaic_load_config()) {
+	if (mosaic_init()) {
 		printf("Error loading config file\n");
 		return 1;
 	}
