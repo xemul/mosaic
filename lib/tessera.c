@@ -144,6 +144,7 @@ int mosaic_del_tessera(struct tessera *t)
 	 * FIXME -- this ages iteration is not nice, would
 	 * (probably) be better to keep mounted state for
 	 * all ages in one status file.
+	 * FIXME -- can be mounted in mosaic
 	 */
 
 	if (td->iter_ages &&
