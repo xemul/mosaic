@@ -1,0 +1,119 @@
+* GENERIC FUNCTIONS
+
+int mosaic_init(void)
+
+	Initializes the library.
+
+* MOSAICS MANAGEMENT FUNCTIONS
+
+int mosaic_iterate(int (*cb)(struct mosaic *, void *), void *)
+
+	Iterates over existing mosaics by calling the callback with opaque
+	argument. Return non zero from cb to stop, the return value will
+	propagate back.
+
+struct mosaic *mosaic_find_by_name(char *name)
+
+	Will return a handler to a mosaic with the given name or NULL if the
+	mosaic doesn't exist.
+
+int mosaic_iterate_elements(struct mosaic *, int (*cb)(struct mosaic *, struct element *, void *), void *)
+
+	Iterates over elements of mosaic. The cb semantics is the same as in
+	mosaic_iterate() function.
+
+int mosaic_iterate_mounted(struct mosaic *, int (*cb)(struct mosaic *, char *mp, void *), void *)
+
+	Iterates over paths to which mosaic is mounted (not by hands, but with
+	mosaic_mount() only). The "char *mp" is the path as it was given to the
+	mosaic_mount().
+
+struct mosaic *mosaic_new(char *name)
+
+	Creates a new mosaic, but doesn't add one to config file. To do so call
+	the mosaic_add().
+
+int mosaic_set_element(struct mosaic *m, char *name, int age, char *at, char *opt)
+
+	Sets (adds) element to mosaic. The @name is the name of tessera, the
+	@age is its age (both should exist), the @at is the path inside the 
+	mosaic to where the tessera will be attached upon mosaic_mount(). The
+	@opt is colon-separated options, now only the "options=..." for mounting
+	are supported (see OPTIONS)
+
+int mosaic_del_element(struct mosaic *m, char *name);
+
+	Removes element from mosaic by tessera name.
+
+int mosaic_add(struct mosaic *m)
+
+	Adds mosaic to config file. Called after mosaic_new() and a set of
+	mosaic_set_element()-s.
+
+int mosaic_update(struct mosaic *m)
+
+	Updates mosaic config. Called after mosaic_find_by_name() and a set of
+	mosaic_set|del_element()-s.
+
+int mosaic_del(struct mosaic *m)
+
+	Removes mosaic. Will fail if mosaic is mounted.
+
+int mosaic_mount(struct mosaic *m, char *mountpoint, char *options)
+
+	Mounts mosaic (with all elements) to @mountpoint with the @options as
+	options. See OPTIONS below for mount options.
+
+int mosaic_umount(struct mosaic *m, char *mountpoint)
+
+	Umounts the mosaic. Can fail if umount() syscall fails. If the 
+	@mountpoint argument is NULL umounts from all locations found.
+
+* TESSERA MANAGEMENT FUNCTIONS
+
+int mosaic_iterate_tesserae(int (*cb)(struct tessera *, void *), void *x)
+
+	Iterates over tesserae. Without ages, to iterate over ages use the
+	mosaic_iterate_ages_t().
+
+struct tessera *mosaic_find_tessera(char *name)
+
+	Find tessera by name and returns a handle.
+
+int mosaic_add_tessera(char *type, char *name, int n_opts, char **opts)
+
+	Adds tessera to config file. Options are tessera-specific, see the 
+	TESSERAE TYPES int tesserae.txt doc.
+
+int mosaic_iterate_ages_t(struct tessera *t, int (*cb)(struct tessera *t, int age, void *), void *)
+
+	Iterates over ages of the given tessera. Callback ret value acts the
+	same as in other iterators.
+
+int mosaic_iterate_mounted_t(struct tessera *t, int age, int (*cb)(struct tessera *t, int age, char *mp, void *), void *)
+
+	Iterates over tessera mountpoints. Only includes those created by the
+	mosaic_mount_tessera(), in-mosaic mounts are not included.
+
+int mosaic_del_tessera(struct tessera *t)
+
+	Removes tessera. Contents is not removed and is left on disk.
+
+int mosaic_mount_tessera(struct tessera *t, int age, char *at, char *options)
+
+	Mounts tessera of age @age to @at path with @options mount options (see
+	the OPTIONS below).
+
+int mosaic_umount_tessera(struct tessera *t, int age, char *at)
+
+	Umounts tessera with age from path. If @at is NULL umounts all of them.
+
+int mosaic_grow_tessera(struct tessera *t, int age, int from_age)
+
+	Creates new age of tessera. The @from_age is which age to grow the
+	tessera from. Original tessera age can become locked, i.e. not available
+	for RW mounting, see TESSERAE TYPES in tesserae.txt file
+
+* OPTIONS
+
+Currently only "ro" and "rw" mount options are supported.

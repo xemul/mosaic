@@ -1,0 +1,34 @@
+Types of tesserae
+
+* Overlay
+
+This is overlayfs-based tessera. Creation options are
+
+ [0] location -- path on disk where to put one.
+
+Live growing is not supported. When grown the base age is locked.
+
+* Dm_thin
+
+Based on thin target of device-mapper. Creation options are
+
+ [0] device -- path to device with thin-pool initialized
+ [1] fs     -- name of the filesystem to create inside
+ [2] size   -- size of individual ages
+
+* Plain
+
+Just a plain directory that will be added to mosaic. Options
+
+ [0] location
+
+No growing is supported
+
+* Ephemeral
+
+A tessera that will be created on mount and destroyed afterwards.
+Options are
+
+ [0] directories -- colon-separated list of directories to create
+
+No growing.

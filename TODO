@@ -2,7 +2,6 @@
 * int age -> string id/version/whatever
 * ages management (del/merge)
 * moar tests
-* documentation file
 * do not delete tesserae that are in mosaic
 * logging
 * on-line ovl growing
