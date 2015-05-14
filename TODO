@@ -4,7 +4,6 @@
 * moar tests
 * documentation file
 * ephemeral tesserae
-* config file and state dir placement
 * do not delete tesserae that are in mosaic
 * logging
 * on-line ovl growing

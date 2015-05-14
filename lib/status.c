@@ -8,7 +8,8 @@
 #include "mosaic.h"
 #include "status.h"
 
-#define STATUS_DIR	"mosaic.status"
+/* Run-Time dir for state that disappears after reboot */
+#define STATUS_RUN_DIR	STATUS_DIR "/rt"
 
 /*
  * Generic "ID" level
@@ -18,10 +19,10 @@ static int st_check_dir(void)
 {
 	int fd;
 
-	if (!access(STATUS_DIR"/active", F_OK))
+	if (!access(STATUS_RUN_DIR"/active", F_OK))
 		return 0;
 
-	if (mount("mosaic.status", STATUS_DIR, "tmpfs", 0, NULL)) {
+	if (mount("mosaic.status", STATUS_RUN_DIR, "tmpfs", 0, NULL)) {
 		perror("Can't mount status dir");
 		return 1;
 	}
@@ -30,10 +31,10 @@ static int st_check_dir(void)
 	 * FIXME -- record in mountinfo should be enough
 	 */
 
-	fd = creat(STATUS_DIR"/active", 0600);
+	fd = creat(STATUS_RUN_DIR"/active", 0600);
 	if (fd < 0) {
 		perror("Can't create status dir");
-		umount(STATUS_DIR);
+		umount(STATUS_RUN_DIR);
 		return 1;
 	}
 
@@ -55,7 +56,7 @@ static void set_mounted(char *id, char *path)
 	 * FIXME -- locking
 	 */
 
-	sprintf(st_aux, STATUS_DIR "/%s", id);
+	sprintf(st_aux, STATUS_RUN_DIR "/%s", id);
 	st = fopen(st_aux, "a+");
 	if (!st)
 		goto skip;
@@ -87,7 +88,7 @@ static int st_for_each_mounted(char *id, int (*cb)(char *, void *), void *x)
 	if (st_check_dir())
 		return -1;
 
-	sprintf(st_aux, STATUS_DIR "/%s", id);
+	sprintf(st_aux, STATUS_RUN_DIR "/%s", id);
 	st = fopen(st_aux, "r");
 	if (!st)
 		return -1;
@@ -144,7 +145,7 @@ static int do_umount(char *id, char *path, int (*cb)(char *, void *), void *x)
 	FILE *nst;
 	int ret;
 
-	sprintf(st_aux, STATUS_DIR "/.%s.upd", id);
+	sprintf(st_aux, STATUS_RUN_DIR "/.%s.upd", id);
 	nst = fopen(st_aux, "w");
 	if (!nst)
 		return -1;
@@ -158,12 +159,12 @@ static int do_umount(char *id, char *path, int (*cb)(char *, void *), void *x)
 	ret = st_for_each_mounted(id, umount_one, &uc);
 
 	fclose(nst);
-	sprintf(st_aux, STATUS_DIR "/.%s.upd", id);
+	sprintf(st_aux, STATUS_RUN_DIR "/.%s.upd", id);
 
 	if (!ret) {
 		char aux2[PATH_MAX];
 
-		sprintf(aux2, STATUS_DIR "/%s", id);
+		sprintf(aux2, STATUS_RUN_DIR "/%s", id);
 
 		if (uc.empty) {
 			unlink(st_aux);
@@ -192,7 +193,7 @@ int st_is_mounted(struct mosaic *m)
 {
 	char path[PATH_MAX];
 
-	sprintf(path, STATUS_DIR "/mos.%s", m->m_name);
+	sprintf(path, STATUS_RUN_DIR "/mos.%s", m->m_name);
 	return access(path, F_OK) == 0 ? 1 : 0;
 }
 
@@ -258,7 +259,7 @@ int st_is_mounted_t(struct tessera *t, int age, void *x)
 {
 	char path[PATH_MAX];
 
-	sprintf(path, STATUS_DIR "/tes.%s.%d", t->t_name, age);
+	sprintf(path, STATUS_RUN_DIR "/tes.%s.%d", t->t_name, age);
 	return access(path, F_OK) == 0 ? 1 : 0;
 }
 

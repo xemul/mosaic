@@ -11,19 +11,16 @@ clean_ts() {
 }
 
 clean() {
-	rm -f "mosaic.conf"
-	umount "mosaic.status"
-	rmdir "mosaic.status"
 	rmdir "$m_dir"
+	clean_st
 	clean_ts
 }
 
 clean
 
 run_tests() {
-	touch "mosaic.conf"
-	mkdir "mosaic.status"
 	mkdir "$m_dir"
+	creat_st
 	prep_ts
 
 	echo "* Check tessera mounting"
@@ -87,6 +84,7 @@ run_tests() {
 	$moctl "m" "del" "m1"
 	$moctl "t" "del" "t.a"
 	$moctl "t" "del" "t.b"
+
 	clean
 }
 

@@ -3,9 +3,10 @@
 #include <yaml.h>
 #include "thin_id.h"
 #include "yaml-util.h"
+#include "status.h"
 
 /* FIXME -- combine with STATUS_DIR from status.c */
-#define THIN_MAP_DIR	"mosaic.thin.map"
+#define THIN_MAP_DIR	STATUS_DIR "/thin_map"
 
 /*
  * The file with mapping is THIN_MAP_DIR/thin_<device> and

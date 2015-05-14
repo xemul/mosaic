@@ -2,7 +2,11 @@
 #define __MOSAIC_STATUS_H__
 #include <stdbool.h>
 
+#define STATUS_DIR	"mosaic.status"
+
 struct mosaic;
+struct tessera;
+
 void st_set_mounted(struct mosaic *, char *path);
 void st_set_mounted_t(struct tessera *t, int age, char *path);
 

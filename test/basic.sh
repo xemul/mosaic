@@ -9,9 +9,7 @@ clean_ts() {
 }
 
 clean() {
-	rm -f "mosaic.conf"
-	umount "mosaic.status"
-	rmdir "mosaic.status"
+	clean_st
 	clean_ts
 }
 
@@ -22,8 +20,8 @@ $moctl && fail "Work without config"
 echo "... PASS"
 
 run_tests() {
-	touch "mosaic.conf"
-	mkdir "mosaic.status"
+	creat_st
+
 	prep_ts
 
 	echo "* Check tessera mgmt functionality"

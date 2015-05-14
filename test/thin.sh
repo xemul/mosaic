@@ -13,11 +13,9 @@ clean_ts() {
 	rm -f "$thin_f_loc/mt.dev"
 	rm -f "$thin_f_loc/data.dev"
 	rmdir "$thin_f_loc"
-	rm -rf "mosaic.thin.map"
 }
 
 prep_ts() {
-	mkdir "mosaic.thin.map"
 	echo "Making dm pool"
 	mkdir "$thin_f_loc"
 	dd if=/dev/zero of="$thin_f_loc/mt.dev" bs=1024 count=$((32 * 1024))
