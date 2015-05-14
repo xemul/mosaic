@@ -14,6 +14,7 @@
 #include "status.h"
 #include "util.h"
 #include "log.h"
+#include "config.h"
 
 #ifndef OVERLAYFS_SUPER_MAGIC
 #define OVERLAYFS_SUPER_MAGIC 0x794c7630
@@ -78,11 +79,20 @@ static int parse_overlay(struct tessera *t, char *key, char *val)
 	return -1;
 }
 
+static inline void print_overlay_info(FILE *f, int off, struct overlay_tessera *ot)
+{
+	fprintf(f, "%*slocation: %s\n", off, "", ot->ovl_location);
+}
+
 static void save_overlay(struct tessera *t, FILE *f)
 {
-	struct overlay_tessera *ot = t->priv;
+	print_overlay_info(f, CFG_TESS_OFF, t->priv);
+}
 
-	fprintf(f, "    location: %s\n", ot->ovl_location);
+static void show_overlay(struct tessera *t, int age)
+{
+	if (age == -1)
+		print_overlay_info(stdout, 0, t->priv);
 }
 
 static int iterate_ages(struct tessera *t, int (*cb)(struct tessera *t, int age, void *), void *x)
@@ -119,16 +129,6 @@ static int iterate_ages(struct tessera *t, int (*cb)(struct tessera *t, int age,
 	closedir(d);
 
 	return ret;
-}
-
-static void show_overlay(struct tessera *t, int age)
-{
-	struct overlay_tessera *ot = t->priv;
-
-	if (age != -1)
-		return;
-
-	printf("location: %s\n", ot->ovl_location);
 }
 
 /*

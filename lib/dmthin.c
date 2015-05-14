@@ -8,6 +8,7 @@
 #include "tessera.h"
 #include "thin_id.h"
 #include "log.h"
+#include "config.h"
 
 struct thin_tessera {
 	char *thin_dev;
@@ -145,27 +146,26 @@ static int parse_thin(struct tessera *t, char *key, char *val)
 	return -1;
 }
 
+static inline void print_thin_info(FILE *f, int off, struct thin_tessera *tt)
+{
+	fprintf(f, "%*sdevice: %s\n", off, "", tt->thin_dev);
+	fprintf(f, "%*sfs: %s\n", off, "", tt->thin_fs);
+	fprintf(f, "%*sage_size: %lu\n", off, "", tt->thin_age_size);
+}
+
 static void save_thin(struct tessera *t, FILE *f)
 {
-	struct thin_tessera *tt = t->priv;
-
-	fprintf(f, "    device: %s\n", tt->thin_dev);
-	fprintf(f, "    fs: %s\n", tt->thin_fs);
-	fprintf(f, "    age_size: %lu\n", tt->thin_age_size);
+	print_thin_info(f, CFG_TESS_OFF, t->priv);
 }
 
 static void show_thin(struct tessera *t, int age)
 {
 	struct thin_tessera *tt = t->priv;
 
-	if (age != -1) {
+	if (age != -1)
 		printf("    volume: %d\n", thin_get_id(tt->thin_dev, t->t_name, age, false));
-		return;
-	}
-
-	printf("device: %s\n", tt->thin_dev);
-	printf("fs: %s\n", tt->thin_fs);
-	printf("age_size: %lu\n", tt->thin_age_size);
+	else
+		print_thin_info(stdout, 0, tt);
 }
 
 static int mount_thin(struct tessera *t, int age, char *path, char *options)

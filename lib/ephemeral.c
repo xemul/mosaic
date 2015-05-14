@@ -7,6 +7,7 @@
 #include "mosaic.h"
 #include "tessera.h"
 #include "log.h"
+#include "config.h"
 
 struct eph_tessera {
 	int n_dirs;
@@ -87,29 +88,25 @@ static int parse_eph(struct tessera *t, char *key, char *val)
 	return -1;
 }
 
-static void save_eph(struct tessera *t, FILE *f)
+static inline void print_eph_info(FILE *f, int off, struct eph_tessera *et)
 {
-	struct eph_tessera *et = t->priv;
 	int i;
 
-	fprintf(f, "    dirs:");
+	fprintf(f, "%*sdirs:", off, "");
 	for (i = 0; i < et->n_dirs; i++)
 		fprintf(f, "%c%s", (i == 0 ? ' ' : ':'), et->dirs[i]);
 	fprintf(f, "\n");
 }
 
+static void save_eph(struct tessera *t, FILE *f)
+{
+	print_eph_info(f, CFG_TESS_OFF, t->priv);
+}
+
 static void show_eph(struct tessera *t, int age)
 {
-	struct eph_tessera *et = t->priv;
-	int i;
-
-	if (age != -1)
-		return;
-
-	printf("dirs:");
-	for (i = 0; i < et->n_dirs; i++)
-		printf("%c%s", (i == 0 ? ' ' : ':'), et->dirs[i]);
-	printf("\n");
+	if (age == -1)
+		print_eph_info(stdout, 0, t->priv);
 }
 
 static int mount_eph(struct tessera *t, int age, char *path, char *options)

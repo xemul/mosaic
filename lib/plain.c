@@ -7,6 +7,7 @@
 #include "mosaic.h"
 #include "tessera.h"
 #include "log.h"
+#include "config.h"
 
 struct plain_tessera {
 	char *pl_location;
@@ -63,21 +64,20 @@ static int parse_plain(struct tessera *t, char *key, char *val)
 	return -1;
 }
 
+static inline void print_plain_info(FILE *f, int off, struct plain_tessera *pt)
+{
+	fprintf(f, "%*slocation: %s\n", off, "", pt->pl_location);
+}
+
 static void save_plain(struct tessera *t, FILE *f)
 {
-	struct plain_tessera *pt = t->priv;
-
-	fprintf(f, "    location: %s\n", pt->pl_location);
+	print_plain_info(f, CFG_TESS_OFF, t->priv);
 }
 
 static void show_plain(struct tessera *t, int age)
 {
-	struct plain_tessera *pt = t->priv;
-
-	if (age != -1)
-		return;
-
-	printf("location: %s\n", pt->pl_location);
+	if (age == -1)
+		print_plain_info(stdout, 0, t->priv);
 }
 
 static int mount_plain(struct tessera *t, int age, char *path, char *options)
