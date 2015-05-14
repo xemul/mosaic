@@ -7,6 +7,15 @@
 /* FIXME -- combine with STATUS_DIR from status.c */
 #define THIN_MAP_DIR	"mosaic.thin.map"
 
+/*
+ * The file with mapping is THIN_MAP_DIR/thin_<device> and
+ * contains mapping in yaml format like this
+ *
+ * - tessera: <name>
+ *   age: <age>
+ *   vol_id: <thin volume ID>
+ */
+
 void dev_map_file_name(char *dev, char *file)
 {
 	char *aux;
