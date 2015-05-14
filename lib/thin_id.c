@@ -5,7 +5,6 @@
 #include "yaml-util.h"
 #include "status.h"
 
-/* FIXME -- combine with STATUS_DIR from status.c */
 #define THIN_MAP_DIR	STATUS_DIR "/thin_map"
 
 /*
