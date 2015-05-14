@@ -75,7 +75,6 @@ static int add_thin(struct tessera *t, int n_opts, char **opts)
 static int del_pool(struct thin_map *tm, void *x)
 {
 	struct tessera *t = x;
-	struct thin_tessera *tt = t->priv;
 	char cmd[1024];
 
 	if (strcmp(tm->tess, t->t_name))
@@ -83,8 +82,13 @@ static int del_pool(struct thin_map *tm, void *x)
 
 	sprintf(cmd, "dmsetup remove mosaic-%s-%d", t->t_name, tm->age);
 	system(cmd);
+
+#if 0 /* Only if contents removal is requested */
+	struct thin_tessera *tt = t->priv;
+
 	sprintf(cmd, "dmsetup message %s 0 \"delete %d\"", tt->thin_dev, tm->vol_id);
 	system(cmd);
+#endif
 
 	return 0;
 }
