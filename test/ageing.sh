@@ -93,6 +93,8 @@ run_tests() {
 
 	$moctl "tessera" "del" "t.a" \
 			|| fail "T-Del"
+
+	clean
 }
 
 echo "###### Running tests for overlay"
@@ -103,5 +105,4 @@ echo "###### Running tests for thin"
 . thin.sh
 run_tests
 
-clean
 echo "All tests passed"
