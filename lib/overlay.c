@@ -115,11 +115,13 @@ static int iterate_ages(struct tessera *t, int (*cb)(struct tessera *t, int age,
 			continue;
 
 		if (!strcmp(de->d_name, "base"))
+			/* Zero age, already called at the beginning */
 			continue;
 
-		if (strncmp(de->d_name, "age-", 4))
-			/* FIXME -- what? */
+		if (strncmp(de->d_name, "age-", 4)) {
+			log("WARNING: Something extra in ovl dir [%s]\n", de->d_name);
 			continue;
+		}
 
 		ret = cb(t, atoi(de->d_name + 4), x);
 		if (ret)

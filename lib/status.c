@@ -28,10 +28,6 @@ static int st_check_dir(void)
 		return 1;
 	}
 
-	/*
-	 * FIXME -- record in mountinfo should be enough
-	 */
-
 	fd = creat(STATUS_RUN_DIR"/active", 0600);
 	if (fd < 0) {
 		loge("Can't create status dir");
