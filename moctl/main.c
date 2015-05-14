@@ -347,6 +347,9 @@ static int print_age(struct tessera *t, int age, void *x)
 	printf("  - age: %d\n", age);
 	mosaic_iterate_mounted_t(t, age, print_mounted_t, p);
 
+	if (t->t_desc->show)
+		t->t_desc->show(t, age);
+
 	return 0;
 }
 
@@ -371,7 +374,7 @@ static int show_tessera(int argc, char **argv)
 
 	printf("type: %s\n", t->t_desc->td_name);
 	if (t->t_desc->show)
-		t->t_desc->show(t);
+		t->t_desc->show(t, -1);
 
 	return 0;
 }

@@ -18,9 +18,11 @@ struct tess_desc {
 	int (*parse)(struct tessera *t, char *name, char *value);
 	void (*save)(struct tessera *t, FILE *);
 	/*
-	 * Show any information about tessera on the screen
+	 * Show any information about tessera on the screen.
+	 * If age is -1 then info about tessera itself is
+	 * requested, otherwise -- smth about the age itself.
 	 */
-	void (*show)(struct tessera *t);
+	void (*show)(struct tessera *t, int age);
 
 	int (*mount)(struct tessera *t, int age, char *path, char *options);
 	int (*grow)(struct tessera *t, int old_age, int new_age);

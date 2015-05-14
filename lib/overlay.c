@@ -121,9 +121,13 @@ static int iterate_ages(struct tessera *t, int (*cb)(struct tessera *t, int age,
 	return ret;
 }
 
-static void show_overlay(struct tessera *t)
+static void show_overlay(struct tessera *t, int age)
 {
 	struct overlay_tessera *ot = t->priv;
+
+	if (age != -1)
+		return;
+
 	printf("location: %s\n", ot->ovl_location);
 }
 

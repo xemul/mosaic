@@ -70,9 +70,13 @@ static void save_plain(struct tessera *t, FILE *f)
 	fprintf(f, "    location: %s\n", pt->pl_location);
 }
 
-static void show_plain(struct tessera *t)
+static void show_plain(struct tessera *t, int age)
 {
 	struct plain_tessera *pt = t->priv;
+
+	if (age != -1)
+		return;
+
 	printf("location: %s\n", pt->pl_location);
 }
 

@@ -98,10 +98,13 @@ static void save_eph(struct tessera *t, FILE *f)
 	fprintf(f, "\n");
 }
 
-static void show_eph(struct tessera *t)
+static void show_eph(struct tessera *t, int age)
 {
 	struct eph_tessera *et = t->priv;
 	int i;
+
+	if (age != -1)
+		return;
 
 	printf("dirs:");
 	for (i = 0; i < et->n_dirs; i++)

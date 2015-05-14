@@ -150,9 +150,14 @@ static void save_thin(struct tessera *t, FILE *f)
 	fprintf(f, "    age_size: %lu\n", tt->thin_age_size);
 }
 
-static void show_thin(struct tessera *t)
+static void show_thin(struct tessera *t, int age)
 {
 	struct thin_tessera *tt = t->priv;
+
+	if (age != -1) {
+		printf("    volume: %d\n", thin_get_id(tt->thin_dev, t->t_name, age, false));
+		return;
+	}
 
 	printf("device: %s\n", tt->thin_dev);
 	printf("fs: %s\n", tt->thin_fs);
