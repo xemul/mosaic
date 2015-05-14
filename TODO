@@ -3,7 +3,6 @@
 * ages management (del/merge)
 * moar tests
 * documentation file
-* ephemeral tesserae
 * do not delete tesserae that are in mosaic
 * logging
 * on-line ovl growing

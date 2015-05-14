@@ -24,6 +24,7 @@ int mosaic_iterate_tesserae(int (*cb)(struct tessera *, void *), void *x)
 extern struct tess_desc tess_desc_overlay;
 extern struct tess_desc tess_desc_plain;
 extern struct tess_desc tess_desc_thin;
+extern struct tess_desc tess_desc_ephemeral;
 
 static struct tess_desc tess_desc_btrfs = {
 	.td_name = "btrfs",
@@ -39,6 +40,8 @@ struct tess_desc *tess_desc_by_type(char *type)
 		return &tess_desc_thin;
 	if (!strcmp(type, "plain"))
 		return &tess_desc_plain;
+	if (!strcmp(type, "ephemeral"))
+		return &tess_desc_ephemeral;
 
 	return NULL;
 }

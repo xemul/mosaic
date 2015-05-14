@@ -7,6 +7,7 @@ OBJS += overlay.o
 OBJS += dmthin.o
 OBJS += thin_id.o
 OBJS += plain.o
+OBJS += ephemeral.o
 OBJS += status.o
 OBJS += util.o
 OBJS += yaml.o
