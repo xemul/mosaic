@@ -44,5 +44,6 @@ int mosaic_init(void);
 typedef void (*mosaic_log_fn)(const char *f, ...)
 	    __attribute__ ((format(printf, 1, 2)));
 void mosaic_init_err_log(mosaic_log_fn lfn);
+void mosaic_print_types_t(void);
 
 #endif

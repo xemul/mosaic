@@ -4,6 +4,10 @@ int mosaic_init(void)
 
 	Initializes the library.
 
+void mosaic_print_types_t(void)
+
+	Prints supported tesserae types.
+
 * MOSAICS MANAGEMENT FUNCTIONS
 
 int mosaic_iterate(int (*cb)(struct mosaic *, void *), void *)

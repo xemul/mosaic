@@ -20,6 +20,7 @@ Syntaxis is
 			grow    <name> <age>[:<base-age>]
 			mount   <name> <path> [<options>]
 			umount  <name> [<path>]
+			types
 
 For mosaic <elements> are "<tessera-name>:<age>:<location>[:<options>]".
 The <options> can be "options=<mount-options>"

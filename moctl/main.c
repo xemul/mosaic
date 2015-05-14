@@ -55,6 +55,7 @@ static void usage(void)
 "    m|mount   <name>:<age> <location> [<mount-options>]\n"
 "    u|umount  <name>:<age> [<location>]\n"
 "    g|grow    <name> <new-age>[:<base-age>]\n"
+"    t|types   -- shows available types\n"
 );
 }
 
@@ -491,10 +492,16 @@ static int grow_tessera(int argc, char **argv)
 	return mosaic_grow_tessera(t, new_age, base_age) == 0 ? 0 : 1;
 }
 
+static int show_t_types(void)
+{
+	mosaic_print_types_t();
+	return 0;
+}
+
 static int do_tessera(int argc, char **argv)
 {
 	if (argc < 1) {
-		printf("Usage: moctl tessera <list|show|add|del|mount|grow> ...\n");
+		printf("Usage: moctl tessera <list|show|add|del|mount|grow|types> ...\n");
 		return 1;
 	}
 
@@ -512,6 +519,8 @@ static int do_tessera(int argc, char **argv)
 		return umount_tessera(argc - 1, argv + 1);
 	if (argv_is(argv[0], "grow"))
 		return grow_tessera(argc - 1, argv + 1);
+	if (argv_is(argv[0], "types"))
+		return show_t_types();
 
 	printf("Unknown mosaic action %s\n", argv[0]);
 	return 1;

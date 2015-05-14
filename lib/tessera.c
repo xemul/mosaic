@@ -22,26 +22,30 @@ int mosaic_iterate_tesserae(int (*cb)(struct tessera *, void *), void *x)
 }
 
 extern struct tess_desc tess_desc_overlay;
-extern struct tess_desc tess_desc_plain;
 extern struct tess_desc tess_desc_thin;
+extern struct tess_desc tess_desc_plain;
 extern struct tess_desc tess_desc_ephemeral;
 
 static struct tess_desc tess_desc_btrfs = {
 	.td_name = "btrfs",
 };
 
+static struct tess_desc *t_types[] = {
+	&tess_desc_overlay,
+	&tess_desc_thin,
+	&tess_desc_plain,
+	&tess_desc_ephemeral,
+	&tess_desc_btrfs,
+	NULL,
+};
+
 struct tess_desc *tess_desc_by_type(char *type)
 {
-	if (!strcmp(type, "overlay"))
-		return &tess_desc_overlay;
-	if (!strcmp(type, "btrfs"))
-		return &tess_desc_btrfs;
-	if (!strcmp(type, "dm_thin"))
-		return &tess_desc_thin;
-	if (!strcmp(type, "plain"))
-		return &tess_desc_plain;
-	if (!strcmp(type, "ephemeral"))
-		return &tess_desc_ephemeral;
+	int i;
+
+	for (i = 0; t_types[i] != NULL; i++)
+		if (!strcmp(t_types[i]->td_name, type))
+			return t_types[i];
 
 	return NULL;
 }
@@ -162,4 +166,12 @@ int mosaic_del_tessera(struct tessera *t)
 	free(t);
 
 	return config_update();
+}
+
+void mosaic_print_types_t(void)
+{
+	int i;
+
+	for (i = 0; t_types[i] != NULL; i++)
+		printf("%s\n", t_types[i]->td_name);
 }
