@@ -140,11 +140,6 @@ err:
 	return -1;
 }
 
-static int iterate_ages(struct tessera *t, int (*cb)(struct tessera *t, int age, void *), void *x)
-{
-	return cb(t, 0, x);
-}
-
 struct tess_desc tess_desc_ephemeral = {
 	.td_name = "ephemeral",
 	.add = add_eph,
@@ -156,5 +151,4 @@ struct tess_desc tess_desc_ephemeral = {
 	/*
 	 * Growing can not be implemented at all
 	 */
-	.iter_ages = iterate_ages,
 };

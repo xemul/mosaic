@@ -133,7 +133,8 @@ int mosaic_add_tessera(char *type, char *name, int n_opts, char **opts)
 int mosaic_iterate_ages_t(struct tessera *t, int (*cb)(struct tessera *, int age, void *), void *x)
 {
 	if (!t->t_desc->iter_ages)
-		return -1;
+		/* Special case -- only base tessera available */
+		return cb(t, 0, x);
 
 	return t->t_desc->iter_ages(t, cb, x);
 }
@@ -150,8 +151,7 @@ int mosaic_del_tessera(struct tessera *t)
 	 * FIXME -- can be mounted in mosaic
 	 */
 
-	if (td->iter_ages &&
-			td->iter_ages(t, st_is_mounted_t, NULL))
+	if (mosaic_iterate_ages_t(t, st_is_mounted_t, NULL))
 		return -1;
 
 	list_del(&t->sl);

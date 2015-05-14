@@ -69,11 +69,6 @@ static void save_plain(struct tessera *t, FILE *f)
 	fprintf(f, "    location: %s\n", pt->pl_location);
 }
 
-static int iterate_ages(struct tessera *t, int (*cb)(struct tessera *t, int age, void *), void *x)
-{
-	return cb(t, 0, x);
-}
-
 static void show_plain(struct tessera *t)
 {
 	struct plain_tessera *pt = t->priv;
@@ -108,5 +103,4 @@ struct tess_desc tess_desc_plain = {
 	 * copying the whole subtree. Not sure
 	 * anyone needs this.
 	 */
-	.iter_ages = iterate_ages,
 };
