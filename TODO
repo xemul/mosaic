@@ -9,3 +9,4 @@
 * cache config files' data in memory (pure lib case)
 * pfcache for thin
 * control elements mounting order
+* crash-safe operations
