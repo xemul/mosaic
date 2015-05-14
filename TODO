@@ -1,4 +1,3 @@
-* tessera state -- all ages in one file
 * locking (states and config)
 * int age -> string id/version/whatever
 * ages management (del/merge)
@@ -6,7 +5,6 @@
 * documentation file
 * ephemeral tesserae
 * config file and state dir placement
-* update mosaic elements when mounted
 * do not delete tesserae that are in mosaic
 * logging
 * on-line ovl growing
