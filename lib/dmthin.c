@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include "util.h"
 #include "mosaic.h"
 #include "tessera.h"
@@ -166,11 +167,26 @@ static int mount_thin(struct tessera *t, int age, char *path, char *options)
 	if (parse_mount_opts(options, &m_flags))
 		return -1;
 
-	/*
-	 * FIXME -- device is added on ->add, not on config load
-	 */
-
 	sprintf(dev, "/dev/mapper/mosaic-%s-%d", t->t_name, age);
+	if (access(dev, F_OK)) {
+		int id;
+		char cmd[1024];
+
+		/*
+		 * Device file is not (yet) there. Call dmsetup.
+		 */
+
+		id = thin_get_id(tt->thin_dev, t->t_name, age, false);
+		if (id < 0)
+			return -1;
+
+		sprintf(cmd, "dmsetup create %s --table \"0 %lu thin %s %d\"",
+				dev + 12, tt->thin_age_size >> SECTOR_SHIFT,
+				tt->thin_dev, id);
+		if (system(cmd))
+			return -1;
+	}
+
 	return mount(dev, path, tt->thin_fs, m_flags, NULL);
 }
 
