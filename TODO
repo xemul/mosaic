@@ -3,7 +3,6 @@
 * ages management (del/merge)
 * moar tests
 * do not delete tesserae that are in mosaic
-* logging
 * on-line ovl growing
 * space management (quota)
 * free tessera with contents

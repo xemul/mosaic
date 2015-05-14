@@ -58,7 +58,7 @@ int mosaic_mount(struct mosaic *m, char *mp_path, char *options)
 	}
 
 	if (stat(mp_path, &buf)) {
-		log("Can't stat %s\n", mp_path);
+		loge("Can't stat %s\n", mp_path);
 		return -1;
 	}
 

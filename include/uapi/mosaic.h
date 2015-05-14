@@ -41,4 +41,8 @@ int mosaic_grow_tessera(struct tessera *t, int age, int from_age);
  * Misc
  */
 int mosaic_init(void);
+typedef void (*mosaic_log_fn)(const char *f, ...)
+	    __attribute__ ((format(printf, 1, 2)));
+void mosaic_init_err_log(mosaic_log_fn lfn);
+
 #endif

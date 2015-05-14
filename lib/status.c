@@ -65,7 +65,7 @@ static void set_mounted(char *id, char *path)
 	while (fgets(st_aux, sizeof(st_aux), st)) {
 		if (st_aux[0] != '-' || st_aux[1] != ' ') {
 			/* BUG */
-			log("Fatal. State file screwed up.\n");
+			log("FATAL. State file screwed up.\n");
 			goto done;
 		}
 
@@ -98,7 +98,7 @@ static int st_for_each_mounted(char *id, int (*cb)(char *, void *), void *x)
 		if (st_aux[0] != '-' || st_aux[1] != ' ') {
 			/* BUG */
 			ret = -1;
-			log("Fatal. State file screwed up.\n");
+			log("FATAL. State file screwed up.\n");
 			fclose(st);
 			break;
 		}

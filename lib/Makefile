@@ -11,6 +11,7 @@ OBJS += ephemeral.o
 OBJS += status.o
 OBJS += util.o
 OBJS += yaml.o
+OBJS += log.o
 
 all: $(TGT)
 

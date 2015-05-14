@@ -182,19 +182,15 @@ static int mount_overlay_delta(struct tessera *t, int age, char *l_path, int l_o
 	 * Check the delta exists at all
 	 */
 	sprintf(l_path + l_off, "/age-%d", age);
-	if (access(l_path, F_OK) < 0) {
-		log("Age %d of %s doesn't exist\n", age, t->t_name);
+	if (access(l_path, F_OK) < 0)
 		return -1;
-	}
 
 	/*
 	 * Check that mountpoint is already set up
 	 */
 	sprintf(l_path + l_off, "/age-%d/root", age);
-	if (statfs(l_path, &buf) < 0) {
-		loge("Can't stat");
+	if (statfs(l_path, &buf) < 0)
 		return -1;
-	}
 
 	if (buf.f_type == OVERLAYFS_SUPER_MAGIC)
 		return 0;

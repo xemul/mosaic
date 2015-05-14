@@ -1,3 +1,4 @@
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -515,6 +516,16 @@ static int do_tessera(int argc, char **argv)
 	printf("Unknown mosaic action %s\n", argv[0]);
 	return 1;
 }
+
+static void print_lib_log(const char *fmt, ...)
+{
+	va_list va;
+
+	va_start(va, fmt);
+	vprintf(fmt, va);
+	va_end(va);
+}
+
 int main(int argc, char **argv)
 {
 	if (argc < 2) {
@@ -526,6 +537,8 @@ int main(int argc, char **argv)
 		printf("Error loading config file\n");
 		return 1;
 	}
+
+	mosaic_init_err_log(print_lib_log);
 
 	if (argv_is(argv[1], "mosaic"))
 		return do_mosaic(argc - 2, argv + 2);
