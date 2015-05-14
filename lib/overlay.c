@@ -13,6 +13,7 @@
 #include "overlay.h"
 #include "status.h"
 #include "util.h"
+#include "log.h"
 
 #ifndef OVERLAYFS_SUPER_MAGIC
 #define OVERLAYFS_SUPER_MAGIC 0x794c7630
@@ -27,13 +28,13 @@ static int add_overlay(struct tessera *t, int n_opts, char **opts)
 	struct overlay_tessera *ot;
 
 	if (n_opts < 1) {
-		printf("Usage: moctl tessera add <name> overlay <location>\n");
+		log("Usage: moctl tessera add <name> overlay <location>\n");
 		return -1;
 	}
 
 	if (access(opts[0], F_OK) < 0) {
 		if (mkdir(opts[0], 0600) < 0) {
-			perror("Can't make dir for base");
+			loge("Can't make dir for base");
 			return -1;
 		}
 	}
@@ -152,7 +153,7 @@ static int mount_overlay_delta(struct tessera *t, int age, char *l_path, int l_o
 
 		if (access(l_path, F_OK) < 0) {
 			if (mkdir(l_path, 0600) < 0) {
-				perror("Can't make dir for base");
+				loge("Can't make dir for base");
 				return -1;
 			}
 		}
@@ -165,7 +166,7 @@ static int mount_overlay_delta(struct tessera *t, int age, char *l_path, int l_o
 		sprintf(l_path + l_off, "/data");
 		if (access(l_path, F_OK) < 0) {
 			if (mkdir(l_path, 0600) < 0) {
-				perror("Can't make dir for data");
+				loge("Can't make dir for data");
 				return -1;
 			}
 		}
@@ -178,7 +179,7 @@ static int mount_overlay_delta(struct tessera *t, int age, char *l_path, int l_o
 	 */
 	sprintf(l_path + l_off, "/age-%d", age);
 	if (access(l_path, F_OK) < 0) {
-		printf("Age %d of %s doesn't exist\n", age, t->t_name);
+		log("Age %d of %s doesn't exist\n", age, t->t_name);
 		return -1;
 	}
 
@@ -187,7 +188,7 @@ static int mount_overlay_delta(struct tessera *t, int age, char *l_path, int l_o
 	 */
 	sprintf(l_path + l_off, "/age-%d/root", age);
 	if (statfs(l_path, &buf) < 0) {
-		perror("Can't stat");
+		loge("Can't stat");
 		return -1;
 	}
 
@@ -200,7 +201,7 @@ static int mount_overlay_delta(struct tessera *t, int age, char *l_path, int l_o
 	 */
 	sprintf(l_path + l_off, "/age-%d/parent", age);
 	if (readlink(l_path, aux, sizeof(aux)) < 0) {
-		perror("Can't readlink");
+		loge("Can't readlink");
 		return -1;
 	}
 
@@ -221,7 +222,7 @@ static int mount_overlay_delta(struct tessera *t, int age, char *l_path, int l_o
 	sprintf(l_path + l_off, "/age-%d/root", age);
 
 	if (mount("none", l_path, "overlay", 0, aux)) {
-		perror("Can't mount overlay");
+		loge("Can't mount overlay");
 		return -1;
 	}
 
@@ -274,7 +275,7 @@ static int mount_overlay(struct tessera *t, int age, char *path, char *options)
 		return -1;
 
 	if (mount(l_path, path, NULL, MS_BIND | m_flags, NULL) < 0) {
-		perror("Can't bind mount overlay");
+		loge("Can't bind mount overlay");
 		return -1;
 	}
 
@@ -301,7 +302,7 @@ static int grow_overlay(struct tessera *t, int base_age, int new_age)
 
 	plen = sprintf(path, "%s/age-%d", ot->ovl_location, new_age);
 	if (mkdir(path, 0600)) {
-		perror("Can't make snapshot");
+		loge("Can't make snapshot");
 		return -1;
 	}
 

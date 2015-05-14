@@ -6,6 +6,7 @@
 #include <string.h>
 #include "mosaic.h"
 #include "tessera.h"
+#include "log.h"
 
 struct plain_tessera {
 	char *pl_location;
@@ -16,13 +17,13 @@ static int add_plain(struct tessera *t, int n_opts, char **opts)
 	struct plain_tessera *pt;
 
 	if (n_opts < 1) {
-		printf("Usage: moctl tessera add <name> plain <location>\n");
+		log("Usage: moctl tessera add <name> plain <location>\n");
 		return -1;
 	}
 
 	if (access(opts[0], F_OK) < 0) {
 		if (mkdir(opts[0], 0600) < 0) {
-			perror("Can't make dir for plain tessera");
+			loge("Can't make dir for plain tessera");
 			return -1;
 		}
 	}
@@ -83,7 +84,7 @@ static int mount_plain(struct tessera *t, int age, char *path, char *options)
 		return -1;
 
 	if (options) {
-		printf("Mount options are not yet supported\n");
+		log("Mount options are not yet supported\n");
 		return -1;
 	}
 

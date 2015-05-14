@@ -11,6 +11,7 @@
 #include "util.h"
 #include "status.h"
 #include "config.h"
+#include "log.h"
 
 #include "uapi/mosaic.h"
 
@@ -35,7 +36,7 @@ static int do_mosaic_umount(struct mosaic *m, char *mp)
 	list_for_each_entry(e, &m->elements, ml) {
 		sprintf(path + plen, "%s", e->e_at);
 		if (umount(path)) {
-			perror("Can't umount");
+			loge("Can't umount");
 			return -1;
 		}
 	}
@@ -52,17 +53,17 @@ int mosaic_mount(struct mosaic *m, char *mp_path, char *options)
 	int plen;
 
 	if (options) {
-		printf("Mount options not yet supported\n");
+		log("Mount options not yet supported\n");
 		return -1;
 	}
 
 	if (stat(mp_path, &buf)) {
-		printf("Can't stat %s\n", mp_path);
+		log("Can't stat %s\n", mp_path);
 		return -1;
 	}
 
 	if (!S_ISDIR(buf.st_mode)) {
-		printf("Can't mount mosaic on non-directory\n");
+		log("Can't mount mosaic on non-directory\n");
 		return -1;
 	}
 

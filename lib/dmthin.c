@@ -7,6 +7,7 @@
 #include "mosaic.h"
 #include "tessera.h"
 #include "thin_id.h"
+#include "log.h"
 
 struct thin_tessera {
 	char *thin_dev;
@@ -50,13 +51,13 @@ static int add_thin(struct tessera *t, int n_opts, char **opts)
 	unsigned long sz;
 
 	if (n_opts < 3) {
-		printf("Usage: moctl tessera add <name> dm_thin <device> <fstype> <age-size>\n");
+		log("Usage: moctl tessera add <name> dm_thin <device> <fstype> <age-size>\n");
 		return -1;
 	}
 
 	sz = parse_blk_size(opts[2]);
 	if (!sz) {
-		printf("Invalid size %s\n", opts[1]);
+		log("Invalid size %s\n", opts[1]);
 		return -1;
 	}
 

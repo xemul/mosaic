@@ -7,6 +7,7 @@
 #include <string.h>
 #include "mosaic.h"
 #include "status.h"
+#include "log.h"
 
 /* Run-Time dir for state that disappears after reboot */
 #define STATUS_RUN_DIR	STATUS_DIR "/rt"
@@ -23,7 +24,7 @@ static int st_check_dir(void)
 		return 0;
 
 	if (mount("mosaic.status", STATUS_RUN_DIR, "tmpfs", 0, NULL)) {
-		perror("Can't mount status dir");
+		loge("Can't mount status dir");
 		return 1;
 	}
 
@@ -33,7 +34,7 @@ static int st_check_dir(void)
 
 	fd = creat(STATUS_RUN_DIR"/active", 0600);
 	if (fd < 0) {
-		perror("Can't create status dir");
+		loge("Can't create status dir");
 		umount(STATUS_RUN_DIR);
 		return 1;
 	}
@@ -64,7 +65,7 @@ static void set_mounted(char *id, char *path)
 	while (fgets(st_aux, sizeof(st_aux), st)) {
 		if (st_aux[0] != '-' || st_aux[1] != ' ') {
 			/* BUG */
-			printf("Fatal. State file screwed up.\n");
+			log("Fatal. State file screwed up.\n");
 			goto done;
 		}
 
@@ -97,7 +98,7 @@ static int st_for_each_mounted(char *id, int (*cb)(char *, void *), void *x)
 		if (st_aux[0] != '-' || st_aux[1] != ' ') {
 			/* BUG */
 			ret = -1;
-			printf("Fatal. State file screwed up.\n");
+			log("Fatal. State file screwed up.\n");
 			fclose(st);
 			break;
 		}

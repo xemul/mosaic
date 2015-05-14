@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include "mosaic.h"
 #include "tessera.h"
+#include "log.h"
 
 struct eph_tessera {
 	int n_dirs;
@@ -39,7 +40,7 @@ static int add_eph(struct tessera *t, int n_opts, char **opts)
 	struct eph_tessera *et;
 
 	if (n_opts < 1) {
-		printf("Usage: moctl tessera add <name> ephemeral <dirs>:\n");
+		log("Usage: moctl tessera add <name> ephemeral <dirs>:\n");
 		return -1;
 	}
 
@@ -118,7 +119,7 @@ static int mount_eph(struct tessera *t, int age, char *path, char *options)
 		return -1;
 
 	if (options) {
-		printf("Mount options are not yet supported\n");
+		log("Mount options are not yet supported\n");
 		return -1;
 	}
 

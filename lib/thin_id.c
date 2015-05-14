@@ -4,6 +4,7 @@
 #include "thin_id.h"
 #include "yaml-util.h"
 #include "status.h"
+#include "log.h"
 
 #define THIN_MAP_DIR	STATUS_DIR "/thin_map"
 
@@ -93,7 +94,7 @@ static int get_map_id(struct thin_map *tm, void *x)
 
 	if (!strcmp(tms->m.tess, tm->tess) && (tms->m.age == tm->age)) {
 		if (tms->m.vol_id != -1)
-			printf("BUG: double map mapping for %s:%d\n",
+			log("BUG: double map mapping for %s:%d\n",
 					tms->m.tess, tms->m.age);
 
 		tms->m.vol_id = tm->vol_id;

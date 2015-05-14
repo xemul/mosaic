@@ -5,6 +5,7 @@
 #include "yaml-util.h"
 #include "mosaic.h"
 #include "tessera.h"
+#include "log.h"
 
 struct mosaic_state *ms;
 
@@ -341,7 +342,7 @@ int config_update(void)
 	fclose(f);
 
 	if (rename(UPD_CFG_NAME, "mosaic.conf")) {
-		perror("Can't rename config");
+		loge("Can't rename config");
 		return 1;
 	}
 
