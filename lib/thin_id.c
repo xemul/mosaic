@@ -118,11 +118,25 @@ static int parse_maps_file(yaml_parser_t *p, void *x)
 			parse_maps, x);
 }
 
+static int thin_walk_mapf(FILE *mapf, struct thin_map_walk *tmw)
+{
+	int ret;
+	yaml_parser_t p;
+
+	if (!yaml_parser_initialize(&p))
+		return -1;
+
+	yaml_parser_set_input_file(&p, mapf);
+	ret = yaml_parse_all(&p, parse_maps_file, tmw);
+	yaml_parser_delete(&p);
+
+	return ret;
+}
+
 int thin_get_id(char *dev_name, char *tess_name, int age, bool new)
 {
 	char m_path[1024];
 	FILE *mapf;
-	yaml_parser_t p;
 	int ret = -1;
 	struct thin_map_search tms = {
 		.m = {
@@ -137,23 +151,14 @@ int thin_get_id(char *dev_name, char *tess_name, int age, bool new)
 		.x = &tms,
 	};
 
-	if (!yaml_parser_initialize(&p))
-		goto out;
-
 	dev_map_file_name(dev_name, m_path);
 	mapf = fopen(m_path, "a+");
 	if (!mapf)
-		goto out_p;
+		goto out;
 
-	yaml_parser_set_input_file(&p, mapf);
-	ret = yaml_parse_all(&p, parse_maps_file, &tmw);
-	if (ret)
+	ret = thin_walk_mapf(mapf, &tmw);
+	if (ret < 0)
 		goto out_f;
-
-	if (tms.m.vol_id > 0) {
-		ret = tms.m.vol_id;
-		goto out_f;
-	}
 
 	if (new) {
 		if (tms.m.vol_id > 0) {
@@ -170,8 +175,6 @@ int thin_get_id(char *dev_name, char *tess_name, int age, bool new)
 
 out_f:
 	fclose(mapf);
-out_p:
-	yaml_parser_delete(&p);
 out:
 	return ret;
 }
@@ -181,23 +184,14 @@ int thin_walk_ids(char *dev, int (*cb)(struct thin_map *, void *), void *x)
 	int ret = -1;
 	char m_path[1024];
 	FILE *mapf;
-	yaml_parser_t p;
 	struct thin_map_walk tmw = { .cb = cb, .x = x, };
-
-	if (!yaml_parser_initialize(&p))
-		goto out;
 
 	dev_map_file_name(dev, m_path);
 	mapf = fopen(m_path, "r");
-	if (!mapf)
-		goto out_p;
+	if (mapf) {
+		ret = thin_walk_mapf(mapf, &tmw);
+		fclose(mapf);
+	}
 
-	yaml_parser_set_input_file(&p, mapf);
-	ret = yaml_parse_all(&p, parse_maps_file, &tmw);
-
-	fclose(mapf);
-out_p:
-	yaml_parser_delete(&p);
-out:
 	return ret;
 }
