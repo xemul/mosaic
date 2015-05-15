@@ -10,4 +10,5 @@ struct thin_map {
 };
 
 int thin_walk_ids(char *dev, int (*cb)(struct thin_map *, void *), void *);
+int thin_del_ids(char *dev, int (*cb)(struct thin_map *, void *), void *x);
 #endif

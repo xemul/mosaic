@@ -91,14 +91,14 @@ static int del_pool(struct thin_map *tm, void *x)
 	system(cmd);
 #endif
 
-	return 0;
+	return 1;
 }
 
 static void del_thin(struct tessera *t)
 {
 	struct thin_tessera *tt = t->priv;
 
-	thin_walk_ids(tt->thin_dev, del_pool, t);
+	thin_del_ids(tt->thin_dev, del_pool, t);
 
 	free(tt->thin_dev);
 	free(tt->thin_fs);

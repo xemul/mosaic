@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <yaml.h>
+#include <unistd.h>
 #include "thin_id.h"
 #include "yaml-util.h"
 #include "status.h"
@@ -30,11 +31,6 @@ void dev_map_file_name(char *dev, char *file)
 		if (*aux == '/')
 			*aux = '_';
 }
-
-struct thin_map_search {
-	struct thin_map m;
-	int max_id;
-};
 
 struct thin_map_walk {
 	int (*cb)(struct thin_map *tm, void *x);
@@ -87,6 +83,11 @@ static int parse_map(yaml_parser_t *p, void *x)
 	free(tm.tess);
 	return 0;
 }
+
+struct thin_map_search {
+	struct thin_map m;
+	int max_id;
+};
 
 static int get_map_id(struct thin_map *tm, void *x)
 {
@@ -193,5 +194,69 @@ int thin_walk_ids(char *dev, int (*cb)(struct thin_map *, void *), void *x)
 		fclose(mapf);
 	}
 
+	return ret;
+}
+
+struct thin_map_del {
+	int (*cb)(struct thin_map *, void *);
+	void *arg;
+	FILE *nmapf;
+};
+
+static int thin_del_id(struct thin_map *tm, void *x)
+{
+	struct thin_map_del *tmd = x;
+
+	if (tmd->cb(tm, tmd->arg))
+		return 0;
+
+	fprintf(tmd->nmapf, "- tessera: %s\n", tm->tess);
+	fprintf(tmd->nmapf, "  age: %d\n", tm->age);
+	fprintf(tmd->nmapf, "  vol_id: %d\n", tm->vol_id);
+	return 0;
+}
+
+int thin_del_ids(char *dev, int (*cb)(struct thin_map *, void *), void *x)
+{
+	int ret = -1;
+	char m_path[1024], aux[1024];
+	FILE *mapf, *nmapf;
+	struct thin_map_del tmd;
+	struct thin_map_walk tmw;
+
+	dev_map_file_name(dev, m_path);
+	mapf = fopen(m_path, "r");
+	if (!mapf)
+		goto out;
+
+	/* FIXME -- locking */
+	sprintf(aux, THIN_MAP_DIR "/.upd");
+	nmapf = fopen(aux, "w");
+	if (!nmapf)
+		goto out_f;
+
+	tmd.cb = cb;
+	tmd.arg = x;
+	tmd.nmapf = nmapf;
+
+	tmw.cb = thin_del_id;
+	tmw.x = &tmd;
+
+	ret = thin_walk_mapf(mapf, &tmw);
+	if (ret < 0)
+		goto out_nf;
+
+	/* XXX -- empty status file gets removed, should this one? */
+	fclose(nmapf);
+	fclose(mapf);
+	rename(aux, m_path);
+	return 0;
+
+out_nf:
+	fclose(nmapf);
+	unlink(aux);
+out_f:
+	fclose(mapf);
+out:
 	return ret;
 }
