@@ -54,7 +54,7 @@ static int add_eph(struct tessera *t, int n_opts, char **opts)
 	return 0;
 }
 
-static void del_eph(struct tessera *t)
+static void del_eph(struct tessera *t, int age)
 {
 	int i;
 	struct eph_tessera *et = t->priv;

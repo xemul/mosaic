@@ -94,7 +94,7 @@ static int del_pool(struct thin_map *tm, void *x)
 	return 1;
 }
 
-static void del_thin(struct tessera *t)
+static void del_thin(struct tessera *t, int age)
 {
 	struct thin_tessera *tt = t->priv;
 

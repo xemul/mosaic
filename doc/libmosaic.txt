@@ -99,9 +99,10 @@ int mosaic_iterate_mounted_t(struct tessera *t, int age, int (*cb)(struct tesser
 	Iterates over tessera mountpoints. Only includes those created by the
 	mosaic_mount_tessera(), in-mosaic mounts are not included.
 
-int mosaic_del_tessera(struct tessera *t)
+int mosaic_del_tessera(struct tessera *t, int age)
 
-	Removes tessera. Contents is not removed and is left on disk.
+	Removes tessera or one of its ages. If age is -1, then all are removed. Contents
+	is not removed and is left on disk.
 
 int mosaic_mount_tessera(struct tessera *t, int age, char *at, char *options)
 

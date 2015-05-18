@@ -143,7 +143,7 @@ int mosaic_iterate_ages_t(struct tessera *t, int (*cb)(struct tessera *, int age
 	return t->t_desc->iter_ages(t, cb, x);
 }
 
-int mosaic_del_tessera(struct tessera *t)
+int mosaic_del_tessera(struct tessera *t, int age)
 {
 	struct tess_desc *td = t->t_desc;
 
@@ -155,12 +155,15 @@ int mosaic_del_tessera(struct tessera *t)
 	 * FIXME -- can be mounted in mosaic
 	 */
 
-	if (mosaic_iterate_ages_t(t, st_is_mounted_t, NULL))
-		return -1;
+	if (age == -1) {
+		if (mosaic_iterate_ages_t(t, st_is_mounted_t, NULL))
+			return -1;
+	} else
+		return -1; /* FIXME  implement */
 
 	list_del(&t->sl);
 	if (td->del)
-		td->del(t);
+		td->del(t, age);
 
 	free(t->t_name);
 	free(t);

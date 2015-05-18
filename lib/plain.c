@@ -35,7 +35,7 @@ static int add_plain(struct tessera *t, int n_opts, char **opts)
 	return 0;
 }
 
-static void del_plain(struct tessera *t)
+static void del_plain(struct tessera *t, int age)
 {
 	struct plain_tessera *pt = t->priv;
 

@@ -48,7 +48,7 @@ static int add_overlay(struct tessera *t, int n_opts, char **opts)
 
 static void umount_deltas(struct tessera *t);
 
-static void del_overlay(struct tessera *t)
+static void del_overlay(struct tessera *t, int age)
 {
 	struct overlay_tessera *ot = t->priv;
 

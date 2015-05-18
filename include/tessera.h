@@ -9,7 +9,7 @@ struct tess_desc {
 	 * Add/Del callbacks from cldline
 	 */
 	int (*add)(struct tessera *t, int n_opts, char **opts);
-	void (*del)(struct tessera *t);
+	void (*del)(struct tessera *t, int age);
 	/*
 	 * Parse/Save callback from/for config
 	 * Last call to parse is with NULL/NULL and is to

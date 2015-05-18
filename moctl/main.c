@@ -394,10 +394,18 @@ static int add_tessera(int argc, char **argv)
 static int del_tessera(int argc, char **argv)
 {
 	struct tessera *t;
+	int age = -1; /* for "all" by default */
+	char *aux;
 
 	if (argc < 1) {
-		printf("Usage: moctl tessera del <name>\n");
+		printf("Usage: moctl tessera del <name>[:<age>]\n");
 		return 1;
+	}
+
+	aux = strchr(argv[0], ':');
+	if (aux) {
+		*aux = '\0';
+		age = atoi(aux + 1);
 	}
 
 	t = mosaic_find_tessera(argv[0]);
@@ -406,7 +414,7 @@ static int del_tessera(int argc, char **argv)
 		return 1;
 	}
 
-	return mosaic_del_tessera(t) == 0 ? 0 : 1;
+	return mosaic_del_tessera(t, age) == 0 ? 0 : 1;
 }
 
 static int mount_tessera(int argc, char **argv)

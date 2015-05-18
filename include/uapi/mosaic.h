@@ -31,7 +31,7 @@ struct tessera *mosaic_find_tessera(char *name);
 int mosaic_add_tessera(char *type, char *name, int n_opts, char **opts);
 int mosaic_iterate_ages_t(struct tessera *t, int (*cb)(struct tessera *t, int age, void *), void *);
 int mosaic_iterate_mounted_t(struct tessera *t, int age, int (*cb)(struct tessera *t, int age, char *mp, void *), void *);
-int mosaic_del_tessera(struct tessera *t);
+int mosaic_del_tessera(struct tessera *t, int age);
 int mosaic_mount_tessera(struct tessera *t, int age, char *at, char *options);
 int mosaic_umount_tessera(struct tessera *t, int age, char *at);
 int mosaic_grow_tessera(struct tessera *t, int age, int from_age);
