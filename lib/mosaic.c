@@ -138,7 +138,7 @@ static struct element *find_element(struct mosaic *m, char *name)
 	return NULL;
 }
 
-int mosaic_set_element(struct mosaic *m, char *name, int age, char *at, char *opt)
+int mosaic_set_element(struct mosaic *m, char *name, char *age, char *at, char *opt)
 {
 	struct element *e;
 
@@ -161,7 +161,7 @@ int mosaic_set_element(struct mosaic *m, char *name, int age, char *at, char *op
 		INIT_LIST_HEAD(&e->ml);
 	}
 
-	e->e_age = age;
+	e->e_age = strdup(age);
 	e->e_at = strdup(at);
 	e->e_options = NULL;
 
@@ -171,6 +171,7 @@ int mosaic_set_element(struct mosaic *m, char *name, int age, char *at, char *op
 		a = strchr(opt, '=');
 		if (!a || strncmp(opt, "options", a - opt)) {
 			free(e->e_at);
+			free(e->e_age);
 			free(e);
 			return -1;
 		}
@@ -197,6 +198,7 @@ int mosaic_del_element(struct mosaic *m, char *name)
 
 	list_del(&e->ml);
 	free(e->e_at);
+	free(e->e_age);
 	free(e->e_options);
 	free(e);
 

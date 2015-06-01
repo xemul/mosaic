@@ -12,7 +12,7 @@ int mosaic_iterate_elements(struct mosaic *, int (*cb)(struct mosaic *, struct e
 int mosaic_iterate_mounted(struct mosaic *, int (*cb)(struct mosaic *, char *mp, void *), void *);
 
 struct mosaic *mosaic_new(char *name);
-int mosaic_set_element(struct mosaic *m, char *name, int age, char *at, char *opt);
+int mosaic_set_element(struct mosaic *m, char *name, char *age, char *at, char *opt);
 int mosaic_del_element(struct mosaic *m, char *name);
 int mosaic_add(struct mosaic *m);
 int mosaic_update(struct mosaic *m);
@@ -29,12 +29,12 @@ struct tessera;
 int mosaic_iterate_tesserae(int (*cb)(struct tessera *, void *), void *x);
 struct tessera *mosaic_find_tessera(char *name);
 int mosaic_add_tessera(char *type, char *name, int n_opts, char **opts);
-int mosaic_iterate_ages_t(struct tessera *t, int (*cb)(struct tessera *t, int age, void *), void *);
-int mosaic_iterate_mounted_t(struct tessera *t, int age, int (*cb)(struct tessera *t, int age, char *mp, void *), void *);
-int mosaic_del_tessera(struct tessera *t, int age);
-int mosaic_mount_tessera(struct tessera *t, int age, char *at, char *options);
-int mosaic_umount_tessera(struct tessera *t, int age, char *at);
-int mosaic_grow_tessera(struct tessera *t, int age, int from_age);
+int mosaic_iterate_ages_t(struct tessera *t, int (*cb)(struct tessera *t, char *age, void *), void *);
+int mosaic_iterate_mounted_t(struct tessera *t, char *age, int (*cb)(struct tessera *t, char *age, char *mp, void *), void *);
+int mosaic_del_tessera(struct tessera *t, char *age);
+int mosaic_mount_tessera(struct tessera *t, char *age, char *at, char *options);
+int mosaic_umount_tessera(struct tessera *t, char *age, char *at);
+int mosaic_grow_tessera(struct tessera *t, char *age, char *from_age);
 
 
 /*

@@ -17,7 +17,7 @@ struct element {
 		struct tessera *t;
 		char *e_name; /* parse-time only */
 	};
-	int e_age;
+	char *e_age;
 	char *e_at;
 	char *e_options;
 	struct list_head ml;

@@ -54,7 +54,7 @@ static int add_eph(struct tessera *t, int n_opts, char **opts)
 	return 0;
 }
 
-static void del_eph(struct tessera *t, int age)
+static void del_eph(struct tessera *t, char *age)
 {
 	int i;
 	struct eph_tessera *et = t->priv;
@@ -103,19 +103,19 @@ static void save_eph(struct tessera *t, FILE *f)
 	print_eph_info(f, CFG_TESS_OFF, t->priv);
 }
 
-static void show_eph(struct tessera *t, int age)
+static void show_eph(struct tessera *t, char *age)
 {
-	if (age == -1)
+	if (!age)
 		print_eph_info(stdout, 0, t->priv);
 }
 
-static int mount_eph(struct tessera *t, int age, char *path, char *options)
+static int mount_eph(struct tessera *t, char *age, char *path, char *options)
 {
 	struct eph_tessera *et = t->priv;
 	char aux[PATH_MAX];
 	int l, i;
 
-	if (age != 0)
+	if (age)
 		return -1;
 
 	if (options) {

@@ -37,7 +37,7 @@ struct mosaic *mosaic_new(char *name)
 	Creates a new mosaic, but doesn't add one to config file. To do so call
 	the mosaic_add().
 
-int mosaic_set_element(struct mosaic *m, char *name, int age, char *at, char *opt)
+int mosaic_set_element(struct mosaic *m, char *name, char *age, char *at, char *opt)
 
 	Sets (adds) element to mosaic. The @name is the name of tessera, the
 	@age is its age (both should exist), the @at is the path inside the 
@@ -89,31 +89,31 @@ int mosaic_add_tessera(char *type, char *name, int n_opts, char **opts)
 	Adds tessera to config file. Options are tessera-specific, see the 
 	TESSERAE TYPES int tesserae.txt doc.
 
-int mosaic_iterate_ages_t(struct tessera *t, int (*cb)(struct tessera *t, int age, void *), void *)
+int mosaic_iterate_ages_t(struct tessera *t, int (*cb)(struct tessera *t, char *age, void *), void *)
 
 	Iterates over ages of the given tessera. Callback ret value acts the
 	same as in other iterators.
 
-int mosaic_iterate_mounted_t(struct tessera *t, int age, int (*cb)(struct tessera *t, int age, char *mp, void *), void *)
+int mosaic_iterate_mounted_t(struct tessera *t, char *age, int (*cb)(struct tessera *t, char *age, char *mp, void *), void *)
 
 	Iterates over tessera mountpoints. Only includes those created by the
 	mosaic_mount_tessera(), in-mosaic mounts are not included.
 
-int mosaic_del_tessera(struct tessera *t, int age)
+int mosaic_del_tessera(struct tessera *t, char *age)
 
-	Removes tessera or one of its ages. If age is -1, then all are removed. Contents
+	Removes tessera or one of its ages. If age is NULL, then all are removed. Contents
 	is not removed and is left on disk.
 
-int mosaic_mount_tessera(struct tessera *t, int age, char *at, char *options)
+int mosaic_mount_tessera(struct tessera *t, char *age, char *at, char *options)
 
 	Mounts tessera of age @age to @at path with @options mount options (see
 	the OPTIONS below).
 
-int mosaic_umount_tessera(struct tessera *t, int age, char *at)
+int mosaic_umount_tessera(struct tessera *t, char *age, char *at)
 
 	Umounts tessera with age from path. If @at is NULL umounts all of them.
 
-int mosaic_grow_tessera(struct tessera *t, int age, int from_age)
+int mosaic_grow_tessera(struct tessera *t, char *age, char *from_age)
 
 	Creates new age of tessera. The @from_age is which age to grow the
 	tessera from. Original tessera age can become locked, i.e. not available

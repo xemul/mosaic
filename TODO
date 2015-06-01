@@ -1,5 +1,4 @@
 * locking (states and config)
-* int age -> string id/version/whatever
 * ages management (del/merge)
 * moar tests
 * do not delete tesserae that are in mosaic

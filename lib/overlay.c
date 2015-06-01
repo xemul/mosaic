@@ -48,7 +48,7 @@ static int add_overlay(struct tessera *t, int n_opts, char **opts)
 
 static void umount_deltas(struct tessera *t);
 
-static void del_overlay(struct tessera *t, int age)
+static void del_overlay(struct tessera *t, char *age)
 {
 	struct overlay_tessera *ot = t->priv;
 
@@ -89,20 +89,20 @@ static void save_overlay(struct tessera *t, FILE *f)
 	print_overlay_info(f, CFG_TESS_OFF, t->priv);
 }
 
-static void show_overlay(struct tessera *t, int age)
+static void show_overlay(struct tessera *t, char *age)
 {
-	if (age == -1)
+	if (!age)
 		print_overlay_info(stdout, 0, t->priv);
 }
 
-static int iterate_ages(struct tessera *t, int (*cb)(struct tessera *t, int age, void *), void *x)
+static int iterate_ages(struct tessera *t, int (*cb)(struct tessera *t, char *age, void *), void *x)
 {
 	struct overlay_tessera *ot = t->priv;
 	DIR *d;
 	struct dirent *de;
 	int ret = 0;
 
-	ret = cb(t, 0, x);
+	ret = cb(t, NULL, x);
 	if (ret)
 		return ret;
 
@@ -123,7 +123,7 @@ static int iterate_ages(struct tessera *t, int (*cb)(struct tessera *t, int age,
 			continue;
 		}
 
-		ret = cb(t, atoi(de->d_name + 4), x);
+		ret = cb(t, de->d_name + 4, x);
 		if (ret)
 			break;
 	}
@@ -148,13 +148,15 @@ static int iterate_ages(struct tessera *t, int (*cb)(struct tessera *t, int age,
  *     wlock   -> write locked
  */
 
-static int mount_overlay_delta(struct tessera *t, int age, char *l_path, int l_off, int *top_ro)
+static char *ovl_base_age_name = "base";
+
+static int mount_overlay_delta(struct tessera *t, char *age, char *l_path, int l_off, int *top_ro)
 {
 	struct overlay_tessera *ot = t->priv;
-	char aux[4096];
+	char aux[4096], *parent;
 	struct statfs buf;
 
-	if (age == 0) {
+	if (!age) {
 		l_off += sprintf(l_path + l_off, "/base");
 
 		if (access(l_path, F_OK) < 0) {
@@ -183,14 +185,14 @@ static int mount_overlay_delta(struct tessera *t, int age, char *l_path, int l_o
 	/*
 	 * Check the delta exists at all
 	 */
-	sprintf(l_path + l_off, "/age-%d", age);
+	sprintf(l_path + l_off, "/age-%s", age);
 	if (access(l_path, F_OK) < 0)
 		return -1;
 
 	/*
 	 * Check that mountpoint is already set up
 	 */
-	sprintf(l_path + l_off, "/age-%d/root", age);
+	sprintf(l_path + l_off, "/age-%s/root", age);
 	if (statfs(l_path, &buf) < 0)
 		return -1;
 
@@ -201,27 +203,32 @@ static int mount_overlay_delta(struct tessera *t, int age, char *l_path, int l_o
 	 * It's not. Time to check for the lower delta and mount
 	 * this one.
 	 */
-	sprintf(l_path + l_off, "/age-%d/parent", age);
+	sprintf(l_path + l_off, "/age-%s/parent", age);
 	if (readlink(l_path, aux, sizeof(aux)) < 0) {
 		loge("Can't readlink");
 		return -1;
 	}
 
+	if (!strcmp(aux, ovl_base_age_name))
+		parent = NULL;
+	else
+		parent = aux;
+
 	/*
 	 * Check parent mount and ask for it into l_path
 	 */
-	if (mount_overlay_delta(t, atoi(aux), l_path, l_off, NULL))
+	if (mount_overlay_delta(t, parent, l_path, l_off, NULL))
 		return -1;
 
-	sprintf(aux, "upperdir=%s/age-%d/data,workdir=%s/age-%d/work,lowerdir=%s/",
+	sprintf(aux, "upperdir=%s/age-%s/data,workdir=%s/age-%s/work,lowerdir=%s/",
 			ot->ovl_location, age, ot->ovl_location, age, l_path);
 
 	if (top_ro) {
-		sprintf(l_path + l_off, "/age-%d/wlock", age);
+		sprintf(l_path + l_off, "/age-%s/wlock", age);
 		*top_ro = (access(l_path, F_OK) == 0);
 	}
 
-	sprintf(l_path + l_off, "/age-%d/root", age);
+	sprintf(l_path + l_off, "/age-%s/root", age);
 
 	if (mount("none", l_path, "overlay", 0, aux)) {
 		loge("Can't mount overlay");
@@ -236,14 +243,14 @@ struct umount_ctx {
 	int p_off;
 };
 
-static int umount_overlay_delta(struct tessera *t, int age, void *x)
+static int umount_overlay_delta(struct tessera *t, char *age, void *x)
 {
 	struct umount_ctx *uc = x;
 
-	if (age == 0)
+	if (!age)
 		return 0;
 
-	sprintf(uc->path + uc->p_off, "age-%d/root", age);
+	sprintf(uc->path + uc->p_off, "age-%s/root", age);
 	umount(uc->path);
 
 	return 0;
@@ -260,7 +267,7 @@ static void umount_deltas(struct tessera *t)
 	iterate_ages(t, umount_overlay_delta, &uc);
 }
 
-static int mount_overlay(struct tessera *t, int age, char *path, char *options)
+static int mount_overlay(struct tessera *t, char *age, char *path, char *options)
 {
 	struct overlay_tessera *ot = t->priv;
 	char l_path[PATH_MAX];
@@ -287,12 +294,15 @@ static int mount_overlay(struct tessera *t, int age, char *path, char *options)
 	return 0;
 }
 
-static int grow_overlay(struct tessera *t, int base_age, int new_age)
+static int grow_overlay(struct tessera *t, char *base_age, char *new_age)
 {
 	struct overlay_tessera *ot = t->priv;
 	char path[PATH_MAX], aux[32];
 	int plen, i;
 	char *subs[] = { "/data", "/work", "/root", ".parent", NULL, };
+
+	if (!base_age)
+		base_age = ovl_base_age_name;
 
 	/*
 	 * FIXME -- this checks only pure mount, in-mosaic
@@ -302,7 +312,7 @@ static int grow_overlay(struct tessera *t, int base_age, int new_age)
 	if (st_is_mounted_t(t, base_age, NULL))
 		return -1;
 
-	plen = sprintf(path, "%s/age-%d", ot->ovl_location, new_age);
+	plen = sprintf(path, "%s/age-%s", ot->ovl_location, new_age);
 	if (mkdir(path, 0600)) {
 		loge("Can't make snapshot");
 		return -1;
@@ -315,7 +325,7 @@ static int grow_overlay(struct tessera *t, int base_age, int new_age)
 		if (subs[i][0] == '/')
 			ret = mkdir(path, 0600);
 		else {
-			sprintf(aux, "%d", base_age);
+			sprintf(aux, "%s", base_age);
 			ret = symlink(aux, path);
 		}
 
@@ -323,8 +333,8 @@ static int grow_overlay(struct tessera *t, int base_age, int new_age)
 			goto cleanup;
 	}
 
-	if (base_age)
-		sprintf(path, "%s/age-%d/wlock", ot->ovl_location, base_age);
+	if (base_age != ovl_base_age_name)
+		sprintf(path, "%s/age-%s/wlock", ot->ovl_location, base_age);
 	else
 		sprintf(path, "%s/base/wlock", ot->ovl_location);
 

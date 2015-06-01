@@ -97,10 +97,10 @@ static int print_element(struct mosaic *m, struct element *e, void *x)
 	}
 
 	printf("  - name: %s\n", e->t->t_name);
-	if (e->e_age == 0)
+	if (!e->e_age)
 		printf("    age:     base\n");
 	else
-		printf("    age:     %d\n", e->e_age);
+		printf("    age:     %s\n", e->e_age);
 	printf("    at:      %s\n", e->e_at ? : "-");
 	printf("    options: %s\n", e->e_options ? : "none");
 	printf("\n");
@@ -136,8 +136,7 @@ static int set_elements(struct mosaic *m, int argc, char **argv)
 	int i;
 
 	for (i = 0; i < argc; i++) {
-		int age;
-		char *at, *ed, *aux;
+		char *age, *at, *ed, *aux;
 
 		/* Name */
 		aux = strchr(argv[i], ':');
@@ -145,10 +144,9 @@ static int set_elements(struct mosaic *m, int argc, char **argv)
 			goto err;
 
 		*aux = '\0';
-
-		/* Age */
 		ed = aux + 1;
 
+		/* Age */
 		if (!strcmp(ed, "del")) {
 			if (mosaic_del_element(m, argv[i]))
 				return 1;
@@ -160,7 +158,8 @@ static int set_elements(struct mosaic *m, int argc, char **argv)
 		if (!aux)
 			goto err;
 
-		age = atoi(ed);
+		age = ed;
+		*aux = '\0';
 		ed = aux + 1;
 
 		/* Location */
@@ -324,7 +323,7 @@ static int list_tesserae(void)
 	return mosaic_iterate_tesserae(print_tessera, NULL);
 }
 
-static int print_mounted_t(struct tessera *t, int age, char *mp, void *x)
+static int print_mounted_t(struct tessera *t, char *age, char *mp, void *x)
 {
 	int *p = x;
 
@@ -337,7 +336,7 @@ static int print_mounted_t(struct tessera *t, int age, char *mp, void *x)
 	return 0;
 }
 
-static int print_age(struct tessera *t, int age, void *x)
+static int print_age(struct tessera *t, char *age, void *x)
 {
 	int *p = x;
 
@@ -346,7 +345,7 @@ static int print_age(struct tessera *t, int age, void *x)
 		printf("ages:\n");
 	}
 
-	printf("  - age: %d\n", age);
+	printf("  - age: %s\n", age);
 	mosaic_iterate_mounted_t(t, age, print_mounted_t, p);
 
 	if (t->t_desc->show)
@@ -376,7 +375,7 @@ static int show_tessera(int argc, char **argv)
 
 	printf("type: %s\n", t->t_desc->td_name);
 	if (t->t_desc->show)
-		t->t_desc->show(t, -1);
+		t->t_desc->show(t, NULL);
 
 	return 0;
 }
@@ -394,8 +393,7 @@ static int add_tessera(int argc, char **argv)
 static int del_tessera(int argc, char **argv)
 {
 	struct tessera *t;
-	int age = -1; /* for "all" by default */
-	char *aux;
+	char *age = NULL /* "all" by default */, *aux;
 
 	if (argc < 1) {
 		printf("Usage: moctl tessera del <name>[:<age>]\n");
@@ -405,7 +403,7 @@ static int del_tessera(int argc, char **argv)
 	aux = strchr(argv[0], ':');
 	if (aux) {
 		*aux = '\0';
-		age = atoi(aux + 1);
+		age = aux + 1;
 	}
 
 	t = mosaic_find_tessera(argv[0]);
@@ -420,8 +418,7 @@ static int del_tessera(int argc, char **argv)
 static int mount_tessera(int argc, char **argv)
 {
 	struct tessera *t;
-	int age = 0;
-	char *options = NULL, *aux;
+	char *age = NULL, *options = NULL, *aux;
 
 	if (argc < 2) {
 		printf("Usage: moctl tessera mount <name>:<age> <location> [<options>]\n");
@@ -431,7 +428,7 @@ static int mount_tessera(int argc, char **argv)
 	aux = strchr(argv[0], ':');
 	if (aux) {
 		*aux = '\0';
-		age = atoi(aux + 1);
+		age = aux + 1;
 	}
 
 	if (argc >= 3)
@@ -449,8 +446,7 @@ static int mount_tessera(int argc, char **argv)
 static int umount_tessera(int argc, char **argv)
 {
 	struct tessera *t;
-	int age = 0;
-	char *aux;
+	char *age = NULL, *aux;
 
 	if (argc < 1) {
 		printf("Usage: moctl tessera umount <name>:<age> [<location>]\n");
@@ -460,7 +456,7 @@ static int umount_tessera(int argc, char **argv)
 	aux = strchr(argv[0], ':');
 	if (aux) {
 		*aux = '\0';
-		age = atoi(aux + 1);
+		age = aux + 1;
 	}
 
 	t = mosaic_find_tessera(argv[0]);
@@ -475,8 +471,7 @@ static int umount_tessera(int argc, char **argv)
 static int grow_tessera(int argc, char **argv)
 {
 	struct tessera *t;
-	int base_age = 0, new_age;
-	char *aux;
+	char *base_age = NULL, *new_age, *aux;
 
 	if (argc < 2) {
 		printf("Usage: moctl tessera grow <name> <new-age>[:<base-age>]\n");
@@ -492,10 +487,10 @@ static int grow_tessera(int argc, char **argv)
 	aux = strchr(argv[1], ':');
 	if (aux) {
 		*aux = '\0';
-		base_age = atoi(aux + 1);
+		base_age = aux + 1;
 	}
 
-	new_age = atoi(argv[1]);
+	new_age = argv[1];
 
 	return mosaic_grow_tessera(t, new_age, base_age) == 0 ? 0 : 1;
 }

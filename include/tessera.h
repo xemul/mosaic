@@ -9,7 +9,7 @@ struct tess_desc {
 	 * Add/Del callbacks from cldline
 	 */
 	int (*add)(struct tessera *t, int n_opts, char **opts);
-	void (*del)(struct tessera *t, int age);
+	void (*del)(struct tessera *t, char *age);
 	/*
 	 * Parse/Save callback from/for config
 	 * Last call to parse is with NULL/NULL and is to
@@ -22,14 +22,14 @@ struct tess_desc {
 	 * If age is -1 then info about tessera itself is
 	 * requested, otherwise -- smth about the age itself.
 	 */
-	void (*show)(struct tessera *t, int age);
+	void (*show)(struct tessera *t, char *age);
 
-	int (*mount)(struct tessera *t, int age, char *path, char *options);
-	int (*grow)(struct tessera *t, int old_age, int new_age);
-	int (*iter_ages)(struct tessera *, int (*cb)(struct tessera *, int, void *), void *);
+	int (*mount)(struct tessera *t, char *age, char *path, char *options);
+	int (*grow)(struct tessera *t, char *old_age, char *new_age);
+	int (*iter_ages)(struct tessera *, int (*cb)(struct tessera *, char *, void *), void *);
 };
 
-int do_mount_tessera(struct tessera *t, int age, char *at, char *options);
+int do_mount_tessera(struct tessera *t, char *age, char *at, char *options);
 struct tess_desc *tess_desc_by_type(char *type);
 struct tessera *find_tessera(struct mosaic_state *ms, char *name);
 #endif

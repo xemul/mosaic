@@ -244,28 +244,28 @@ int st_umount(struct mosaic *m, char *from, int (*cb)(struct mosaic *, char *p))
  * Tessera level
  */
 
-void st_set_mounted_t(struct tessera *t, int age, char *path)
+void st_set_mounted_t(struct tessera *t, char *age, char *path)
 {
 	char id[512];
 
-	sprintf(id, "tes.%s.%d", t->t_name, age);
+	sprintf(id, "tes.%s.%s", t->t_name, age);
 	set_mounted(id, path);
 }
 
-int st_is_mounted_t(struct tessera *t, int age, void *x)
+int st_is_mounted_t(struct tessera *t, char *age, void *x)
 {
 	char path[PATH_MAX];
 
-	sprintf(path, STATUS_RUN_DIR "/tes.%s.%d", t->t_name, age);
+	sprintf(path, STATUS_RUN_DIR "/tes.%s.%s", t->t_name, age);
 	return access(path, F_OK) == 0 ? 1 : 0;
 }
 
 struct t_iter_ctx {
 	struct tessera *t;
-	int age;
+	char *age;
 	union {
-		int (*cb_x)(struct tessera *, int, char *, void *);
-		int (*cb)(struct tessera *, int, char *);
+		int (*cb_x)(struct tessera *, char *age, char *, void *);
+		int (*cb)(struct tessera *, char *age, char *);
 	};
 	void *cb_arg;
 };
@@ -276,7 +276,8 @@ static int tessera_iter_one(char *path, void *x)
 	return i->cb_x(i->t, i->age, path, i->cb_arg);
 }
 
-int mosaic_iterate_mounted_t(struct tessera *t, int age, int (*cb)(struct tessera *, int age, char *, void *), void *x)
+int mosaic_iterate_mounted_t(struct tessera *t, char *age,
+		int (*cb)(struct tessera *, char *age, char *, void *), void *x)
 {
 	char id[512];
 	struct t_iter_ctx i;
@@ -286,7 +287,7 @@ int mosaic_iterate_mounted_t(struct tessera *t, int age, int (*cb)(struct tesser
 	i.cb_x = cb;
 	i.cb_arg = x;
 
-	sprintf(id, "tes.%s.%d", t->t_name, age);
+	sprintf(id, "tes.%s.%s", t->t_name, age);
 	return st_for_each_mounted(id, tessera_iter_one, &i);
 }
 
@@ -296,7 +297,8 @@ static int umount_tessera(char *path, void *x)
 	return i->cb(i->t, i->age, path);
 }
 
-int st_umount_t(struct tessera *t, int age, char *from, int (*cb)(struct tessera *, int, char *))
+int st_umount_t(struct tessera *t, char *age, char *from,
+		int (*cb)(struct tessera *, char *age, char *))
 {
 	char id[512];
 	struct t_iter_ctx i;
@@ -305,6 +307,6 @@ int st_umount_t(struct tessera *t, int age, char *from, int (*cb)(struct tessera
 	i.age = age;
 	i.cb = cb;
 
-	sprintf(id, "tes.%s.%d", t->t_name, age);
+	sprintf(id, "tes.%s.%s", t->t_name, age);
 	return do_umount(id, from, umount_tessera, &i);
 }

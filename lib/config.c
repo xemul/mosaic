@@ -114,8 +114,7 @@ static int parse_element_value(yaml_parser_t *p, char *key, void *x)
 	}
 
 	if (!strcmp(key, "age")) {
-		e->e_age = atoi(val);
-		free(val);
+		e->e_age = val;
 		return 0;
 	}
 
@@ -143,7 +142,7 @@ static int parse_element(yaml_parser_t *p, void *x)
 
 	e = malloc(sizeof(*e));
 	e->t = NULL;
-	e->e_age = 0;
+	e->e_age = NULL;
 	e->e_at = NULL;
 	e->e_options = NULL;
 	list_add_tail(&e->ml, &m->elements);
@@ -329,8 +328,8 @@ int config_update(void)
 
 		list_for_each_entry(e, &m->elements, ml) {
 			fprintf(f, "      - name: %s\n", e->t->t_name);
-			if (e->e_age != 0)
-				fprintf(f, "        age: %d\n", e->e_age);
+			if (e->e_age)
+				fprintf(f, "        age: %s\n", e->e_age);
 			if (e->e_at)
 				fprintf(f, "        at: %s\n", e->e_at);
 			if (e->e_options)

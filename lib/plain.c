@@ -35,7 +35,7 @@ static int add_plain(struct tessera *t, int n_opts, char **opts)
 	return 0;
 }
 
-static void del_plain(struct tessera *t, int age)
+static void del_plain(struct tessera *t, char *age)
 {
 	struct plain_tessera *pt = t->priv;
 
@@ -74,17 +74,17 @@ static void save_plain(struct tessera *t, FILE *f)
 	print_plain_info(f, CFG_TESS_OFF, t->priv);
 }
 
-static void show_plain(struct tessera *t, int age)
+static void show_plain(struct tessera *t, char *age)
 {
-	if (age == -1)
+	if (!age)
 		print_plain_info(stdout, 0, t->priv);
 }
 
-static int mount_plain(struct tessera *t, int age, char *path, char *options)
+static int mount_plain(struct tessera *t, char *age, char *path, char *options)
 {
 	struct plain_tessera *pt = t->priv;
 
-	if (age != 0)
+	if (age)
 		return -1;
 
 	if (options) {

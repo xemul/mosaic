@@ -66,7 +66,7 @@ struct tessera *mosaic_find_tessera(char *name)
 	return find_tessera(ms, name);
 }
 
-int mosaic_mount_tessera(struct tessera *t, int age, char *path, char *options)
+int mosaic_mount_tessera(struct tessera *t, char *age, char *path, char *options)
 {
 	struct stat buf;
 	int ret;
@@ -84,17 +84,17 @@ int mosaic_mount_tessera(struct tessera *t, int age, char *path, char *options)
 	return ret;
 }
 
-static int do_umount_tessera(struct tessera *t, int age, char *path)
+static int do_umount_tessera(struct tessera *t, char *age, char *path)
 {
 	return umount(path);
 }
 
-int mosaic_umount_tessera(struct tessera *t, int age, char *path)
+int mosaic_umount_tessera(struct tessera *t, char *age, char *path)
 {
 	return st_umount_t(t, age, path, do_umount_tessera);
 }
 
-int do_mount_tessera(struct tessera *t, int age, char *path, char *options)
+int do_mount_tessera(struct tessera *t, char *age, char *path, char *options)
 {
 	if (!t->t_desc->mount)
 		return -1;
@@ -102,7 +102,7 @@ int do_mount_tessera(struct tessera *t, int age, char *path, char *options)
 	return t->t_desc->mount(t, age, path, options);
 }
 
-int mosaic_grow_tessera(struct tessera *t, int new_age, int base_age)
+int mosaic_grow_tessera(struct tessera *t, char *new_age, char *base_age)
 {
 	if (!t->t_desc->grow)
 		return -1;
@@ -134,7 +134,7 @@ int mosaic_add_tessera(char *type, char *name, int n_opts, char **opts)
 	return config_update();
 }
 
-int mosaic_iterate_ages_t(struct tessera *t, int (*cb)(struct tessera *, int age, void *), void *x)
+int mosaic_iterate_ages_t(struct tessera *t, int (*cb)(struct tessera *, char *age, void *), void *x)
 {
 	if (!t->t_desc->iter_ages)
 		/* Special case -- only base tessera available */
@@ -143,7 +143,7 @@ int mosaic_iterate_ages_t(struct tessera *t, int (*cb)(struct tessera *, int age
 	return t->t_desc->iter_ages(t, cb, x);
 }
 
-int mosaic_del_tessera(struct tessera *t, int age)
+int mosaic_del_tessera(struct tessera *t, char *age)
 {
 	struct tess_desc *td = t->t_desc;
 
@@ -155,7 +155,7 @@ int mosaic_del_tessera(struct tessera *t, int age)
 	 * FIXME -- can be mounted in mosaic
 	 */
 
-	if (age == -1) {
+	if (!age) {
 		if (mosaic_iterate_ages_t(t, st_is_mounted_t, NULL))
 			return -1;
 	} else
