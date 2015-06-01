@@ -96,7 +96,16 @@ static void show_overlay(struct tessera *t)
 
 static void show_overlay_age(struct tessera *t, char *age)
 {
-	/* FIXME -- print 'locked' state */
+	struct overlay_tessera *ot = t->priv;
+	char p[PATH_MAX];
+
+	if (age)
+		sprintf(p, "%s/age-%s/wlock", ot->ovl_location, age);
+	else
+		sprintf(p, "%s/base/wlock", ot->ovl_location);
+
+	if (access(p, F_OK) == 0)
+		printf("    wlocked: yes\n");
 }
 
 static int iterate_ages(struct tessera *t, int (*cb)(struct tessera *t, char *age, void *), void *x)
