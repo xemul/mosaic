@@ -103,10 +103,9 @@ static void save_eph(struct tessera *t, FILE *f)
 	print_eph_info(f, CFG_TESS_OFF, t->priv);
 }
 
-static void show_eph(struct tessera *t, char *age)
+static void show_eph(struct tessera *t)
 {
-	if (!age)
-		print_eph_info(stdout, 0, t->priv);
+	print_eph_info(stdout, 0, t->priv);
 }
 
 static int mount_eph(struct tessera *t, char *age, char *path, char *options)
@@ -147,7 +146,7 @@ struct tess_desc tess_desc_ephemeral = {
 	.del = del_eph,
 	.parse = parse_eph,
 	.save = save_eph,
-	.show = show_eph,
+	.show_tess = show_eph,
 	.mount = mount_eph,
 	/*
 	 * Growing can not be implemented at all

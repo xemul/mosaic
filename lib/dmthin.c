@@ -158,15 +158,18 @@ static void save_thin(struct tessera *t, FILE *f)
 	print_thin_info(f, CFG_TESS_OFF, t->priv);
 }
 
-static void show_thin(struct tessera *t, char *age)
+static void show_thin(struct tessera *t)
 {
 	struct thin_tessera *tt = t->priv;
-
-	if (age)
-		printf("    volume: %d\n", thin_get_id(tt->thin_dev, t->t_name, age, false));
-	else
-		print_thin_info(stdout, 0, tt);
+	print_thin_info(stdout, 0, tt);
 }
+
+static void show_thin_age(struct tessera *t, char *age)
+{
+	struct thin_tessera *tt = t->priv;
+	printf("    volume: %d\n", thin_get_id(tt->thin_dev, t->t_name, age, false));
+}
+
 
 static int mount_thin(struct tessera *t, char *age, char *path, char *options)
 {
@@ -260,7 +263,8 @@ struct tess_desc tess_desc_thin = {
 	.del = del_thin,
 	.parse = parse_thin,
 	.save = save_thin,
-	.show = show_thin,
+	.show_age = show_thin_age,
+	.show_tess = show_thin,
 	.mount = mount_thin,
 	.grow = grow_thin,
 	.iter_ages = iterate_ages,

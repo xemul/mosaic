@@ -345,11 +345,11 @@ static int print_age(struct tessera *t, char *age, void *x)
 		printf("ages:\n");
 	}
 
-	printf("  - age: %s\n", age);
+	printf("  - age: %s\n", age ? : "<base>");
 	mosaic_iterate_mounted_t(t, age, print_mounted_t, p);
 
-	if (t->t_desc->show)
-		t->t_desc->show(t, age);
+	if (t->t_desc->show_age)
+		t->t_desc->show_age(t, age);
 
 	return 0;
 }
@@ -374,8 +374,8 @@ static int show_tessera(int argc, char **argv)
 	mosaic_iterate_ages_t(t, print_age, &printed);
 
 	printf("type: %s\n", t->t_desc->td_name);
-	if (t->t_desc->show)
-		t->t_desc->show(t, NULL);
+	if (t->t_desc->show_tess)
+		t->t_desc->show_tess(t);
 
 	return 0;
 }

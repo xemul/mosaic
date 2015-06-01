@@ -74,10 +74,9 @@ static void save_plain(struct tessera *t, FILE *f)
 	print_plain_info(f, CFG_TESS_OFF, t->priv);
 }
 
-static void show_plain(struct tessera *t, char *age)
+static void show_plain(struct tessera *t)
 {
-	if (!age)
-		print_plain_info(stdout, 0, t->priv);
+	print_plain_info(stdout, 0, t->priv);
 }
 
 static int mount_plain(struct tessera *t, char *age, char *path, char *options)
@@ -101,7 +100,7 @@ struct tess_desc tess_desc_plain = {
 	.del = del_plain,
 	.parse = parse_plain,
 	.save = save_plain,
-	.show = show_plain,
+	.show_tess = show_plain,
 	.mount = mount_plain,
 	/*
 	 * Growing can only be implemented by

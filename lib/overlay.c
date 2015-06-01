@@ -89,10 +89,14 @@ static void save_overlay(struct tessera *t, FILE *f)
 	print_overlay_info(f, CFG_TESS_OFF, t->priv);
 }
 
-static void show_overlay(struct tessera *t, char *age)
+static void show_overlay(struct tessera *t)
 {
-	if (!age)
-		print_overlay_info(stdout, 0, t->priv);
+	print_overlay_info(stdout, 0, t->priv);
+}
+
+static void show_overlay_age(struct tessera *t, char *age)
+{
+	/* FIXME -- print 'locked' state */
 }
 
 static int iterate_ages(struct tessera *t, int (*cb)(struct tessera *t, char *age, void *), void *x)
@@ -363,7 +367,8 @@ struct tess_desc tess_desc_overlay = {
 	.del = del_overlay,
 	.parse = parse_overlay,
 	.save = save_overlay,
-	.show = show_overlay,
+	.show_age = show_overlay_age,
+	.show_tess = show_overlay,
 	.mount = mount_overlay,
 	.grow = grow_overlay,
 	.iter_ages = iterate_ages,
