@@ -158,16 +158,16 @@ static void save_thin(struct tessera *t, FILE *f)
 	print_thin_info(f, CFG_TESS_OFF, t->priv);
 }
 
-static void show_thin(struct tessera *t)
+static void show_thin(struct tessera *t, int off)
 {
 	struct thin_tessera *tt = t->priv;
-	print_thin_info(stdout, 0, tt);
+	print_thin_info(stdout, off, tt);
 }
 
-static void show_thin_age(struct tessera *t, char *age)
+static void show_thin_age(struct tessera *t, char *age, int off)
 {
 	struct thin_tessera *tt = t->priv;
-	printf("    volume: %d\n", thin_get_id(tt->thin_dev, t->t_name, age, false));
+	printf("%*svolume: %d\n", off, "", thin_get_id(tt->thin_dev, t->t_name, age, false));
 }
 
 

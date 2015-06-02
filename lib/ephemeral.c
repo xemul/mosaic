@@ -103,9 +103,9 @@ static void save_eph(struct tessera *t, FILE *f)
 	print_eph_info(f, CFG_TESS_OFF, t->priv);
 }
 
-static void show_eph(struct tessera *t)
+static void show_eph(struct tessera *t, int off)
 {
-	print_eph_info(stdout, 0, t->priv);
+	print_eph_info(stdout, off, t->priv);
 }
 
 static int mount_eph(struct tessera *t, char *age, char *path, char *options)

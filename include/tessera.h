@@ -20,8 +20,8 @@ struct tess_desc {
 	/*
 	 * Show any information about tessera/age on the screen.
 	 */
-	void (*show_tess)(struct tessera *t);
-	void (*show_age)(struct tessera *t, char *age);
+	void (*show_tess)(struct tessera *t, int off);
+	void (*show_age)(struct tessera *t, char *age, int off);
 
 	int (*mount)(struct tessera *t, char *age, char *path, char *options);
 	int (*grow)(struct tessera *t, char *old_age, char *new_age);

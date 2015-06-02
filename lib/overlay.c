@@ -89,12 +89,12 @@ static void save_overlay(struct tessera *t, FILE *f)
 	print_overlay_info(f, CFG_TESS_OFF, t->priv);
 }
 
-static void show_overlay(struct tessera *t)
+static void show_overlay(struct tessera *t, int off)
 {
-	print_overlay_info(stdout, 0, t->priv);
+	print_overlay_info(stdout, off, t->priv);
 }
 
-static void show_overlay_age(struct tessera *t, char *age)
+static void show_overlay_age(struct tessera *t, char *age, int off)
 {
 	struct overlay_tessera *ot = t->priv;
 	char p[PATH_MAX];
@@ -105,7 +105,7 @@ static void show_overlay_age(struct tessera *t, char *age)
 		sprintf(p, "%s/base/wlock", ot->ovl_location);
 
 	if (access(p, F_OK) == 0)
-		printf("    wlocked: yes\n");
+		printf("%*swlocked: yes\n", off, "");
 }
 
 static int iterate_ages(struct tessera *t, int (*cb)(struct tessera *t, char *age, void *), void *x)

@@ -98,7 +98,7 @@ static int print_element(struct mosaic *m, struct element *e, void *x)
 
 	printf("  - name: %s\n", e->t->t_name);
 	if (!e->e_age)
-		printf("    age:     base\n");
+		printf("    age:     <base>\n");
 	else
 		printf("    age:     %s\n", e->e_age);
 	printf("    at:      %s\n", e->e_at ? : "-");
@@ -349,7 +349,7 @@ static int print_age(struct tessera *t, char *age, void *x)
 	mosaic_iterate_mounted_t(t, age, print_mounted_t, p);
 
 	if (t->t_desc->show_age)
-		t->t_desc->show_age(t, age);
+		t->t_desc->show_age(t, age, 4);
 
 	return 0;
 }
@@ -375,7 +375,7 @@ static int show_tessera(int argc, char **argv)
 
 	printf("type: %s\n", t->t_desc->td_name);
 	if (t->t_desc->show_tess)
-		t->t_desc->show_tess(t);
+		t->t_desc->show_tess(t, 0);
 
 	return 0;
 }
