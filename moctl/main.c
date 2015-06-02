@@ -96,7 +96,7 @@ static int print_element(struct mosaic *m, struct element *e, void *x)
 		printf("elements:\n");
 	}
 
-	printf("  - name: %s\n", e->t->t_name);
+	printf("  - name:    %s\n", e->t->t_name);
 	if (!e->e_age)
 		printf("    age:     <base>\n");
 	else
