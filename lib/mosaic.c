@@ -138,6 +138,15 @@ static struct element *find_element(struct mosaic *m, char *name)
 	return NULL;
 }
 
+static void clean_elem(struct element *e)
+{
+	free(e->e_at);
+	if (e->e_options)
+		free(e->e_options);
+	if (e->e_age)
+		free(e->e_age);
+}
+
 int mosaic_set_element(struct mosaic *m, char *name, char *age, char *at, char *opt)
 {
 	struct element *e;
@@ -146,10 +155,9 @@ int mosaic_set_element(struct mosaic *m, char *name, char *age, char *at, char *
 		return -1;
 
 	e = find_element(m, name);
-	if (e) {
-		free(e->e_at);
-		free(e->e_options);
-	} else {
+	if (e)
+		clean_elem(e);
+	else {
 		struct tessera *t;
 
 		t = mosaic_find_tessera(name);
@@ -173,9 +181,7 @@ int mosaic_set_element(struct mosaic *m, char *name, char *age, char *at, char *
 
 		a = strchr(opt, '=');
 		if (!a || strncmp(opt, "options", a - opt)) {
-			free(e->e_at);
-			if (e->e_age)
-				free(e->e_age);
+			clean_elem(e);
 			free(e);
 			return -1;
 		}
@@ -201,10 +207,7 @@ int mosaic_del_element(struct mosaic *m, char *name)
 		return -1;
 
 	list_del(&e->ml);
-	free(e->e_at);
-	if (e->e_age)
-		free(e->e_age);
-	free(e->e_options);
+	clean_elem(e);
 	free(e);
 
 	return 0;
