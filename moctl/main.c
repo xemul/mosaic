@@ -158,8 +158,12 @@ static int set_elements(struct mosaic *m, int argc, char **argv)
 		if (!aux)
 			goto err;
 
-		age = ed;
-		*aux = '\0';
+		if (aux == ed)
+			age = NULL;
+		else {
+			age = ed;
+			*aux = '\0';
+		}
 		ed = aux + 1;
 
 		/* Location */
