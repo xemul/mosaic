@@ -36,7 +36,7 @@ static int do_mosaic_umount(struct mosaic *m, char *mp)
 	list_for_each_entry(e, &m->elements, ml) {
 		sprintf(path + plen, "%s", e->e_at);
 		if (umount(path)) {
-			loge("Can't umount");
+			loge("Can't umount\n");
 			return -1;
 		}
 	}
