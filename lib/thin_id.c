@@ -69,7 +69,7 @@ static int parse_map_elem(yaml_parser_t *p, char *key, void *x)
 static int parse_map(yaml_parser_t *p, void *x)
 {
 	struct thin_map_walk *tmw = x;
-	struct thin_map tm;
+	struct thin_map tm = {};
 	int ret;
 
 	ret = yaml_parse_map_body(p, parse_map_elem, &tm);
@@ -88,11 +88,19 @@ struct thin_map_search {
 	int max_id;
 };
 
+static bool age_equal(char *a1, char *a2)
+{
+	if (a1 == NULL || a2 == NULL)
+		return a1 == a2;
+	else
+		return !strcmp(a1, a2);
+}
+
 static int get_map_id(struct thin_map *tm, void *x)
 {
 	struct thin_map_search *tms = x;
 
-	if (!strcmp(tms->m.tess, tm->tess) && (tms->m.age == tm->age)) {
+	if (!strcmp(tms->m.tess, tm->tess) && age_equal(tms->m.age, tm->age)) {
 		if (tms->m.vol_id != -1)
 			log("BUG: double map mapping for %s:%s\n",
 					tms->m.tess, tms->m.age);
@@ -168,7 +176,8 @@ int thin_get_id(char *dev_name, char *tess_name, char *age, bool new)
 
 		ret = tms.max_id + 1;
 		fprintf(mapf, "- tessera: %s\n", tess_name);
-		fprintf(mapf, "  age: %s\n", age);
+		if (age)
+			fprintf(mapf, "  age: %s\n", age);
 		fprintf(mapf, "  vol_id: %d\n", ret);
 	} else
 		ret = tms.m.vol_id; /* -1 in case of error */
@@ -210,7 +219,8 @@ static int thin_del_id(struct thin_map *tm, void *x)
 		return 0;
 
 	fprintf(tmd->nmapf, "- tessera: %s\n", tm->tess);
-	fprintf(tmd->nmapf, "  age: %s\n", tm->age);
+	if (tm->age)
+		fprintf(tmd->nmapf, "  age: %s\n", tm->age);
 	fprintf(tmd->nmapf, "  vol_id: %d\n", tm->vol_id);
 	return 0;
 }

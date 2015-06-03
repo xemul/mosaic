@@ -81,7 +81,7 @@ static int del_pool(struct thin_map *tm, void *x)
 	if (strcmp(tm->tess, t->t_name))
 		return 0;
 
-	sprintf(cmd, "dmsetup remove mosaic-%s-%s", t->t_name, tm->age);
+	sprintf(cmd, "dmsetup remove mosaic-%s-%s", t->t_name, tm->age ? : "0");
 	system(cmd);
 
 #if 0 /* Only if contents removal is requested */
@@ -180,7 +180,7 @@ static int mount_thin(struct tessera *t, char *age, char *path, char *options)
 	if (parse_mount_opts(options, &m_flags))
 		return -1;
 
-	sprintf(dev, "/dev/mapper/mosaic-%s-%s", t->t_name, age);
+	sprintf(dev, "/dev/mapper/mosaic-%s-%s", t->t_name, age ? : "0");
 	if (access(dev, F_OK)) {
 		int id;
 		char cmd[1024];
