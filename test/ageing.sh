@@ -63,7 +63,7 @@ run_tests() {
 
 	echo "* Test mosaic construction out of aged tesserae"
 
-	$moctl "mosaic" "add" "m0" "t.a:0:t:options=ro" \
+	$moctl "mosaic" "add" "m0" "t.a::t:options=ro" \
 			|| fail "M-Add 0"
 
 	$moctl "mosaic" "add" "m1" "t.a:1:t" \
@@ -94,12 +94,18 @@ run_tests() {
 	clean
 }
 
-echo "###### Running tests for overlay"
-. ovl.sh
-run_tests
+list=${1-"ovl:thin"}
 
-echo "###### Running tests for thin"
-. thin.sh
-run_tests
+if echo $list | fgrep -q "ovl" ; then
+	echo "###### Running tests for overlay"
+	. ovl.sh
+	run_tests
+fi
+
+if echo $list | fgrep -q "thin" ; then
+	echo "###### Running tests for thin"
+	. thin.sh
+	run_tests
+fi
 
 echo "All tests passed"

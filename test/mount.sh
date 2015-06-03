@@ -54,7 +54,7 @@ run_tests() {
 	echo "* Check mosaic mounting (based on tesseras)"
 	mkdir "$m_dir/mt-a" "$m_dir/mt-b"
 
-	$moctl "mosaic" "add" "m1" "t.a:0:mt-a" "t.b:0:mt-b" \
+	$moctl "mosaic" "add" "m1" "t.a::mt-a" "t.b::mt-b" \
 			|| fail "M-Add"
 	$moctl "mosaic" "mount" "m1" "$m_dir" \
 			|| fail "M-Mount"
@@ -88,16 +88,24 @@ run_tests() {
 	clean
 }
 
-echo "###### Running tests for overlay"
-. ovl.sh
-run_tests
+list=${1-"ovl:thin:plain"}
 
-echo "###### Running tests for thin"
-. thin.sh
-run_tests
+if echo $list | fgrep -q "ovl" ; then
+	echo "###### Running tests for overlay"
+	. ovl.sh
+	run_tests
+fi
 
-echo "###### Running tests for plain"
-. plain.sh
-run_tests
+if echo $list | fgrep -q "thin" ; then
+	echo "###### Running tests for thin"
+	. thin.sh
+	run_tests
+fi
+
+if echo $list | fgrep -q "plain" ; then
+	echo "###### Running tests for plain"
+	. plain.sh
+	run_tests
+fi
 
 echo "All tests passed"
