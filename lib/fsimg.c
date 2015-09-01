@@ -96,7 +96,23 @@ static int drop_fsimg_tess(struct mosaic *m, struct tessera *t,
 static int mount_fsimg_tess(struct mosaic *m, struct tessera *t,
 		char *path, int mount_flags)
 {
-	return -1;
+	struct fsimg_priv *fp = m->priv;
+	char aux[1024], *nl;
+	FILE *lsp;
+
+	sprintf(aux, "losetup --find --show /proc/self/fd/%d/%s", fp->locfd, t->t_name);
+	lsp = popen(aux, "r");
+	if (!lsp)
+		return -1;
+
+	fgets(aux, sizeof(aux), lsp);
+	pclose(lsp);
+
+	nl = strchr(aux, '\n');
+	if (nl)
+		*nl = '\0';
+
+	return mount(aux, path, m->default_fs, mount_flags, NULL);
 }
 
 static int resize_fsimg_tess(struct mosaic *m, struct tessera *t,

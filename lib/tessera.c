@@ -13,6 +13,9 @@ tessera_t mosaic_open_tess(mosaic_t m, char *name, int open_flags)
 
 	t = malloc(sizeof(*t));
 
+	/*
+	 * FIXME -- refcounting against mosaic_close()
+	 */
 	t->m = m;
 	t->t_name = strdup(name);
 
@@ -39,13 +42,12 @@ int mosaic_make_tess(mosaic_t m, char *name, unsigned long size_in_blocks, int m
 	return m->m_ops->new_tessera(m, name, size_in_blocks, NULL, make_flags);
 }
 
-int mosaic_make_tess_fs(mosaic_t m, char *name, unsigned long size_in_blocks, char *fsname, int make_flags)
+int mosaic_make_tess_fs(mosaic_t m, char *name, unsigned long size_in_blocks, int make_flags)
 {
 	if (make_flags)
 		return -1;
 
-	return m->m_ops->new_tessera(m, name, size_in_blocks,
-			fsname ? : m->default_fs, make_flags);
+	return m->m_ops->new_tessera(m, name, size_in_blocks, m->default_fs, make_flags);
 }
 
 int mosaic_clone_tess(tessera_t from, char *name, int clone_flags)

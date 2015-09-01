@@ -21,29 +21,44 @@ static inline int argis(char *arg, char *is)
 
 static int parse_mount_flags(char *flags)
 {
-	return -1;
+	return 0;
 }
 
 static int do_mosaic_mount(mosaic_t m, int argc, char **argv)
 {
 	char *path;
-	int flags = 0;
+	tessera_t t = NULL;
+	int flags;
 
-	if (argc < 1) {
-		printf("Usage: moctl <name> mount <path> [<flags>]\n");
+	if (argc < 2) {
+		printf("Usage: moctl <name> mount [<tessera>] <path> <flags>\n");
 		return 1;
+	}
+
+	if (argc >= 3) {
+		t = mosaic_open_tess(m, argv[0], 0);
+		if (!t) {
+			perror("Can't open tessera");
+			return 1;
+		}
+
+		argc--;
+		argv++;
 	}
 
 	path = argv[0];
-	if (argc >= 2) {
-		flags = parse_mount_flags(argv[1]);
-		if (flags == -1)
-			return 1;
-	}
+	flags = parse_mount_flags(argv[1]);
 
-	if (mosaic_mount(m, path, flags) < 0) {
-		perror("Can't mount mosaic");
-		return 1;
+	if (t) {
+		if (mosaic_mount_tess(t, path, flags)) {
+			perror("Can't mount mosaic");
+			return 1;
+		}
+	} else {
+		if (mosaic_mount(m, path, flags) < 0) {
+			perror("Can't mount mosaic");
+			return 1;
+		}
 	}
 
 	return 0;
@@ -93,7 +108,7 @@ static int do_mosaic_new_tess(mosaic_t m, int argc, char **argv)
 	if (argis(argv[0], "disk"))
 		ret = mosaic_make_tess(m, argv[1], size, 0);
 	else if (argis(argv[0], "fs"))
-		ret = mosaic_make_tess_fs(m, argv[1], size, NULL, 0);
+		ret = mosaic_make_tess_fs(m, argv[1], size, 0);
 	else
 		return 1;
 

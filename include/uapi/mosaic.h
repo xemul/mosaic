@@ -21,7 +21,7 @@ tessera_t mosaic_open_tess(mosaic_t m, char *name, int open_flags);
 void mosaic_close_tess(tessera_t);
 
 int mosaic_make_tess(mosaic_t m, char *name, unsigned long size_in_blocks, int make_flags);
-int mosaic_make_tess_fs(mosaic_t m, char *name, unsigned long size_in_blocks, char *fsname, int make_flags);
+int mosaic_make_tess_fs(mosaic_t m, char *name, unsigned long size_in_blocks, int make_flags);
 
 int mosaic_clone_tess(tessera_t from, char *name, int clone_flags);
 int mosaic_drop_tess(tessera_t t, int drop_flags);
