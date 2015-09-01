@@ -1,6 +1,7 @@
 TGT = libmosaic.so
 OBJS =
 OBJS += mosaic.o
+OBJS += tessera.o
 OBJS += fsimg.o
 OBJS += config.o
 OBJS += yaml.o
