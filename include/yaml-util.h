@@ -1,5 +1,7 @@
 #ifndef __MOSAIC_YAML_UTIL_H__
 #define __MOSAIC_YAML_UTIL_H__
+#include <yaml.h>
+
 int yaml_parse_block(yaml_parser_t *p, int bs, int be, int (*body)(yaml_parser_t *, void *), void *x);
 int yaml_parse_block_seq(yaml_parser_t *p, int bs, int be,
 		int (*element)(yaml_parser_t *, void *), void *x);
