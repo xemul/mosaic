@@ -26,6 +26,7 @@ int mosaic_make_tess_fs(mosaic_t m, char *name, unsigned long size_in_blocks, in
 int mosaic_clone_tess(tessera_t from, char *name, int clone_flags);
 int mosaic_drop_tess(tessera_t t, int drop_flags);
 int mosaic_mount_tess(tessera_t t, char *path, int mount_flags);
+int mosaic_umount_tess(tessera_t t, char *path, int umount_flags);
 int mosaic_resize_tess(tessera_t t, unsigned long new_size_in_blocks, int resize_flags);
 
 /* Misc */

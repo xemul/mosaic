@@ -100,6 +100,9 @@ static int mount_fsimg_tess(struct mosaic *m, struct tessera *t,
 	char aux[1024], *nl;
 	FILE *lsp;
 
+	/*
+	 * FIXME: call losetup by hands?
+	 */
 	sprintf(aux, "losetup --find --show /proc/self/fd/%d/%s", fp->locfd, t->t_name);
 	lsp = popen(aux, "r");
 	if (!lsp)
@@ -113,6 +116,13 @@ static int mount_fsimg_tess(struct mosaic *m, struct tessera *t,
 		*nl = '\0';
 
 	return mount(aux, path, m->default_fs, mount_flags, NULL);
+}
+
+static int umount_fsimg_tess(struct mosaic *m, struct tessera *t,
+		char *path, int umount_flags)
+{
+	/* FIXME -- get the device from path and losetup --detach it %) */
+	return -1;
 }
 
 static int resize_fsimg_tess(struct mosaic *m, struct tessera *t,
@@ -131,5 +141,6 @@ const struct mosaic_ops mosaic_fsimg = {
 	.clone_tessera = NULL, /* regular loops can't do it */
 	.drop_tessera = drop_fsimg_tess,
 	.mount_tessera = mount_fsimg_tess,
+	.umount_tessera = umount_fsimg_tess,
 	.resize_tessera = resize_fsimg_tess,
 };

@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <sys/mount.h>
 #include "mosaic.h"
 #include "tessera.h"
 #include "uapi/mosaic.h"
@@ -81,6 +82,19 @@ int mosaic_mount_tess(tessera_t t, char *path, int mount_flags)
 	struct mosaic *m = t->m;
 
 	return m->m_ops->mount_tessera(m, t, path, mount_flags);
+}
+
+int mosaic_umount_tess(tessera_t t, char *path, int umount_flags)
+{
+	struct mosaic *m = t->m;
+
+	if (umount_flags)
+		return -1;
+
+	if (m->m_ops->umount_tessera)
+		return m->m_ops->umount_tessera(m, t, path, umount_flags);
+	else
+		return umount(path);
 }
 
 int mosaic_resize_tess(tessera_t t, unsigned long new_size_in_blocks, int resize_flags)
