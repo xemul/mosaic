@@ -90,6 +90,10 @@ static int drop_fsimg_tess(struct mosaic *m, struct tessera *t,
 {
 	struct fsimg_priv *fp = m->priv;
 
+	/*
+	 * FIXME -- what if mounted?
+	 */
+
 	return unlinkat(fp->locfd, t->t_name, 0);
 }
 
@@ -121,8 +125,36 @@ static int mount_fsimg_tess(struct mosaic *m, struct tessera *t,
 static int umount_fsimg_tess(struct mosaic *m, struct tessera *t,
 		char *path, int umount_flags)
 {
-	/* FIXME -- get the device from path and losetup --detach it %) */
-	return -1;
+	char aux[1024], aux2[1024], *e;
+	FILE *lsp;
+
+	/*
+	 * FIXME -- manual losetup on the same file screws things up :(
+	 * FIXME -- do it by hands
+	 */
+
+	sprintf(aux, "losetup -j %s/%s", m->m_loc, t->t_name);
+	lsp = popen(aux, "r");
+	if (!lsp)
+		return -1;
+
+	fgets(aux, sizeof(aux), lsp);
+	pclose(lsp);
+
+	e = strchr(aux, ':');
+	if (!e)
+		return -1;
+
+	*e = '\0';
+
+	if (umount(path))
+		return -1;
+
+	sprintf(aux2, "losetup -d %s\n", aux);
+	if (system(aux2))
+		return -1;
+
+	return 0;
 }
 
 static int resize_fsimg_tess(struct mosaic *m, struct tessera *t,

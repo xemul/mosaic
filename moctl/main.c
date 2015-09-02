@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/mount.h>
 #include "uapi/mosaic.h"
 
 static inline int argis(char *arg, char *is)
@@ -56,6 +57,44 @@ static int do_mosaic_mount(mosaic_t m, int argc, char **argv)
 		}
 	} else {
 		if (mosaic_mount(m, path, flags) < 0) {
+			perror("Can't mount mosaic");
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+static int do_mosaic_umount(mosaic_t m, int argc, char **argv)
+{
+	char *path;
+	tessera_t t = NULL;
+
+	if (argc < 1) {
+		printf("Usage: moctl <name> umount [<tessera>] <path>\n");
+		return 1;
+	}
+
+	if (argc >= 2) {
+		t = mosaic_open_tess(m, argv[0], 0);
+		if (!t) {
+			perror("Can't open tessera");
+			return 1;
+		}
+
+		argc--;
+		argv++;
+	}
+
+	path = argv[0];
+
+	if (t) {
+		if (mosaic_umount_tess(t, path, 0)) {
+			perror("Can't mount mosaic");
+			return 1;
+		}
+	} else {
+		if (umount(path) < 0) {
 			perror("Can't mount mosaic");
 			return 1;
 		}
@@ -159,6 +198,8 @@ static int do_mosaic(char *name, int argc, char **argv)
 
 	if (argis(argv[0], "mount"))
 		return do_mosaic_mount(mos, argc - 1, argv + 1);
+	if (argis(argv[0], "umount"))
+		return do_mosaic_umount(mos, argc - 1, argv + 1);
 	if (argis(argv[0], "new"))
 		return do_mosaic_new_tess(mos, argc - 1, argv + 1);
 	if (argis(argv[0], "clone"))
