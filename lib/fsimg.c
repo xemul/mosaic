@@ -147,7 +147,6 @@ const struct mosaic_ops mosaic_fsimg = {
 
 	.open_tessera = open_fsimg_tess,
 	.new_tessera = new_fsimg_tess,
-	.clone_tessera = NULL, /* regular loops can't do it */
 	.drop_tessera = drop_fsimg_tess,
 	.attach_tessera = attach_fsimg_tess,
 	.detach_tessera = detach_fsimg_tess,
