@@ -106,6 +106,7 @@ static int attach_fsimg_tess(struct mosaic *m, struct tessera *t,
 
 	/*
 	 * FIXME: call losetup by hands?
+	 * FIXME: multiple calls should report the same device?
 	 */
 	sprintf(aux, "losetup --find --show /proc/self/fd/%d/%s", fp->locfd, t->t_name);
 	lsp = popen(aux, "r");
@@ -119,7 +120,7 @@ static int attach_fsimg_tess(struct mosaic *m, struct tessera *t,
 	if (nl)
 		*nl = '\0';
 
-	strcpy(devs, aux);
+	strncpy(devs, aux, len);
 	return strlen(devs);
 }
 
