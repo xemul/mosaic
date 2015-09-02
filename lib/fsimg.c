@@ -121,7 +121,7 @@ static int attach_fsimg_tess(struct mosaic *m, struct tessera *t,
 		*nl = '\0';
 
 	strncpy(devs, aux, len);
-	return strlen(devs);
+	return strlen(aux);
 }
 
 static int detach_fsimg_tess(struct mosaic *m, struct tessera *t, char *devs)

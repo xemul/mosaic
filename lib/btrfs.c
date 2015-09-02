@@ -8,6 +8,9 @@
 
 static int open_btrfs(struct mosaic *m, int flags)
 {
+	if (m->default_fs)
+		return -1;
+
 	m->default_fs = strdup("btrfs");
 	return 0;
 }
