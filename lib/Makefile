@@ -6,6 +6,7 @@ OBJS += fsimg.o
 OBJS += config.o
 OBJS += yaml.o
 OBJS += log.o
+OBJS += util.o
 
 all: $(TGT)
 

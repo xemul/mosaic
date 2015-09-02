@@ -3,6 +3,7 @@
 #include <sys/mount.h>
 #include "mosaic.h"
 #include "tessera.h"
+#include "util.h"
 #include "uapi/mosaic.h"
 
 tessera_t mosaic_open_tess(mosaic_t m, char *name, int open_flags)
@@ -80,21 +81,72 @@ int mosaic_drop_tess(tessera_t t, int drop_flags)
 int mosaic_mount_tess(tessera_t t, char *path, int mount_flags)
 {
 	struct mosaic *m = t->m;
+	char tdev[1024];
 
-	return m->m_ops->mount_tessera(m, t, path, mount_flags);
+	if (m->m_ops->mount_tessera)
+		return m->m_ops->mount_tessera(m, t, path, mount_flags);
+
+	if (!m->m_ops->attach_tessera)
+		return -1;
+
+	if (m->m_ops->attach_tessera(m, t, tdev, sizeof(tdev), 0) < 0)
+		return -1;
+
+	return mount(tdev, path, m->default_fs, mount_flags, NULL);
 }
 
 int mosaic_umount_tess(tessera_t t, char *path, int umount_flags)
 {
 	struct mosaic *m = t->m;
+	char *rpath, tdev[1024];
+	int ret;
 
 	if (umount_flags)
 		return -1;
 
 	if (m->m_ops->umount_tessera)
 		return m->m_ops->umount_tessera(m, t, path, umount_flags);
-	else
-		return umount(path);
+
+	if (!m->m_ops->detach_tessera)
+		return -1;
+
+	rpath = realpath(path, NULL);
+
+	if (scan_mounts(rpath, tdev)) {
+		free(rpath);
+		return -1;
+	}
+
+	ret = umount(rpath);
+	if (ret == 0)
+		ret = m->m_ops->detach_tessera(m, t, tdev);
+
+	free(rpath);
+
+	return ret;
+}
+
+int mosaic_get_tess_bdev(tessera_t t, char *devs, int len, int flags)
+{
+	struct mosaic *m = t->m;
+
+	if (flags)
+		return -1;
+
+	if (!m->m_ops->attach_tessera)
+		return -1;
+
+	return m->m_ops->attach_tessera(m, t, devs, len, flags);
+}
+
+int mosaic_put_tess_bdev(tessera_t t, char *devs)
+{
+	struct mosaic *m = t->m;
+
+	if (!m->m_ops->detach_tessera)
+		return -1;
+
+	return m->m_ops->detach_tessera(m, t, devs);
 }
 
 int mosaic_resize_tess(tessera_t t, unsigned long new_size_in_blocks, int resize_flags)

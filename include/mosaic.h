@@ -14,6 +14,8 @@ struct mosaic_ops {
 	int (*drop_tessera)(struct mosaic *, struct tessera *, int drop_flags);
 	int (*mount_tessera)(struct mosaic *, struct tessera *, char *path, int mount_flags);
 	int (*umount_tessera)(struct mosaic *, struct tessera *, char *path, int umount_flags);
+	int (*attach_tessera)(struct mosaic *, struct tessera *, char *devs, int len, int flags);
+	int (*detach_tessera)(struct mosaic *, struct tessera *, char *devs);
 	int (*resize_tessera)(struct mosaic *, struct tessera *, unsigned long size_in_blocks, int resize_flags);
 };
 

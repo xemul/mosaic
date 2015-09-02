@@ -97,8 +97,8 @@ static int drop_fsimg_tess(struct mosaic *m, struct tessera *t,
 	return unlinkat(fp->locfd, t->t_name, 0);
 }
 
-static int mount_fsimg_tess(struct mosaic *m, struct tessera *t,
-		char *path, int mount_flags)
+static int attach_fsimg_tess(struct mosaic *m, struct tessera *t,
+		char *devs, int len, int flags)
 {
 	struct fsimg_priv *fp = m->priv;
 	char aux[1024], *nl;
@@ -119,39 +119,16 @@ static int mount_fsimg_tess(struct mosaic *m, struct tessera *t,
 	if (nl)
 		*nl = '\0';
 
-	return mount(aux, path, m->default_fs, mount_flags, NULL);
+	strcpy(devs, aux);
+	return strlen(devs);
 }
 
-static int umount_fsimg_tess(struct mosaic *m, struct tessera *t,
-		char *path, int umount_flags)
+static int detach_fsimg_tess(struct mosaic *m, struct tessera *t, char *devs)
 {
-	char aux[1024], aux2[1024], *e;
-	FILE *lsp;
+	char aux[1024];
 
-	/*
-	 * FIXME -- manual losetup on the same file screws things up :(
-	 * FIXME -- do it by hands
-	 */
-
-	sprintf(aux, "losetup -j %s/%s", m->m_loc, t->t_name);
-	lsp = popen(aux, "r");
-	if (!lsp)
-		return -1;
-
-	fgets(aux, sizeof(aux), lsp);
-	pclose(lsp);
-
-	e = strchr(aux, ':');
-	if (!e)
-		return -1;
-
-	*e = '\0';
-
-	if (umount(path))
-		return -1;
-
-	sprintf(aux2, "losetup -d %s\n", aux);
-	if (system(aux2))
+	sprintf(aux, "losetup -d %s\n", devs);
+	if (system(aux))
 		return -1;
 
 	return 0;
@@ -172,7 +149,7 @@ const struct mosaic_ops mosaic_fsimg = {
 	.new_tessera = new_fsimg_tess,
 	.clone_tessera = NULL, /* regular loops can't do it */
 	.drop_tessera = drop_fsimg_tess,
-	.mount_tessera = mount_fsimg_tess,
-	.umount_tessera = umount_fsimg_tess,
+	.attach_tessera = attach_fsimg_tess,
+	.detach_tessera = detach_fsimg_tess,
 	.resize_tessera = resize_fsimg_tess,
 };
