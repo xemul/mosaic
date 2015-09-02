@@ -8,7 +8,7 @@ struct mosaic_ops {
 	void (*release)(struct mosaic *self); /* optional */
 	int (*mount)(struct mosaic *self, const char *path, int mount_flags);
 
-	int (*new_tessera)(struct mosaic *, char *name, unsigned long size_in_blocks, char *fsname, int make_flags);
+	int (*new_tessera)(struct mosaic *, char *name, unsigned long size_in_blocks, int make_flags);
 	int (*open_tessera)(struct mosaic *, struct tessera *, int open_flags);
 	int (*clone_tessera)(struct mosaic *, struct tessera *from, char *name, int clone_flags); /* optional */
 	int (*drop_tessera)(struct mosaic *, struct tessera *, int drop_flags);
@@ -18,6 +18,8 @@ struct mosaic_ops {
 	int (*detach_tessera)(struct mosaic *, struct tessera *, char *devs);
 	int (*resize_tessera)(struct mosaic *, struct tessera *, unsigned long size_in_blocks, int resize_flags);
 };
+
+#define NEW_TESS_WITH_FS	0x1
 
 struct mosaic {
 	const struct mosaic_ops *m_ops;

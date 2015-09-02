@@ -54,12 +54,17 @@ static int open_fsimg_tess(struct mosaic *m, struct tessera *t,
 	return fstatat(fp->locfd, t->t_name, &b, 0);
 }
 
-static int new_fsimg_tess(struct mosaic *m,
-		char *name, unsigned long size_in_blocks, char *fsname, int make_flags)
+static int new_fsimg_tess(struct mosaic *m, char *name,
+		unsigned long size_in_blocks, int make_flags)
 {
 	struct fsimg_priv *fp = m->priv;
 	int imgf;
 	char mkfs_call[1024];
+
+	/*
+	 * FIXME -- add separate subdir for images and separate for
+	 * regular fs mount?
+	 */
 
 	imgf = openat(fp->locfd, name, O_WRONLY | O_CREAT | O_EXCL, 0600);
 	if (imgf < 0)
@@ -70,11 +75,11 @@ static int new_fsimg_tess(struct mosaic *m,
 		return -1;
 	}
 
-	if (fsname) {
+	if (make_flags & NEW_TESS_WITH_FS) {
 		/*
 		 * FIXME -- fork and exec mkfs
 		 */
-		sprintf(mkfs_call, "mkfs -t %s %s/%s", fsname, m->m_loc, name);
+		sprintf(mkfs_call, "mkfs -t %s %s/%s", m->default_fs, m->m_loc, name);
 		if (system(mkfs_call)) {
 			close(imgf);
 			return -1;

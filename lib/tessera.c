@@ -41,7 +41,7 @@ int mosaic_make_tess(mosaic_t m, char *name, unsigned long size_in_blocks, int m
 	if (make_flags)
 		return -1;
 
-	return m->m_ops->new_tessera(m, name, size_in_blocks, NULL, make_flags);
+	return m->m_ops->new_tessera(m, name, size_in_blocks, make_flags);
 }
 
 int mosaic_make_tess_fs(mosaic_t m, char *name, unsigned long size_in_blocks, int make_flags)
@@ -49,7 +49,7 @@ int mosaic_make_tess_fs(mosaic_t m, char *name, unsigned long size_in_blocks, in
 	if (make_flags)
 		return -1;
 
-	return m->m_ops->new_tessera(m, name, size_in_blocks, m->default_fs, make_flags);
+	return m->m_ops->new_tessera(m, name, size_in_blocks, make_flags | NEW_TESS_WITH_FS);
 }
 
 int mosaic_clone_tess(tessera_t from, char *name, int clone_flags)
