@@ -115,12 +115,39 @@ static int do_mosaic_new_tess(mosaic_t m, int argc, char **argv)
 	return ret ? 1 : 0;
 }
 
+static int do_mosaic_clone_tess(mosaic_t m, int argc, char **argv)
+{
+	int ret;
+	tessera_t old;
+
+	if (argc < 2) {
+		printf("Usage: moctl <name> clone <old> <new>\n");
+		return 1;
+	}
+
+	old = mosaic_open_tess(m, argv[0], 0);
+	if (!old) {
+		printf("No tessera %s\n", argv[0]);
+		return 1;
+	}
+
+	ret = mosaic_clone_tess(old, argv[1], 0);
+	mosaic_close_tess(old);
+
+	if (ret < 0) {
+		printf("Can't clone %s\n", argv[0]);
+		return 1;
+	}
+
+	return 0;
+}
+
 static int do_mosaic(char *name, int argc, char **argv)
 {
 	mosaic_t mos;
 
 	if (argc < 1) {
-		printf("Usage: moctl <name> [mount|new] ...\n");
+		printf("Usage: moctl <name> [mount|new|clone] ...\n");
 		return 1;
 	}
 
@@ -134,6 +161,8 @@ static int do_mosaic(char *name, int argc, char **argv)
 		return do_mosaic_mount(mos, argc - 1, argv + 1);
 	if (argis(argv[0], "new"))
 		return do_mosaic_new_tess(mos, argc - 1, argv + 1);
+	if (argis(argv[0], "clone"))
+		return do_mosaic_clone_tess(mos, argc - 1, argv + 1);
 
 	return 1;
 }
@@ -141,7 +170,7 @@ static int do_mosaic(char *name, int argc, char **argv)
 int main(int argc, char **argv)
 {
 	if (argc < 2) {
-		printf("Usage: moctl <name> ...\n");
+		printf("Usage: moctl <mosaic_name> <action> [<arguments>]\n");
 		return 1;
 	}
 
