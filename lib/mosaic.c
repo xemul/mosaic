@@ -10,6 +10,8 @@ const struct mosaic_ops *mosaic_find_ops(char *type)
 {
 	if (!strcmp(type, "fsimg"))
 		return &mosaic_fsimg;
+	if (!strcmp(type, "btrfs"))
+		return &mosaic_btrfs;
 
 	return NULL;
 }

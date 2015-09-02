@@ -31,6 +31,7 @@ const struct mosaic_ops *mosaic_find_ops(char *type);
 int mosaic_parse_config(const char *cfg, struct mosaic *);
 
 extern const struct mosaic_ops mosaic_fsimg;
+extern const struct mosaic_ops mosaic_btrfs;
 
 #define MOSAIC_BLOCK_SHIFT	9
 #endif
