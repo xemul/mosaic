@@ -49,11 +49,3 @@ int mosaic_mount(mosaic_t m, char *path, int mount_flags)
 {
 	return m->m_ops->mount(m, path, mount_flags);
 }
-
-void mosaic_set_tessera_fs(mosaic_t m, char *fsname)
-{
-	if (m->default_fs)
-		free(m->default_fs);
-
-	m->default_fs = strdup(fsname);
-}

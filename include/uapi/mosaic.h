@@ -10,7 +10,6 @@ mosaic_t mosaic_open(const char *cfg, int open_flags);
 void mosaic_close(mosaic_t m);
 
 int mosaic_mount(mosaic_t m, char *path, int mount_flags);
-void mosaic_set_tessera_fs(mosaic_t m, char *fsname);
 
 /*
  * Tessera management
