@@ -107,21 +107,22 @@ int mosaic_umount_tess(tessera_t t, char *path, int umount_flags)
 	if (m->m_ops->umount_tessera)
 		return m->m_ops->umount_tessera(m, t, path, umount_flags);
 
-	if (!m->m_ops->detach_tessera)
-		return -1;
-
-	rpath = realpath(path, NULL);
-
-	if (scan_mounts(rpath, tdev)) {
-		free(rpath);
-		return -1;
-	}
+	if (m->m_ops->detach_tessera) {
+		rpath = realpath(path, NULL);
+		if (scan_mounts(rpath, tdev)) {
+			free(rpath);
+			return -1;
+		}
+	} else
+		rpath = path;
 
 	ret = umount(rpath);
-	if (ret == 0)
-		ret = m->m_ops->detach_tessera(m, t, tdev);
 
-	free(rpath);
+	if (rpath != path) {
+		if (ret == 0)
+			ret = m->m_ops->detach_tessera(m, t, tdev);
+		free(rpath);
+	}
 
 	return ret;
 }

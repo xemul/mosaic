@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/mount.h>
 
 #include "mosaic.h"
 #include "log.h"
@@ -51,3 +52,9 @@ int mosaic_mount(mosaic_t m, char *path, int mount_flags)
 {
 	return m->m_ops->mount(m, path, mount_flags);
 }
+
+int bind_mosaic_loc(struct mosaic *m, const char *path, int mount_flags)
+{
+	return mount(m->m_loc, path, NULL, MS_BIND | mount_flags, NULL);
+}
+

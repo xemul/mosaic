@@ -39,11 +39,6 @@ static void release_fsimg(struct mosaic *m)
 	free(fp);
 }
 
-static int mount_fsimg(struct mosaic *m, const char *path, int mount_flags)
-{
-	return mount(m->m_loc, path, NULL, MS_BIND | mount_flags, NULL);
-}
-
 
 static int open_fsimg_tess(struct mosaic *m, struct tessera *t,
 		int open_flags)
@@ -149,7 +144,7 @@ static int resize_fsimg_tess(struct mosaic *m, struct tessera *t,
 const struct mosaic_ops mosaic_fsimg = {
 	.open = open_fsimg,
 	.release = release_fsimg,
-	.mount = mount_fsimg,
+	.mount = bind_mosaic_loc, /* FIXME: location can be device */
 
 	.open_tessera = open_fsimg_tess,
 	.new_tessera = new_fsimg_tess,

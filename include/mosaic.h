@@ -13,7 +13,7 @@ struct mosaic_ops {
 	int (*clone_tessera)(struct mosaic *, struct tessera *from, char *name, int clone_flags); /* optional */
 	int (*drop_tessera)(struct mosaic *, struct tessera *, int drop_flags);
 	int (*mount_tessera)(struct mosaic *, struct tessera *, char *path, int mount_flags); /* optional if attach_tessera */
-	int (*umount_tessera)(struct mosaic *, struct tessera *, char *path, int umount_flags); /* optional if detach_tessera */
+	int (*umount_tessera)(struct mosaic *, struct tessera *, char *path, int umount_flags); /* optional (detach_tessera) */
 	int (*attach_tessera)(struct mosaic *, struct tessera *, char *devs, int len, int flags);
 	int (*detach_tessera)(struct mosaic *, struct tessera *, char *devs);
 	int (*resize_tessera)(struct mosaic *, struct tessera *, unsigned long size_in_blocks, int resize_flags);
@@ -31,6 +31,7 @@ struct mosaic {
 
 const struct mosaic_ops *mosaic_find_ops(char *type);
 int mosaic_parse_config(const char *cfg, struct mosaic *);
+int bind_mosaic_loc(struct mosaic *m, const char *path, int mount_flags);
 
 extern const struct mosaic_ops mosaic_fsimg;
 extern const struct mosaic_ops mosaic_btrfs;
