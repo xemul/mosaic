@@ -4,6 +4,7 @@ OBJS += mosaic.o
 OBJS += tessera.o
 OBJS += fsimg.o
 OBJS += btrfs.o
+OBJS += plain.o
 OBJS += config.o
 OBJS += yaml.o
 OBJS += log.o

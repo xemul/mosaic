@@ -54,6 +54,7 @@ int bind_mosaic_loc(struct mosaic *m, const char *path, int mount_flags);
 
 extern const struct mosaic_ops mosaic_fsimg;
 extern const struct mosaic_ops mosaic_btrfs;
+extern const struct mosaic_ops mosaic_plain;
 
 #define MOSAIC_BLOCK_SHIFT	9
 #endif

@@ -13,6 +13,8 @@ const struct mosaic_ops *mosaic_find_ops(char *type)
 		return &mosaic_fsimg;
 	if (!strcmp(type, "btrfs"))
 		return &mosaic_btrfs;
+	if (!strcmp(type, "plain"))
+		return &mosaic_plain;
 
 	return NULL;
 }
@@ -25,6 +27,7 @@ mosaic_t mosaic_open(const char *cfg, int open_flags)
 		return NULL;
 
 	m = malloc(sizeof(*m));
+	memset(m, 0, sizeof(*m));
 
 	if (mosaic_parse_config(cfg, m)) {
 		free(m);

@@ -138,6 +138,7 @@ static int detach_fsimg_tess(struct mosaic *m, struct tessera *t, char *devs)
 static int resize_fsimg_tess(struct mosaic *m, struct tessera *t,
 		unsigned long size_in_blocks, int resize_flags)
 {
+	/* FIXME */
 	return -1;
 }
 

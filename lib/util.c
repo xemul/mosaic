@@ -1,3 +1,7 @@
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <dirent.h>
 #include <stdio.h>
 #include <string.h>
 #include "util.h"
@@ -34,14 +38,53 @@ int scan_mounts(char *mpath, char *device)
 	return -1;
 }
 
+int remove_rec(int dir_fd)
+{
+	DIR *d;
+	struct dirent *de;
+
+	d = fdopendir(dir_fd);
+	while ((de = readdir(d)) != NULL) {
+		int flg = 0;
+
+		if (!strcmp(de->d_name, ".") || !strcmp(de->d_name, ".."))
+			continue;
+
+		if (de->d_type == DT_DIR) {
+			int sub_fd;
+
+			/* FIXME -- limit of descriptors may not be enough */
+			sub_fd = openat(dir_fd, de->d_name, O_DIRECTORY);
+			if (sub_fd < 0)
+				goto err;
+
+			if (remove_rec(sub_fd) < 0)
+				goto err;
+
+			flg = AT_REMOVEDIR;
+		}
+
+		if (unlinkat(dir_fd, de->d_name, flg))
+			goto err;
+	};
+
+	closedir(d);
+	return 0;
+
+err:
+	closedir(d);
+	return -1;
+}
+
 #ifdef DOTEST
 int main(int argc, char **argv)
 {
-	char tdev[1024];
+	int fd;
 
-	if (!scan_mounts(argv[1], tdev))
-		printf("Resolved [%s] into [%s]\n", argv[1], tdev);
+	fd = open(argv[1], O_DIRECTORY);
+	if (fd < 0)
+		return -1;
 
-	return 0;
+	return remove_rec(fd);
 }
 #endif
