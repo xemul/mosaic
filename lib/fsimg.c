@@ -74,7 +74,7 @@ static int new_fsimg_tess(struct mosaic *m, char *name,
 		/*
 		 * FIXME -- fork and exec mkfs
 		 */
-		sprintf(mkfs_call, "mkfs -t %s %s/%s", m->default_fs, m->m_loc, name);
+		sprintf(mkfs_call, "mkfs -t %s -F %s/%s", m->default_fs, m->m_loc, name);
 		if (system(mkfs_call)) {
 			close(imgf);
 			return -1;
