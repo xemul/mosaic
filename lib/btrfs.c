@@ -45,7 +45,7 @@ static int clone_btrfs_subvol(struct mosaic *m, struct tessera *from,
 	/*
 	 * FIXME: locate tesserae subvolumes in subdirectories
 	 */
-	sprintf(aux, "btrfs subvolume create %s/%s %s/%s",
+	sprintf(aux, "btrfs subvolume snapshot %s/%s %s/%s",
 			m->m_loc, from->t_name, m->m_loc, name);
 	if (system(aux))
 		return -1;
