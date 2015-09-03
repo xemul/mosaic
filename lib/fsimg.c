@@ -8,51 +8,28 @@
 #include "mosaic.h"
 #include "tessera.h"
 
-struct fsimg_priv {
-	int locfd;
-};
-
 static int open_fsimg(struct mosaic *m, int flags)
 {
-	struct fsimg_priv *fp;
-
 	if (!m->default_fs)
 		m->default_fs = strdup("ext4");
 
-	fp = malloc(sizeof(*fp));
-	fp->locfd = open(m->m_loc, O_DIRECTORY);
-	if (fp->locfd < 0) {
-		free(fp);
-		return -1;
-	}
-
-	m->priv = fp;
-
-	return 0;
-}
-
-static void release_fsimg(struct mosaic *m)
-{
-	struct fsimg_priv *fp = m->priv;
-
-	close(fp->locfd);
-	free(fp);
+	return open_locfd(m);
 }
 
 
 static int open_fsimg_tess(struct mosaic *m, struct tessera *t,
 		int open_flags)
 {
-	struct fsimg_priv *fp = m->priv;
+	struct locfd_priv *fp = m->priv;
 	struct stat b;
 
-	return fstatat(fp->locfd, t->t_name, &b, 0);
+	return fstatat(fp->dir, t->t_name, &b, 0);
 }
 
 static int new_fsimg_tess(struct mosaic *m, char *name,
 		unsigned long size_in_blocks, int make_flags)
 {
-	struct fsimg_priv *fp = m->priv;
+	struct locfd_priv *fp = m->priv;
 	int imgf;
 	char mkfs_call[1024];
 
@@ -61,7 +38,7 @@ static int new_fsimg_tess(struct mosaic *m, char *name,
 	 * regular fs mount?
 	 */
 
-	imgf = openat(fp->locfd, name, O_WRONLY | O_CREAT | O_EXCL, 0600);
+	imgf = openat(fp->dir, name, O_WRONLY | O_CREAT | O_EXCL, 0600);
 	if (imgf < 0)
 		return -1;
 
@@ -88,19 +65,19 @@ static int new_fsimg_tess(struct mosaic *m, char *name,
 static int drop_fsimg_tess(struct mosaic *m, struct tessera *t,
 		int drop_flags)
 {
-	struct fsimg_priv *fp = m->priv;
+	struct locfd_priv *fp = m->priv;
 
 	/*
 	 * FIXME -- what if mounted?
 	 */
 
-	return unlinkat(fp->locfd, t->t_name, 0);
+	return unlinkat(fp->dir, t->t_name, 0);
 }
 
 static int attach_fsimg_tess(struct mosaic *m, struct tessera *t,
 		char *devs, int len, int flags)
 {
-	struct fsimg_priv *fp = m->priv;
+	struct locfd_priv *fp = m->priv;
 	char aux[1024], *nl;
 	FILE *lsp;
 
@@ -108,7 +85,7 @@ static int attach_fsimg_tess(struct mosaic *m, struct tessera *t,
 	 * FIXME: call losetup by hands?
 	 * FIXME: multiple calls should report the same device?
 	 */
-	sprintf(aux, "losetup --find --show /proc/self/fd/%d/%s", fp->locfd, t->t_name);
+	sprintf(aux, "losetup --find --show /proc/self/fd/%d/%s", fp->dir, t->t_name);
 	lsp = popen(aux, "r");
 	if (!lsp)
 		return -1;
@@ -144,7 +121,7 @@ static int resize_fsimg_tess(struct mosaic *m, struct tessera *t,
 
 const struct mosaic_ops mosaic_fsimg = {
 	.open = open_fsimg,
-	.release = release_fsimg,
+	.release = release_locfd,
 	.mount = bind_mosaic_loc, /* FIXME: location can be device */
 
 	.open_tessera = open_fsimg_tess,

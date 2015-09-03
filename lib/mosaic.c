@@ -1,3 +1,6 @@
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/types.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -61,3 +64,25 @@ int bind_mosaic_loc(struct mosaic *m, const char *path, int mount_flags)
 	return mount(m->m_loc, path, NULL, MS_BIND | mount_flags, NULL);
 }
 
+int open_locfd(struct mosaic *m)
+{
+	struct locfd_priv *p;
+
+	p = malloc(sizeof(*p));
+	p->dir = open(m->m_loc, O_DIRECTORY);
+	if (p->dir < 0) {
+		free(p);
+		return -1;
+	}
+
+	m->priv = p;
+	return 0;
+}
+
+void release_locfd(struct mosaic *m)
+{
+	struct locfd_priv *p = m->priv;
+
+	close(p->dir);
+	free(p);
+}
