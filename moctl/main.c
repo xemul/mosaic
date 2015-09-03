@@ -31,24 +31,21 @@ static int do_mosaic_mount(mosaic_t m, int argc, char **argv)
 	tessera_t t = NULL;
 	int flags;
 
-	if (argc < 2) {
-		printf("Usage: moctl <name> mount [<tessera>] <path> <flags>\n");
+	if (argc < 3) {
+		printf("Usage: moctl <name> mount <tessera>|- <path> <flags>\n");
 		return 1;
 	}
 
-	if (argc >= 3) {
+	if (strcmp(argv[0], "-")) {
 		t = mosaic_open_tess(m, argv[0], 0);
 		if (!t) {
 			perror("Can't open tessera");
 			return 1;
 		}
-
-		argc--;
-		argv++;
 	}
 
-	path = argv[0];
-	flags = parse_mount_flags(argv[1]);
+	path = argv[1];
+	flags = parse_mount_flags(argv[2]);
 
 	if (t) {
 		if (mosaic_mount_tess(t, path, flags)) {
@@ -70,23 +67,20 @@ static int do_mosaic_umount(mosaic_t m, int argc, char **argv)
 	char *path;
 	tessera_t t = NULL;
 
-	if (argc < 1) {
-		printf("Usage: moctl <name> umount [<tessera>] <path>\n");
+	if (argc < 2) {
+		printf("Usage: moctl <name> umount <tessera>|- <path>\n");
 		return 1;
 	}
 
-	if (argc >= 2) {
+	if (strcmp(argv[0], "-")) {
 		t = mosaic_open_tess(m, argv[0], 0);
 		if (!t) {
 			perror("Can't open tessera");
 			return 1;
 		}
-
-		argc--;
-		argv++;
 	}
 
-	path = argv[0];
+	path = argv[1];
 
 	if (t) {
 		if (mosaic_umount_tess(t, path, 0)) {
@@ -181,6 +175,30 @@ static int do_mosaic_clone_tess(mosaic_t m, int argc, char **argv)
 	return 0;
 }
 
+static int do_mosaic_drop_tess(mosaic_t m, int argc, char **argv)
+{
+	tessera_t t;
+
+	if (argc < 1) {
+		printf("Usage: moctl <mosaic> drop <tessera>\n");
+		return 1;
+	}
+
+	t = mosaic_open_tess(m, argv[0], 0);
+	if (!t) {
+		printf("No tessera %s\n", argv[0]);
+		return 1;
+	}
+
+	if (mosaic_drop_tess(t, 0) < 0) {
+		printf("Can't drop %s\n", argv[0]);
+		mosaic_close_tess(t);
+		return 1;
+	}
+
+	return 0;
+}
+
 static int do_mosaic(char *name, int argc, char **argv)
 {
 	mosaic_t mos;
@@ -204,6 +222,8 @@ static int do_mosaic(char *name, int argc, char **argv)
 		return do_mosaic_new_tess(mos, argc - 1, argv + 1);
 	if (argis(argv[0], "clone"))
 		return do_mosaic_clone_tess(mos, argc - 1, argv + 1);
+	if (argis(argv[0], "drop"))
+		return do_mosaic_drop_tess(mos, argc - 1, argv + 1);
 
 	return 1;
 }
