@@ -7,6 +7,7 @@
 #include <sys/mount.h>
 
 #include "mosaic.h"
+#include "tessera.h"
 #include "log.h"
 #include "uapi/mosaic.h"
 
@@ -62,6 +63,15 @@ int mosaic_mount(mosaic_t m, char *path, int mount_flags)
 int bind_mosaic_loc(struct mosaic *m, const char *path, int mount_flags)
 {
 	return mount(m->m_loc, path, NULL, MS_BIND | mount_flags, NULL);
+}
+
+int bind_tess_loc(struct mosaic *m, struct tessera *t,
+		const char *path, int mount_flags)
+{
+	char aux[1024];
+
+	sprintf(aux, "%s/%s", m->m_loc, t->t_name);
+	return mount(aux, path, NULL, MS_BIND | mount_flags, NULL);
 }
 
 int open_locfd(struct mosaic *m)

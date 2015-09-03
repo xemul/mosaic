@@ -71,15 +71,6 @@ static int drop_btrfs_subvol(struct mosaic *m, struct tessera *t,
 	return 0;
 }
 
-static int mount_btrfs_subvol(struct mosaic *m, struct tessera *t,
-		char *path, int mount_flags)
-{
-	char aux[1024];
-
-	sprintf(aux, "%s/%s", m->m_loc, t->t_name);
-	return mount(aux, path, NULL, MS_BIND | mount_flags, NULL);
-}
-
 static int resize_btrfs_subvol(struct mosaic *m, struct tessera *t,
 		unsigned long size_in_blocks, int resize_flags)
 {
@@ -94,6 +85,6 @@ const struct mosaic_ops mosaic_btrfs = {
 	.open_tessera = open_btrfs_subvol,
 	.clone_tessera = clone_btrfs_subvol,
 	.drop_tessera = drop_btrfs_subvol,
-	.mount_tessera = mount_btrfs_subvol,
+	.mount_tessera = bind_tess_loc,
 	.resize_tessera = resize_btrfs_subvol,
 };

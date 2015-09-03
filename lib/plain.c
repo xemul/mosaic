@@ -61,15 +61,6 @@ static int resize_plain_tess(struct mosaic *m, struct tessera *t,
 	return -1;
 }
 
-static int mount_plain_tess(struct mosaic *m, struct tessera *t,
-		char *path, int mount_flags)
-{
-	char aux[1024];
-
-	sprintf(aux, "%s/%s", m->m_loc, t->t_name);
-	return mount(aux, path, NULL, MS_BIND | mount_flags, NULL);
-}
-
 const struct mosaic_ops mosaic_plain = {
 	.open = open_plain,
 	.release = release_locfd,
@@ -79,5 +70,5 @@ const struct mosaic_ops mosaic_plain = {
 	.open_tessera = open_plain_tess,
 	.drop_tessera = drop_plain_tess,
 	.resize_tessera = resize_plain_tess,
-	.mount_tessera = mount_plain_tess,
+	.mount_tessera = bind_tess_loc,
 };

@@ -23,7 +23,7 @@ struct mosaic_ops {
 	 * implement the attach_tessera callback and library will
 	 * mount this device with default fs.
 	 */
-	int (*mount_tessera)(struct mosaic *, struct tessera *, char *path, int mount_flags);
+	int (*mount_tessera)(struct mosaic *, struct tessera *, const char *path, int mount_flags);
 	/*
 	 * Umount can be optional, in this case library will just call
 	 * umount() and detach_tessera (if present).
@@ -58,6 +58,7 @@ void release_locfd(struct mosaic *m);
 const struct mosaic_ops *mosaic_find_ops(char *type);
 int mosaic_parse_config(const char *cfg, struct mosaic *);
 int bind_mosaic_loc(struct mosaic *m, const char *path, int mount_flags);
+int bind_tess_loc(struct mosaic *m, struct tessera *t, const char *path, int mount_flags);
 
 extern const struct mosaic_ops mosaic_fsimg;
 extern const struct mosaic_ops mosaic_btrfs;
