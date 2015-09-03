@@ -42,6 +42,10 @@ static int new_plain_tess(struct mosaic *m, char *name,
 		unsigned long size_in_blocks, int new_flags)
 {
 	struct plain_priv *pp = m->priv;
+
+	if (!(new_flags & NEW_TESS_WITH_FS))
+		return -1;
+
 	/* FIXME -- size_in_blocks ignored */
 	return mkdirat(pp->locfd, name, 0600);
 }
@@ -59,8 +63,13 @@ static int drop_plain_tess(struct mosaic *m, struct tessera *t,
 		int drop_flags)
 {
 	struct plain_priv *pp = m->priv;
+	int fd;
 
-	if (remove_rec(dup(pp->locfd)))
+	fd = openat(pp->locfd, t->t_name, O_DIRECTORY);
+	if (fd < 0)
+		return -1;
+
+	if (remove_rec(fd))
 		return -1;
 
 	return unlinkat(pp->locfd, t->t_name, AT_REMOVEDIR);

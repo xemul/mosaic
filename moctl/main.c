@@ -204,7 +204,7 @@ static int do_mosaic(char *name, int argc, char **argv)
 	mosaic_t mos;
 
 	if (argc < 1) {
-		printf("Usage: moctl <name> [mount|new|clone] ...\n");
+		printf("Usage: moctl <name> [mount|new|clone|drop] ...\n");
 		return 1;
 	}
 

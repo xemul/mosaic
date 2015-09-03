@@ -20,6 +20,9 @@ static int new_btrfs_subvol(struct mosaic *m, char *name,
 {
 	char aux[1024];
 
+	if (!(make_flags & NEW_TESS_WITH_FS))
+		return -1;
+
 	/*
 	 * FIXME: locate tesserae subvolumes in subdirectories
 	 * FIXME: what to do with "size_in_blocks"? Tree quota?
