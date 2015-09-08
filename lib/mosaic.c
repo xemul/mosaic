@@ -52,6 +52,8 @@ void mosaic_close(mosaic_t m)
 		m->m_ops->release(m);
 	if (m->default_fs)
 		free(m->default_fs);
+	if (m->layout)
+		free(m->layout);
 	free(m);
 }
 
@@ -74,9 +76,9 @@ int bind_tess_loc(struct mosaic *m, struct tessera *t,
 	return mount(aux, path, NULL, MS_BIND | mount_flags, NULL);
 }
 
-int open_locfd(struct mosaic *m)
+int open_mosaic_subdir(struct mosaic *m)
 {
-	struct locfd_priv *p;
+	struct mosaic_subdir_priv *p;
 
 	p = malloc(sizeof(*p));
 	p->dir = open(m->m_loc, O_DIRECTORY);
@@ -89,9 +91,9 @@ int open_locfd(struct mosaic *m)
 	return 0;
 }
 
-void release_locfd(struct mosaic *m)
+void release_mosaic_subdir(struct mosaic *m)
 {
-	struct locfd_priv *p = m->priv;
+	struct mosaic_subdir_priv *p = m->priv;
 
 	close(p->dir);
 	free(p);

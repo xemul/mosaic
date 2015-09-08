@@ -13,14 +13,14 @@ static int open_fsimg(struct mosaic *m, int flags)
 	if (!m->default_fs)
 		m->default_fs = strdup("ext4");
 
-	return open_locfd(m);
+	return open_mosaic_subdir(m);
 }
 
 
 static int open_fsimg_tess(struct mosaic *m, struct tessera *t,
 		int open_flags)
 {
-	struct locfd_priv *fp = m->priv;
+	struct mosaic_subdir_priv *fp = m->priv;
 	struct stat b;
 
 	return fstatat(fp->dir, t->t_name, &b, 0);
@@ -29,7 +29,7 @@ static int open_fsimg_tess(struct mosaic *m, struct tessera *t,
 static int new_fsimg_tess(struct mosaic *m, char *name,
 		unsigned long size_in_blocks, int make_flags)
 {
-	struct locfd_priv *fp = m->priv;
+	struct mosaic_subdir_priv *fp = m->priv;
 	int imgf;
 	char mkfs_call[1024];
 
@@ -65,7 +65,7 @@ static int new_fsimg_tess(struct mosaic *m, char *name,
 static int drop_fsimg_tess(struct mosaic *m, struct tessera *t,
 		int drop_flags)
 {
-	struct locfd_priv *fp = m->priv;
+	struct mosaic_subdir_priv *fp = m->priv;
 
 	/*
 	 * FIXME -- what if mounted?
@@ -77,7 +77,7 @@ static int drop_fsimg_tess(struct mosaic *m, struct tessera *t,
 static int attach_fsimg_tess(struct mosaic *m, struct tessera *t,
 		char *devs, int len, int flags)
 {
-	struct locfd_priv *fp = m->priv;
+	struct mosaic_subdir_priv *fp = m->priv;
 	char aux[1024], *nl;
 	FILE *lsp;
 
@@ -121,7 +121,7 @@ static int resize_fsimg_tess(struct mosaic *m, struct tessera *t,
 
 static int get_fsimg_size(struct mosaic *m, struct tessera *t, unsigned long *size_in_blocks)
 {
-	struct locfd_priv *fp = m->priv;
+	struct mosaic_subdir_priv *fp = m->priv;
 	struct stat buf;
 
 	if (fstatat(fp->dir, t->t_name, &buf, 0))
@@ -133,7 +133,7 @@ static int get_fsimg_size(struct mosaic *m, struct tessera *t, unsigned long *si
 
 const struct mosaic_ops mosaic_fsimg = {
 	.open = open_fsimg,
-	.release = release_locfd,
+	.release = release_mosaic_subdir,
 	.mount = bind_mosaic_loc, /* FIXME: location can be device */
 
 	.open_tessera = open_fsimg_tess,

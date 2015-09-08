@@ -46,16 +46,17 @@ struct mosaic {
 	const struct mosaic_ops *m_ops;
 	char *m_loc;
 	char *default_fs;
+	char *layout;
 
 	void *priv;
 };
 
-struct locfd_priv {
+struct mosaic_subdir_priv {
 	int dir;
 };
 
-int open_locfd(struct mosaic *m);
-void release_locfd(struct mosaic *m);
+int open_mosaic_subdir(struct mosaic *m);
+void release_mosaic_subdir(struct mosaic *m);
 
 const struct mosaic_ops *mosaic_find_ops(char *type);
 int mosaic_parse_config(const char *cfg, struct mosaic *);

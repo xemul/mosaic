@@ -13,14 +13,14 @@ static int open_plain(struct mosaic *m, int open_flags)
 	if (m->default_fs)
 		return -1;
 
-	return open_locfd(m);
+	return open_mosaic_subdir(m);
 }
 
 
 static int new_plain_tess(struct mosaic *m, char *name,
 		unsigned long size_in_blocks, int new_flags)
 {
-	struct locfd_priv *pp = m->priv;
+	struct mosaic_subdir_priv *pp = m->priv;
 
 	if (!(new_flags & NEW_TESS_WITH_FS))
 		return -1;
@@ -32,7 +32,7 @@ static int new_plain_tess(struct mosaic *m, char *name,
 static int open_plain_tess(struct mosaic *m, struct tessera *t,
 		int open_flags)
 {
-	struct locfd_priv *pp = m->priv;
+	struct mosaic_subdir_priv *pp = m->priv;
 	struct stat b;
 
 	return fstatat(pp->dir, t->t_name, &b, 0);
@@ -41,7 +41,7 @@ static int open_plain_tess(struct mosaic *m, struct tessera *t,
 static int drop_plain_tess(struct mosaic *m, struct tessera *t,
 		int drop_flags)
 {
-	struct locfd_priv *pp = m->priv;
+	struct mosaic_subdir_priv *pp = m->priv;
 	int fd;
 
 	fd = openat(pp->dir, t->t_name, O_DIRECTORY);
@@ -64,7 +64,7 @@ static int resize_plain_tess(struct mosaic *m, struct tessera *t,
 static int get_plain_size(struct mosaic *m, struct tessera *t,
 		unsigned long *size_in_blocks)
 {
-	struct locfd_priv *pp = m->priv;
+	struct mosaic_subdir_priv *pp = m->priv;
 	int fd, ret;
 
 	fd = openat(pp->dir, t->t_name, O_DIRECTORY);
@@ -81,7 +81,7 @@ static int get_plain_size(struct mosaic *m, struct tessera *t,
 
 const struct mosaic_ops mosaic_plain = {
 	.open = open_plain,
-	.release = release_locfd,
+	.release = release_mosaic_subdir,
 	.mount = bind_mosaic_loc,
 
 	.new_tessera = new_plain_tess,

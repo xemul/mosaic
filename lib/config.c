@@ -40,6 +40,15 @@ static int parse_top_val(yaml_parser_t *p, char *key, void *x)
 		return 0;
 	}
 
+	if (!strcmp(key, "layout")) {
+		val = yaml_parse_scalar(p);
+		if (!val)
+			return -1;
+
+		m->layout = val;
+		return 0;
+	}
+
 	return -1;
 }
 
