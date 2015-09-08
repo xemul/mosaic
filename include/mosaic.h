@@ -4,6 +4,9 @@ struct mosaic;
 struct tessera;
 
 struct mosaic_ops {
+	/****
+	 * Runtime callbacks
+	 */
 	int (*open)(struct mosaic *self, int open_flags);
 	void (*release)(struct mosaic *self); /* optional */
 	int (*mount)(struct mosaic *self, const char *path, int mount_flags);
@@ -38,6 +41,12 @@ struct mosaic_ops {
 	int (*detach_tessera)(struct mosaic *, struct tessera *, char *devs);
 
 	int (*get_tessera_size)(struct mosaic *, struct tessera *, unsigned long *size_in_blocks);
+
+	/***
+	 * Auxiliary ops
+	 */
+
+	int (*parse_layout)(struct mosaic *m, char *key, char *val);
 };
 
 #define NEW_TESS_WITH_FS	0x1

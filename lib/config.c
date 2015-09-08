@@ -3,6 +3,26 @@
 #include "yaml-util.h"
 #include "mosaic.h"
 
+static int parse_layout_val(yaml_parser_t *p, char *key, void *x)
+{
+	struct mosaic *m = x;
+	char *val;
+
+	if (!m->m_ops || !m->m_ops->parse_layout)
+		return -1;
+
+	val = yaml_parse_scalar(p);
+	if (!val)
+		return -1;
+
+	return m->m_ops->parse_layout(m, key, val);
+}
+
+static int parse_layout(yaml_parser_t *p, void *x)
+{
+	return yaml_parse_map_body(p, parse_layout_val, x);
+}
+
 static int parse_top_val(yaml_parser_t *p, char *key, void *x)
 {
 	char *val;
@@ -40,14 +60,9 @@ static int parse_top_val(yaml_parser_t *p, char *key, void *x)
 		return 0;
 	}
 
-	if (!strcmp(key, "layout")) {
-		val = yaml_parse_scalar(p);
-		if (!val)
-			return -1;
-
-		m->layout = val;
-		return 0;
-	}
+	if (!strcmp(key, "layout"))
+		return yaml_parse_block(p, YAML_MAPPING_START_EVENT,
+				YAML_MAPPING_END_EVENT, parse_layout, m);
 
 	return -1;
 }
