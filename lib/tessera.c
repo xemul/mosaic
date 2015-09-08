@@ -159,3 +159,13 @@ int mosaic_resize_tess(tessera_t t, unsigned long new_size_in_blocks, int resize
 
 	return m->m_ops->resize_tessera(m, t, new_size_in_blocks, resize_flags);
 }
+
+int mosaic_get_tess_size(tessera_t t, unsigned long *size_in_blocks)
+{
+	struct mosaic *m = t->m;
+
+	if (!size_in_blocks)
+		return -1;
+
+	return m->m_ops->get_tessera_size(m, t, size_in_blocks);
+}

@@ -50,6 +50,8 @@ int mosaic_umount_tess(tessera_t t, char *path, int umount_flags);
 int mosaic_get_tess_bdev(tessera_t t, char *devs, int len, int flags);
 int mosaic_put_tess_bdev(tessera_t t, char *devs);
 
+int mosaic_get_tess_size(tessera_t t, unsigned long *size_in_blocks);
+
 /* Misc */
 typedef void (*mosaic_log_fn)(const char *f, ...)
 	            __attribute__ ((format(printf, 1, 2)));

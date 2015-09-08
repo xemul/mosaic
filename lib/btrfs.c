@@ -25,7 +25,7 @@ static int new_btrfs_subvol(struct mosaic *m, char *name,
 
 	/*
 	 * FIXME: locate tesserae subvolumes in subdirectories
-	 * FIXME: what to do with "size_in_blocks"? Tree quota?
+	 * FIXME: qgroups
 	 */
 	sprintf(aux, "btrfs subvolume create %s/%s", m->m_loc, name);
 	if (system(aux))
@@ -74,6 +74,14 @@ static int drop_btrfs_subvol(struct mosaic *m, struct tessera *t,
 static int resize_btrfs_subvol(struct mosaic *m, struct tessera *t,
 		unsigned long size_in_blocks, int resize_flags)
 {
+	/* FIXME: qgroups */
+	return -1;
+}
+
+static int get_btrfs_subvol_size(struct mosaic *m, struct tessera *t,
+		unsigned long *size_in_blocks)
+{
+	/* FIXME: qgroups */
 	return -1;
 }
 
@@ -87,4 +95,5 @@ const struct mosaic_ops mosaic_btrfs = {
 	.drop_tessera = drop_btrfs_subvol,
 	.mount_tessera = bind_tess_loc,
 	.resize_tessera = resize_btrfs_subvol,
+	.get_tessera_size = get_btrfs_subvol_size,
 };

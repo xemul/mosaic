@@ -119,6 +119,18 @@ static int resize_fsimg_tess(struct mosaic *m, struct tessera *t,
 	return -1;
 }
 
+static int get_fsimg_size(struct mosaic *m, struct tessera *t, unsigned long *size_in_blocks)
+{
+	struct locfd_priv *fp = m->priv;
+	struct stat buf;
+
+	if (fstatat(fp->dir, t->t_name, &buf, 0))
+		return -1;
+
+	*size_in_blocks = buf.st_size >> MOSAIC_BLOCK_SHIFT;
+	return 0;
+}
+
 const struct mosaic_ops mosaic_fsimg = {
 	.open = open_fsimg,
 	.release = release_locfd,
@@ -130,4 +142,5 @@ const struct mosaic_ops mosaic_fsimg = {
 	.attach_tessera = attach_fsimg_tess,
 	.detach_tessera = detach_fsimg_tess,
 	.resize_tessera = resize_fsimg_tess,
+	.get_tessera_size = get_fsimg_size,
 };

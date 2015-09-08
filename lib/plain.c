@@ -61,6 +61,24 @@ static int resize_plain_tess(struct mosaic *m, struct tessera *t,
 	return -1;
 }
 
+static int get_plain_size(struct mosaic *m, struct tessera *t,
+		unsigned long *size_in_blocks)
+{
+	struct locfd_priv *pp = m->priv;
+	int fd, ret;
+
+	fd = openat(pp->dir, t->t_name, O_DIRECTORY);
+	if (fd < 0)
+		return -1;
+
+	 ret = get_subdir_size(fd, size_in_blocks);
+	 close(fd);
+
+	 *size_in_blocks >>= MOSAIC_BLOCK_SHIFT;
+
+	 return ret;
+}
+
 const struct mosaic_ops mosaic_plain = {
 	.open = open_plain,
 	.release = release_locfd,
@@ -71,4 +89,5 @@ const struct mosaic_ops mosaic_plain = {
 	.drop_tessera = drop_plain_tess,
 	.resize_tessera = resize_plain_tess,
 	.mount_tessera = bind_tess_loc,
+	.get_tessera_size = get_plain_size,
 };

@@ -36,6 +36,8 @@ struct mosaic_ops {
 	 */
 	int (*attach_tessera)(struct mosaic *, struct tessera *, char *devs, int len, int flags);
 	int (*detach_tessera)(struct mosaic *, struct tessera *, char *devs);
+
+	int (*get_tessera_size)(struct mosaic *, struct tessera *, unsigned long *size_in_blocks);
 };
 
 #define NEW_TESS_WITH_FS	0x1

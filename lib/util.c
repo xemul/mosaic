@@ -76,6 +76,12 @@ err:
 	return -1;
 }
 
+int get_subdir_size(int fd, unsigned long *sizep)
+{
+	/* FIXME: implement */
+	return -1;
+}
+
 #ifdef DOTEST
 int main(int argc, char **argv)
 {
