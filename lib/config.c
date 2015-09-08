@@ -39,6 +39,9 @@ static int parse_top_val(yaml_parser_t *p, char *key, void *x)
 		if (!m->m_ops)
 			return -1;
 
+		if (m->m_ops->init(m))
+			return -1;
+
 		return 0;
 	}
 

@@ -33,27 +33,29 @@ mosaic_t mosaic_open(const char *cfg, int open_flags)
 	m = malloc(sizeof(*m));
 	memset(m, 0, sizeof(*m));
 
-	if (mosaic_parse_config(cfg, m)) {
-		free(m);
-		return NULL;
-	}
+	if (mosaic_parse_config(cfg, m))
+		goto err;
 
-	if (m->m_ops->open(m, open_flags)) {
-		free(m);
-		return NULL;
-	}
+	if (m->m_ops->open(m, open_flags))
+		goto err;
 
 	return m;
+
+err:
+	mosaic_close(m);
+	return NULL;
 }
 
 void mosaic_close(mosaic_t m)
 {
-	if (m->m_ops->release)
-		m->m_ops->release(m);
-	if (m->default_fs)
-		free(m->default_fs);
-	if (m->layout)
-		free(m->layout);
+	if (m->m_ops) {
+		if (m->m_ops->release)
+			m->m_ops->release(m);
+		if (m->default_fs)
+			free(m->default_fs);
+		if (m->layout)
+			free(m->layout);
+	}
 	free(m);
 }
 
@@ -76,25 +78,29 @@ int bind_tess_loc(struct mosaic *m, struct tessera *t,
 	return mount(aux, path, NULL, MS_BIND | mount_flags, NULL);
 }
 
-int open_mosaic_subdir(struct mosaic *m)
+int init_mosaic_subdir(struct mosaic *m)
 {
 	struct mosaic_subdir_priv *p;
 
 	p = malloc(sizeof(*p));
-	p->dir = open(m->m_loc, O_DIRECTORY);
-	if (p->dir < 0) {
-		free(p);
-		return -1;
-	}
-
+	p->dir = -1;
 	m->priv = p;
 	return 0;
+}
+
+int open_mosaic_subdir(struct mosaic *m)
+{
+	struct mosaic_subdir_priv *p = m->priv;
+
+	p->dir = open(m->m_loc, O_DIRECTORY);
+	return p->dir >= 0 ? 0 : -1;
 }
 
 void release_mosaic_subdir(struct mosaic *m)
 {
 	struct mosaic_subdir_priv *p = m->priv;
 
-	close(p->dir);
+	if (p->dir >= 0)
+		close(p->dir);
 	free(p);
 }

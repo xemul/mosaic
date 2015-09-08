@@ -7,8 +7,13 @@ struct mosaic_ops {
 	/****
 	 * Runtime callbacks
 	 */
-	int (*open)(struct mosaic *self, int open_flags);
+	int (*init)(struct mosaic *self);
 	void (*release)(struct mosaic *self); /* optional */
+
+	/*
+	 * Open is called after full config parse
+	 */
+	int (*open)(struct mosaic *self, int open_flags);
 	int (*mount)(struct mosaic *self, const char *path, int mount_flags);
 
 	int (*new_tessera)(struct mosaic *, char *name, unsigned long size_in_blocks, int make_flags);
@@ -64,6 +69,7 @@ struct mosaic_subdir_priv {
 	int dir;
 };
 
+int init_mosaic_subdir(struct mosaic *m);
 int open_mosaic_subdir(struct mosaic *m);
 void release_mosaic_subdir(struct mosaic *m);
 
