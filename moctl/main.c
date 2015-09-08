@@ -199,6 +199,11 @@ static int do_mosaic_drop_tess(mosaic_t m, int argc, char **argv)
 	return 0;
 }
 
+static int do_mosaic_init(char *name, int argc, char **argv)
+{
+	return -1;
+}
+
 static int do_mosaic(char *name, int argc, char **argv)
 {
 	mosaic_t mos;
@@ -207,6 +212,9 @@ static int do_mosaic(char *name, int argc, char **argv)
 		printf("Usage: moctl <name> [mount|new|clone|drop] ...\n");
 		return 1;
 	}
+
+	if (argis(argv[0], "init"))
+		return do_mosaic_init(name, argc, argv);
 
 	mos = mosaic_open(name, 0);
 	if (!mos) {
