@@ -83,7 +83,7 @@ const struct mosaic_ops mosaic_plain = {
 	.init = init_mosaic_subdir,
 	.open = open_plain,
 	.release = release_mosaic_subdir,
-	.mount = bind_mosaic_loc,
+	.mount = bind_mosaic_subdir_loc,
 
 	.new_tessera = new_plain_tess,
 	.open_tessera = open_plain_tess,
@@ -91,4 +91,6 @@ const struct mosaic_ops mosaic_plain = {
 	.resize_tessera = resize_plain_tess,
 	.mount_tessera = bind_tess_loc,
 	.get_tessera_size = get_plain_size,
+
+	.parse_layout = parse_mosaic_subdir_layout,
 };

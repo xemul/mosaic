@@ -64,9 +64,13 @@ int mosaic_mount(mosaic_t m, char *path, int mount_flags)
 	return m->m_ops->mount(m, path, mount_flags);
 }
 
-int bind_mosaic_loc(struct mosaic *m, const char *path, int mount_flags)
+int bind_mosaic_subdir_loc(struct mosaic *m, const char *path, int mount_flags)
 {
-	return mount(m->m_loc, path, NULL, MS_BIND | mount_flags, NULL);
+	struct mosaic_subdir_priv *p = m->priv;
+	char *src;
+
+	src = p->fs_subdir ? : m->m_loc;
+	return mount(src, path, NULL, MS_BIND | mount_flags, NULL);
 }
 
 int bind_tess_loc(struct mosaic *m, struct tessera *t,
@@ -84,8 +88,40 @@ int init_mosaic_subdir(struct mosaic *m)
 
 	p = malloc(sizeof(*p));
 	p->dir = -1;
+	p->fs_subdir = NULL;
+	p->tess_subdir = NULL;
 	m->priv = p;
 	return 0;
+}
+
+int parse_mosaic_subdir_layout(struct mosaic *m, char *key, char *val)
+{
+	struct mosaic_subdir_priv *p = m->priv;
+
+	if (!strcmp(key, "fs")) {
+		int len;
+
+		if (p->fs_subdir)
+			free(p->fs_subdir);
+
+		len = strlen(m->m_loc) + strlen(val) + 2;
+		p->fs_subdir = malloc(len);
+		sprintf(p->fs_subdir, "%s/%s", m->m_loc, val);
+		free(val);
+		return 0;
+	}
+
+	/* FIXME: implement */
+#if 0
+	if (!strcmp(key, "tess")) {
+		if (p->tess_subdir)
+			free(p->tess_subdir);
+		p->tess_subdir = val;
+		return 0;
+	}
+#endif
+
+	return -1;
 }
 
 int open_mosaic_subdir(struct mosaic *m)
@@ -102,5 +138,9 @@ void release_mosaic_subdir(struct mosaic *m)
 
 	if (p->dir >= 0)
 		close(p->dir);
+	if (p->fs_subdir)
+		free(p->fs_subdir);
+	if (p->tess_subdir)
+		free(p->tess_subdir);
 	free(p);
 }

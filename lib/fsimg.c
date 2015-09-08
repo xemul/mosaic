@@ -135,7 +135,7 @@ const struct mosaic_ops mosaic_fsimg = {
 	.init = init_mosaic_subdir,
 	.open = open_fsimg,
 	.release = release_mosaic_subdir,
-	.mount = bind_mosaic_loc, /* FIXME: location can be device */
+	.mount = bind_mosaic_subdir_loc, /* FIXME: location can be device */
 
 	.open_tessera = open_fsimg_tess,
 	.new_tessera = new_fsimg_tess,
@@ -144,4 +144,6 @@ const struct mosaic_ops mosaic_fsimg = {
 	.detach_tessera = detach_fsimg_tess,
 	.resize_tessera = resize_fsimg_tess,
 	.get_tessera_size = get_fsimg_size,
+
+	.parse_layout = parse_mosaic_subdir_layout,
 };

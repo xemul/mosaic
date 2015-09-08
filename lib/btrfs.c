@@ -93,7 +93,7 @@ static int get_btrfs_subvol_size(struct mosaic *m, struct tessera *t,
 const struct mosaic_ops mosaic_btrfs = {
 	.init = init_btrfs,
 	.open = open_btrfs,
-	.mount = bind_mosaic_loc,
+	.mount = bind_mosaic_subdir_loc,
 
 	.new_tessera = new_btrfs_subvol,
 	.open_tessera = open_btrfs_subvol,
@@ -102,4 +102,6 @@ const struct mosaic_ops mosaic_btrfs = {
 	.mount_tessera = bind_tess_loc,
 	.resize_tessera = resize_btrfs_subvol,
 	.get_tessera_size = get_btrfs_subvol_size,
+
+	.parse_layout = parse_mosaic_subdir_layout,
 };

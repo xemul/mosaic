@@ -67,15 +67,18 @@ struct mosaic {
 
 struct mosaic_subdir_priv {
 	int dir;
+	char *fs_subdir;
+	char *tess_subdir;
 };
 
 int init_mosaic_subdir(struct mosaic *m);
 int open_mosaic_subdir(struct mosaic *m);
 void release_mosaic_subdir(struct mosaic *m);
+int parse_mosaic_subdir_layout(struct mosaic *m, char *key, char *val);
+int bind_mosaic_subdir_loc(struct mosaic *m, const char *path, int mount_flags);
 
 const struct mosaic_ops *mosaic_find_ops(char *type);
 int mosaic_parse_config(const char *cfg, struct mosaic *);
-int bind_mosaic_loc(struct mosaic *m, const char *path, int mount_flags);
 int bind_tess_loc(struct mosaic *m, struct tessera *t, const char *path, int mount_flags);
 
 extern const struct mosaic_ops mosaic_fsimg;
