@@ -26,7 +26,7 @@ static int new_plain_tess(struct mosaic *m, char *name,
 		return -1;
 
 	/* FIXME -- size_in_blocks ignored */
-	return mkdirat(pp->dir, name, 0600);
+	return mkdirat(pp->m_loc_dir, name, 0600);
 }
 
 static int open_plain_tess(struct mosaic *m, struct tessera *t,
@@ -35,7 +35,7 @@ static int open_plain_tess(struct mosaic *m, struct tessera *t,
 	struct mosaic_subdir_priv *pp = m->priv;
 	struct stat b;
 
-	return fstatat(pp->dir, t->t_name, &b, 0);
+	return fstatat(pp->m_loc_dir, t->t_name, &b, 0);
 }
 
 static int drop_plain_tess(struct mosaic *m, struct tessera *t,
@@ -44,14 +44,14 @@ static int drop_plain_tess(struct mosaic *m, struct tessera *t,
 	struct mosaic_subdir_priv *pp = m->priv;
 	int fd;
 
-	fd = openat(pp->dir, t->t_name, O_DIRECTORY);
+	fd = openat(pp->m_loc_dir, t->t_name, O_DIRECTORY);
 	if (fd < 0)
 		return -1;
 
 	if (remove_rec(fd))
 		return -1;
 
-	return unlinkat(pp->dir, t->t_name, AT_REMOVEDIR);
+	return unlinkat(pp->m_loc_dir, t->t_name, AT_REMOVEDIR);
 }
 
 static int resize_plain_tess(struct mosaic *m, struct tessera *t,
@@ -67,7 +67,7 @@ static int get_plain_size(struct mosaic *m, struct tessera *t,
 	struct mosaic_subdir_priv *pp = m->priv;
 	int fd, ret;
 
-	fd = openat(pp->dir, t->t_name, O_DIRECTORY);
+	fd = openat(pp->m_loc_dir, t->t_name, O_DIRECTORY);
 	if (fd < 0)
 		return -1;
 

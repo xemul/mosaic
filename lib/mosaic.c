@@ -87,7 +87,7 @@ int init_mosaic_subdir(struct mosaic *m)
 	struct mosaic_subdir_priv *p;
 
 	p = malloc(sizeof(*p));
-	p->dir = -1;
+	p->m_loc_dir = -1;
 	p->fs_subdir = NULL;
 	p->tess_subdir = NULL;
 	m->priv = p;
@@ -128,16 +128,16 @@ int open_mosaic_subdir(struct mosaic *m)
 {
 	struct mosaic_subdir_priv *p = m->priv;
 
-	p->dir = open(m->m_loc, O_DIRECTORY);
-	return p->dir >= 0 ? 0 : -1;
+	p->m_loc_dir = open(m->m_loc, O_DIRECTORY);
+	return p->m_loc_dir >= 0 ? 0 : -1;
 }
 
 void release_mosaic_subdir(struct mosaic *m)
 {
 	struct mosaic_subdir_priv *p = m->priv;
 
-	if (p->dir >= 0)
-		close(p->dir);
+	if (p->m_loc_dir >= 0)
+		close(p->m_loc_dir);
 	if (p->fs_subdir)
 		free(p->fs_subdir);
 	if (p->tess_subdir)

@@ -23,7 +23,7 @@ static int open_fsimg_tess(struct mosaic *m, struct tessera *t,
 	struct mosaic_subdir_priv *fp = m->priv;
 	struct stat b;
 
-	return fstatat(fp->dir, t->t_name, &b, 0);
+	return fstatat(fp->m_loc_dir, t->t_name, &b, 0);
 }
 
 static int new_fsimg_tess(struct mosaic *m, char *name,
@@ -38,7 +38,7 @@ static int new_fsimg_tess(struct mosaic *m, char *name,
 	 * regular fs mount?
 	 */
 
-	imgf = openat(fp->dir, name, O_WRONLY | O_CREAT | O_EXCL, 0600);
+	imgf = openat(fp->m_loc_dir, name, O_WRONLY | O_CREAT | O_EXCL, 0600);
 	if (imgf < 0)
 		return -1;
 
@@ -71,7 +71,7 @@ static int drop_fsimg_tess(struct mosaic *m, struct tessera *t,
 	 * FIXME -- what if mounted?
 	 */
 
-	return unlinkat(fp->dir, t->t_name, 0);
+	return unlinkat(fp->m_loc_dir, t->t_name, 0);
 }
 
 static int attach_fsimg_tess(struct mosaic *m, struct tessera *t,
@@ -85,7 +85,7 @@ static int attach_fsimg_tess(struct mosaic *m, struct tessera *t,
 	 * FIXME: call losetup by hands?
 	 * FIXME: multiple calls should report the same device?
 	 */
-	sprintf(aux, "losetup --find --show /proc/self/fd/%d/%s", fp->dir, t->t_name);
+	sprintf(aux, "losetup --find --show /proc/self/fd/%d/%s", fp->m_loc_dir, t->t_name);
 	lsp = popen(aux, "r");
 	if (!lsp)
 		return -1;
@@ -124,7 +124,7 @@ static int get_fsimg_size(struct mosaic *m, struct tessera *t, unsigned long *si
 	struct mosaic_subdir_priv *fp = m->priv;
 	struct stat buf;
 
-	if (fstatat(fp->dir, t->t_name, &buf, 0))
+	if (fstatat(fp->m_loc_dir, t->t_name, &buf, 0))
 		return -1;
 
 	*size_in_blocks = buf.st_size >> MOSAIC_BLOCK_SHIFT;

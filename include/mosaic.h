@@ -66,7 +66,7 @@ struct mosaic {
 };
 
 struct mosaic_subdir_priv {
-	int dir;
+	int m_loc_dir;
 	char *fs_subdir;
 	char *tess_subdir;
 };
