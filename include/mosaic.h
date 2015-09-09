@@ -4,6 +4,8 @@ struct mosaic;
 struct tessera;
 
 struct mosaic_ops {
+	const char *name;
+
 	/****
 	 * Runtime callbacks
 	 */
@@ -60,7 +62,6 @@ struct mosaic {
 	const struct mosaic_ops *m_ops;
 	char *m_loc;
 	char *default_fs;
-	char *layout;
 
 	void *priv;
 };

@@ -1,6 +1,7 @@
 TGT = moctl
 OBJS =
 OBJS += main.o
+OBJS += create.o
 
 all: $(TGT)
 

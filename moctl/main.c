@@ -4,6 +4,8 @@
 #include <string.h>
 #include <sys/mount.h>
 #include "uapi/mosaic.h"
+#include "moctl.h"
+#include "mosaic.h"
 
 static inline int argis(char *arg, char *is)
 {
@@ -199,9 +201,28 @@ static int do_mosaic_drop_tess(mosaic_t m, int argc, char **argv)
 	return 0;
 }
 
-static int do_mosaic_init(char *name, int argc, char **argv)
+static int do_mosaic_create(char *name, int argc, char **argv)
 {
-	return -1;
+	int ret;
+	mosaic_t m;
+
+	m = malloc(sizeof(*m));
+	memset(m, 0, sizeof(*m));
+
+	if (mosaic_parse_config(name, m))
+		ret = -1;
+	else if (!strcmp(m->m_ops->name, "fsimg"))
+		ret = create_fsimg(m, argc, argv);
+	else if (!strcmp(m->m_ops->name, "btrfs"))
+		ret = create_btrfs(m, argc, argv);
+	else if (!strcmp(m->m_ops->name, "plain"))
+		ret = create_plain(m, argc, argv);
+	else {
+		printf("Unknown mosaic type %s\n", name);
+		ret = -1;
+	}
+
+	return ret ? 1 : 0;
 }
 
 static int do_mosaic(char *name, int argc, char **argv)
@@ -213,12 +234,12 @@ static int do_mosaic(char *name, int argc, char **argv)
 		return 1;
 	}
 
-	if (argis(argv[0], "init"))
-		return do_mosaic_init(name, argc, argv);
+	if (argis(argv[0], "create"))
+		return do_mosaic_create(name, argc - 1, argv + 1);
 
 	mos = mosaic_open(name, 0);
 	if (!mos) {
-		printf("Error opening mosaic %s\n", argv[0]);
+		printf("Error opening mosaic %s\n", name);
 		return 1;
 	}
 

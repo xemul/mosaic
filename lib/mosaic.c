@@ -53,8 +53,6 @@ void mosaic_close(mosaic_t m)
 			m->m_ops->release(m);
 		if (m->default_fs)
 			free(m->default_fs);
-		if (m->layout)
-			free(m->layout);
 	}
 	free(m);
 }
