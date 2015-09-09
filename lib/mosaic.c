@@ -89,7 +89,6 @@ int init_mosaic_subdir(struct mosaic *m)
 	p = malloc(sizeof(*p));
 	p->m_loc_dir = -1;
 	p->fs_subdir = NULL;
-	p->tess_subdir = NULL;
 	m->priv = p;
 	return 0;
 }
@@ -111,7 +110,7 @@ int parse_mosaic_subdir_layout(struct mosaic *m, char *key, char *val)
 		return 0;
 	}
 
-	/* FIXME: implement */
+	/* FIXME: implement? */
 #if 0
 	if (!strcmp(key, "tess")) {
 		if (p->tess_subdir)
@@ -140,7 +139,5 @@ void release_mosaic_subdir(struct mosaic *m)
 		close(p->m_loc_dir);
 	if (p->fs_subdir)
 		free(p->fs_subdir);
-	if (p->tess_subdir)
-		free(p->tess_subdir);
 	free(p);
 }
