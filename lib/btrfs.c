@@ -6,11 +6,6 @@
 #include "mosaic.h"
 #include "tessera.h"
 
-static int init_btrfs(struct mosaic *m)
-{
-	return 0;
-}
-
 static int open_btrfs(struct mosaic *m, int flags)
 {
 	if (m->default_fs)
@@ -91,7 +86,7 @@ static int get_btrfs_subvol_size(struct mosaic *m, struct tessera *t,
 }
 
 const struct mosaic_ops mosaic_btrfs = {
-	.init = init_btrfs,
+	.init = init_mosaic_subdir,
 	.open = open_btrfs,
 	.mount = bind_mosaic_subdir_loc,
 
