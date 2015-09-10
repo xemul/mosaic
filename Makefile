@@ -21,5 +21,8 @@ clean:
 	make -C lib/ clean
 	make -C moctl/ clean
 
+test: all
+	make -C test/
+
 .PHONY: all clean $(SUBS)
 .DEFAULT_GOAL: all
