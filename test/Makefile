@@ -1,11 +1,14 @@
-TESTS = basic,fsimg
+TESTS = basic
 
-all: plain btrfs
+all: plain loop btrfs
+
+loop:
+	./run.sh ${TESTS} fsimg
 
 plain:
-	./run.sh {${TESTS}} plain
+	./run.sh ${TESTS} plain
 
 btrfs:
-	./run.sh {${TESTS}} btrfs
+	./run.sh ${TESTS} btrfs
 
 .PHONY: all
