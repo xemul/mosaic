@@ -1,0 +1,15 @@
+language: c
+
+compiler: gcc
+
+before_install:
+    - sudo apt-get update -qq
+    - sudo apt-get install make gcc libyaml-dev
+
+script:
+    - make
+
+notifications:
+  email:
+    on_success: change
+    on_failure: always
