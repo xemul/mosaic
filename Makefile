@@ -19,5 +19,5 @@ install clean:
 test: all
 	make -C test/
 
-.PHONY: all install clean $(SUBS)
+.PHONY: all install clean test $(SUBS)
 .DEFAULT_GOAL: all
