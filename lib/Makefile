@@ -40,6 +40,12 @@ $(LIBMOSAIC_SO_X): $(LIBMOSAIC_SO_X_Y)
 $(LIBMOSAIC_SO): $(LIBMOSAIC_SO_X)
 	ln -sf $^ $@
 
+install: $(LIBMOSAIC_SO)
+	install -d $(DESTDIR)$(LIBDIR)
+	install -m 755 $(LIBMOSAIC_SO_X_Y) $(DESTDIR)$(LIBDIR)
+	cp -a $(LIBMOSAIC_SO_X) $(LIBMOSAIC_SO) $(DESTDIR)$(LIBDIR)
+.PHONY: install
+
 %.d: %.c
 	$(CC) $(CFLAGS) -M -MT $@ -MT $(patsubst %.d,%.o,$@) $< -o $@
 

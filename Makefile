@@ -12,12 +12,12 @@ lib:
 moctl: lib
 	make -C moctl/
 
-clean:
-	make -C lib/ clean
-	make -C moctl/ clean
+install clean:
+	make -C lib/ $@
+	make -C moctl/ $@
 
 test: all
 	make -C test/
 
-.PHONY: all clean $(SUBS)
+.PHONY: all install clean $(SUBS)
 .DEFAULT_GOAL: all
