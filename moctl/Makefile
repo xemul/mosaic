@@ -6,7 +6,7 @@ OBJS += create.o
 all: $(TGT)
 
 $(TGT): $(OBJS)
-	$(CC) -o $@ $^ -lmosaic -lyaml -L../lib/
+	$(CC) -o $@ $^ -lmosaic -L../lib/
 
 %.d: %.c
 	$(CC) $(CFLAGS) -M -MT $@ -MT $(patsubst %.d,%.o,$@) $< -o $@

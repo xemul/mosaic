@@ -13,7 +13,7 @@ OBJS += util.o
 all: $(TGT)
 
 $(TGT): $(OBJS)
-	$(CC) -shared -lyaml -o $@ $^
+	$(CC) -shared -o $@ $^ -lyaml
 
 %.d: %.c
 	$(CC) $(CFLAGS) -M -MT $@ -MT $(patsubst %.d,%.o,$@) $< -o $@
