@@ -2,12 +2,7 @@ SUBS =
 SUBS += lib
 SUBS += moctl
 
-DIR = $(shell pwd)
-CFLAGS = -I$(DIR)/include/ -Wall -Werror
-CC = gcc
-
-export CFLAGS
-export CC
+include Makefile.inc
 
 all: $(SUBS)
 

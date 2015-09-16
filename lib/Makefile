@@ -1,3 +1,5 @@
+include ../Makefile.inc
+
 LIBVER_MAJOR := 0
 LIBVER_MINOR := 0
 
@@ -17,6 +19,7 @@ OBJS += yaml.o
 OBJS += log.o
 OBJS += util.o
 
+CFLAGS+= -I../include
 CFLAGS+= -fPIC -fvisibility=hidden
 LDFLAGS+= -shared -Wl,-soname,$(LIBMOSAIC_SO_X)
 LDLIBS+= -lyaml

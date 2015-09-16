@@ -1,7 +1,11 @@
+include ../Makefile.inc
+
 TGT = moctl
 OBJS =
 OBJS += main.o
 OBJS += create.o
+
+CFLAGS += -I../include
 
 all: $(TGT)
 
