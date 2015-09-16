@@ -1,6 +1,8 @@
 #ifndef __MOSAIC_UAPI_H__
 #define __MOSAIC_UAPI_H__
 
+#pragma GCC visibility push(default)
+
 /*
  * Mosaic management
  */
@@ -55,4 +57,6 @@ int mosaic_get_tess_size(tessera_t t, unsigned long *size_in_blocks);
 /* Misc */
 typedef void (*mosaic_log_fn)(const char *f, ...)
 	            __attribute__ ((format(printf, 1, 2)));
+
+#pragma GCC visibility pop
 #endif

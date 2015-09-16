@@ -16,7 +16,7 @@ OBJS += yaml.o
 OBJS += log.o
 OBJS += util.o
 
-CFLAGS+= -fPIC
+CFLAGS+= -fPIC -fvisibility=hidden
 LDFLAGS+= -shared -Wl,-soname,$(LIBMOSAIC_SO_X)
 LDLIBS+= -lyaml
 
