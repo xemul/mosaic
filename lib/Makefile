@@ -1,6 +1,7 @@
 LIBVER_MAJOR := 0
 LIBVER_MINOR := 0
 
+LIBMOSAIC		:= libmosaic.a
 LIBMOSAIC_SO		:= libmosaic.so
 LIBMOSAIC_SO_X		:= $(LIBMOSAIC_SO).$(LIBVER_MAJOR)
 LIBMOSAIC_SO_X_Y	:= $(LIBMOSAIC_SO).$(LIBVER_MAJOR).$(LIBVER_MINOR)
@@ -23,6 +24,10 @@ LDLIBS+= -lyaml
 all: $(LIBMOSAIC_SO)
 .PHONY: all
 
+$(LIBMOSAIC): $(OBJS)
+	ar rcs $@ $+
+	ranlib $@
+
 $(LIBMOSAIC_SO_X_Y): $(OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
@@ -43,5 +48,5 @@ endif
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
-	rm -f $(OBJS) *.so *.so.* *.d
+	rm -f $(OBJS) *.a *.so *.so.* *.d
 .PHONY: clean
