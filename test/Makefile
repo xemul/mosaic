@@ -11,4 +11,4 @@ plain:
 btrfs:
 	./run.sh ${TESTS} btrfs
 
-.PHONY: all
+.PHONY: all loop plain btrfs
