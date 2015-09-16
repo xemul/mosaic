@@ -2,3 +2,4 @@
 *.d
 .*
 libmosaic.so
+libmosaic.so.*

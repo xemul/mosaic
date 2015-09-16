@@ -1,4 +1,10 @@
-TGT = libmosaic.so
+LIBVER_MAJOR := 0
+LIBVER_MINOR := 0
+
+LIBMOSAIC_SO		:= libmosaic.so
+LIBMOSAIC_SO_X		:= $(LIBMOSAIC_SO).$(LIBVER_MAJOR)
+LIBMOSAIC_SO_X_Y	:= $(LIBMOSAIC_SO).$(LIBVER_MAJOR).$(LIBVER_MINOR)
+
 OBJS =
 OBJS += mosaic.o
 OBJS += tessera.o
@@ -10,10 +16,21 @@ OBJS += yaml.o
 OBJS += log.o
 OBJS += util.o
 
-all: $(TGT)
+CFLAGS+= -fPIC
+LDFLAGS+= -shared -Wl,-soname,$(LIBMOSAIC_SO_X)
+LDLIBS+= -lyaml
 
-$(TGT): $(OBJS)
-	$(CC) -shared -o $@ $^ -lyaml
+all: $(LIBMOSAIC_SO)
+.PHONY: all
+
+$(LIBMOSAIC_SO_X_Y): $(OBJS)
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ $(LDLIBS) -o $@
+
+$(LIBMOSAIC_SO_X): $(LIBMOSAIC_SO_X_Y)
+	ln -sf $^ $@
+
+$(LIBMOSAIC_SO): $(LIBMOSAIC_SO_X)
+	ln -sf $^ $@
 
 %.d: %.c
 	$(CC) $(CFLAGS) -M -MT $@ -MT $(patsubst %.d,%.o,$@) $< -o $@
@@ -23,9 +40,8 @@ ifneq ($(MAKECMDGOAL),clean)
 endif
 
 %.o: %.c
-	$(CC) $(CFLAGS) $< -c -fPIC -o $@
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
-	rm -rf $(TGT) $(OBJS) *.d
-
-.PHONY: all clean
+	rm -f $(OBJS) *.so *.so.* *.d
+.PHONY: clean
