@@ -14,7 +14,7 @@ all: $(SUBS)
 lib:
 	make -C lib/
 
-moctl:
+moctl: lib
 	make -C moctl/
 
 clean:
