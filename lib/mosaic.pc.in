@@ -1,0 +1,10 @@
+libdir=@LIBDIR@
+
+Name: mosaic
+Version: @VERSION@
+Description: mosaic library
+Requires:
+Requires.private: yaml-0.1
+Libs: -L${libdir} -lmosaic
+Libs.private:
+Cflags:

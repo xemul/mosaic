@@ -1,5 +1,6 @@
 include ../Makefile.inc
 
+VERSION	     := 0.0
 LIBVER_MAJOR := 0
 LIBVER_MINOR := 0
 
@@ -7,6 +8,9 @@ LIBMOSAIC		:= libmosaic.a
 LIBMOSAIC_SO		:= libmosaic.so
 LIBMOSAIC_SO_X		:= $(LIBMOSAIC_SO).$(LIBVER_MAJOR)
 LIBMOSAIC_SO_X_Y	:= $(LIBMOSAIC_SO).$(LIBVER_MAJOR).$(LIBVER_MINOR)
+
+PC = mosaic.pc
+PCDIR=$(LIBDIR)/pkgconfig
 
 OBJS =
 OBJS += mosaic.o
@@ -24,7 +28,7 @@ CFLAGS+= -fPIC -fvisibility=hidden
 LDFLAGS+= -shared -Wl,-soname,$(LIBMOSAIC_SO_X)
 LDLIBS+= -lyaml
 
-all: $(LIBMOSAIC_SO)
+all: $(LIBMOSAIC_SO) $(PC)
 .PHONY: all
 
 $(LIBMOSAIC): $(OBJS)
@@ -40,7 +44,19 @@ $(LIBMOSAIC_SO_X): $(LIBMOSAIC_SO_X_Y)
 $(LIBMOSAIC_SO): $(LIBMOSAIC_SO_X)
 	ln -sf $^ $@
 
-install: $(LIBMOSAIC_SO)
+$(PC): $(PC).in
+	sed \
+		-e 's|@VERSION@|$(VERSION)|g' \
+		-e 's|@LIBDIR@|$(LIBDIR)|g' \
+		$^ > $@
+
+install-pc: $(PC)
+	install -d $(DESTDIR)$(PCDIR)
+	install -m 644 $(PC) $(DESTDIR)$(PCDIR)
+.PHONY: install-pc
+
+
+install: $(LIBMOSAIC_SO) install-pc
 	install -d $(DESTDIR)$(LIBDIR)
 	install -m 755 $(LIBMOSAIC_SO_X_Y) $(DESTDIR)$(LIBDIR)
 	cp -a $(LIBMOSAIC_SO_X) $(LIBMOSAIC_SO) $(DESTDIR)$(LIBDIR)
@@ -57,5 +73,5 @@ endif
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
-	rm -f $(OBJS) *.a *.so *.so.* *.d
+	rm -f $(OBJS) $(PC) *.a *.so *.so.* *.d
 .PHONY: clean
