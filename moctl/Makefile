@@ -1,17 +1,27 @@
 include ../Makefile.inc
 
-TGT = moctl
+LIB_PATH=../lib
+
+BIN = moctl
+REALBIN = .$(BIN)-real
 OBJS =
 OBJS += main.o
 OBJS += create.o
 
 CFLAGS += -fPIE -I../include
 
-all: $(TGT)
+all: $(BIN)
 .PHONY: all
 
-$(TGT): $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $^ -lmosaic -L../lib/
+$(BIN): wrapper.sh.in $(REALBIN)
+	sed \
+		 -e 's|@REALBIN@|$(REALBIN)|g' \
+		 -e 's|@LIB_PATH@|$(LIB_PATH)|g' \
+		< $< > $@ \
+	&& chmod a+x $@
+
+$(REALBIN): $(OBJS)
+	$(CC) $(CFLAGS) -o $@ $^ -lmosaic -L $(LIB_PATH)
 
 %.d: %.c
 	$(CC) $(CFLAGS) -M -MT $@ -MT $(patsubst %.d,%.o,$@) $< -o $@
@@ -23,11 +33,11 @@ endif
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-install: $(TGT)
+install: $(REALBIN)
 	install -d $(DESTDIR)$(BINDIR)
-	install -m 755 $(TGT) $(DESTDIR)$(BINDIR)
+	install -m 755 $(REALBIN) $(DESTDIR)$(BINDIR)/$(BIN)
 .PHONY: install
 
 clean:
-	rm -rf $(TGT) $(OBJS) *.d
+	rm -rf $(BIN) $(REALBIN) $(OBJS) *.d
 .PHONY: clean
