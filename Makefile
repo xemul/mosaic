@@ -2,27 +2,22 @@ SUBS =
 SUBS += lib
 SUBS += moctl
 
-DIR = $(shell pwd)
-CFLAGS = -I$(DIR)/include/ -Wall -Werror
-CC = gcc
-
-export CFLAGS
-export CC
+include Makefile.inc
 
 all: $(SUBS)
 
 lib:
 	make -C lib/
 
-moctl:
+moctl: lib
 	make -C moctl/
 
-clean:
-	make -C lib/ clean
-	make -C moctl/ clean
+install clean:
+	make -C lib/ $@
+	make -C moctl/ $@
 
 test: all
 	make -C test/
 
-.PHONY: all clean $(SUBS)
+.PHONY: all install clean test $(SUBS)
 .DEFAULT_GOAL: all
