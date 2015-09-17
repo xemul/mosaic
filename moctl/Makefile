@@ -5,13 +5,13 @@ OBJS =
 OBJS += main.o
 OBJS += create.o
 
-CFLAGS += -I../include
+CFLAGS += -fPIE -I../include
 
 all: $(TGT)
 .PHONY: all
 
 $(TGT): $(OBJS)
-	$(CC) -o $@ $^ -lmosaic -L../lib/
+	$(CC) $(CFLAGS) -o $@ $^ -lmosaic -L../lib/
 
 %.d: %.c
 	$(CC) $(CFLAGS) -M -MT $@ -MT $(patsubst %.d,%.o,$@) $< -o $@
@@ -21,7 +21,7 @@ ifneq ($(MAKECMDGOAL),clean)
 endif
 
 %.o: %.c
-	$(CC) $(CFLAGS) $< -c -fPIC -o $@
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 install: $(TGT)
 	install -d $(DESTDIR)$(BINDIR)
