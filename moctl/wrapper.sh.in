@@ -4,4 +4,4 @@
 # from @LIB_PATH@ that might not yet be installed into a proper place.
 
 BASEDIR=$(dirname $0)
-LD_LIBRARY_PATH=${BASEDIR}/@LIB_PATH@ exec ${BASEDIR}/@REALBIN@
+LD_LIBRARY_PATH=${BASEDIR}/@LIB_PATH@ exec ${BASEDIR}/@REALBIN@ $@
