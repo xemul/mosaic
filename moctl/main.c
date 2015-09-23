@@ -51,7 +51,7 @@ static int do_mosaic_mount(mosaic_t m, int argc, char **argv)
 
 	if (t) {
 		if (mosaic_mount_tess(t, path, flags)) {
-			perror("Can't mount mosaic");
+			perror("Can't mount tessera");
 			return 1;
 		}
 	} else {
@@ -86,12 +86,12 @@ static int do_mosaic_umount(mosaic_t m, int argc, char **argv)
 
 	if (t) {
 		if (mosaic_umount_tess(t, path, 0)) {
-			perror("Can't mount mosaic");
+			perror("Can't umount tessera");
 			return 1;
 		}
 	} else {
 		if (umount(path) < 0) {
-			perror("Can't mount mosaic");
+			perror("Can't umount mosaic");
 			return 1;
 		}
 	}
