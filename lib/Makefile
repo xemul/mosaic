@@ -67,7 +67,7 @@ install: $(LIBMOSAIC_SO) install-pc
 %.d: %.c
 	$(CC) $(CFLAGS) -M -MT $@ -MT $(patsubst %.d,%.o,$@) $< -o $@
 
-ifneq ($(MAKECMDGOAL),clean)
+ifneq ($(MAKECMDGOALS),clean)
 -include $(patsubst %.o,%.d,$(OBJS))
 endif
 
