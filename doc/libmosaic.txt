@@ -1,0 +1,69 @@
+The API is described in include/uapi/mosaic.h
+
+* mosaic_t -- a handle for mosaic object
+
+* tessera_t -- a handle for tessera object
+
+
+* mosaic_t mosaic_open(const char *cfg, int open_flags)
+  void mosaic_close(mosaic_t m)
+
+  Open and close the mosaic hanlde.
+
+  @cfg is path to config file of mosaic name. In the former 
+  case the path is just opened, in the latter the mosaic
+  config is looked up in the default directory (/etc).
+
+
+* tessera_t mosaic_open_tess(mosaic_t m, char *name, int open_flags)
+  void mosaic_close_tess(tessera_t)
+
+  Open and close tessera handle.
+
+
+* int mosaic_mount(mosaic_t m, char *path, int mount_flags)
+  int mosaic_mount_tess(tessera_t t, char *path, int mount_flags);
+  int mosaic_umount_tess(tessera_t t, char *path, int umount_flags);
+
+  Mount metadata or tessera into @path location with @mount_flags
+  flags.
+
+
+* int mosaic_make_tess(mosaic_t m, char *name, unsigned long size_in_blocks, int make_flags)
+  int mosaic_make_tess_fs(mosaic_t m, char *name, unsigned long size_in_blocks, int make_flags)
+
+  Makes new tessera. The _fs routine also puts an empty filesystem
+  (default_fs from config file) on it. The @size_in_blocks is
+  the size of new tessera in 512-bytes blocks.
+
+
+* int mosaic_clone_tess(tessera_t from, char *name, int clone_flags)
+
+  Clones the tessera @from in a COW-manner. If backend doesn't supports
+  COW-ing then error is returned.
+
+
+* int mosaic_drop_tess(tessera_t t, int drop_flags)
+
+  Removes tessera and ALL DATA ON IT! 
+
+
+* int mosaic_resize_tess(tessera_t t, unsigned long new_size_in_blocks, int resize_flags)
+
+  Changes the size of a given tessera.
+
+
+* int mosaic_get_tess_bdev(tessera_t t, char *devs, int len, int flags);
+  int mosaic_put_tess_bdev(tessera_t t, char *devs);
+
+  Gets path to block device that can be opened. This call makes sure the
+  device really exists and is ready to work, respectively the _put_ one
+  stops/detaches the device.
+
+  The device path is but in the @devs buffer of @len length and the real
+  lenght of the path is returned.
+ 
+ 
+* int mosaic_get_tess_size(tessera_t t, unsigned long *size_in_blocks);
+
+  Puts the size (in 512-bytes blocks) into the @size_in_blocks variable.

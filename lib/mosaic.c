@@ -33,6 +33,10 @@ mosaic_t mosaic_open(const char *cfg, int open_flags)
 	m = malloc(sizeof(*m));
 	memset(m, 0, sizeof(*m));
 
+	/*
+	 * FIXME: support opening by name
+	 */
+
 	if (mosaic_parse_config(cfg, m))
 		goto err;
 

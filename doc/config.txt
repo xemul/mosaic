@@ -1,0 +1,16 @@
+Config file is yaml file consisting of a mapping with the
+keys being
+
+* type: the backend type. Can be onw of btrfs, fsimg, plain.
+
+* location: a string describing where the tessera is. It's
+  type-specific.
+
+* default_fs: the filesystem to be put on tesserae. Some
+  backends do not support arbitrary value of this, som
+  have defaults (ext4).
+
+* layout: the way metadata and tesserae are put on the
+  storage. It's a mapping of
+
+  * fs: path where to put metadata under the location

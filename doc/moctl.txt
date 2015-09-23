@@ -1,0 +1,49 @@
+Usage:
+
+   moctl <mosaic> <action> <arguments>
+
+   The <mosaic> argument is the mosaic config file. The moctl
+   doesn't generate or change one, it should just exist.
+
+Actions:
+
+* mount: Mounts mosaic or tessera.
+
+  Usage: mount <tessera>|- <path> <flags>
+
+  If tessera name is "-", then the mosaic itself is mounted.
+
+* umount: Umounts stuff mounted with mount action
+
+  Usage: umount <tessera>|- <path>
+
+
+* new: Creates new empty tessera
+
+  Usage: new fs|disk <tessera> <size>
+
+  If "disk" is given then the plain block device is created,
+  if "fs" is given, then the created block device is marked
+  with the default filesystem. Some backends do not support
+  both types, e.g. btrfs only supports the "fs" type.
+
+  Size accepts KMG suffixes. The <tessera> is the new volume
+  name the user wants.
+
+* clone: Clones tessera from some other one
+
+  Usage: clone <tessera_from> <tessera>
+
+  Clone is performed using the COW technology if the backend
+  supports this. If no the error is reported back and new
+  tessera is not created.
+
+* drop: Drops tessera
+
+  Usage: drop <tessera>
+
+  And removes all the data! The tesserae that were cloned from
+  this one are not affected (or error is reported if the backend
+  doesn't support such thing, but we don't have and don't plan
+  to have such backends).
+
