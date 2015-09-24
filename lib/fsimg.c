@@ -5,8 +5,10 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <limits.h>
 #include "mosaic.h"
 #include "tessera.h"
+#include "util.h"
 
 static int open_fsimg(struct mosaic *m, int flags)
 {
@@ -31,7 +33,6 @@ static int new_fsimg_tess(struct mosaic *m, char *name,
 {
 	struct mosaic_subdir_priv *fp = m->priv;
 	int imgf;
-	char mkfs_call[1024];
 
 	/*
 	 * FIXME -- add separate subdir for images and separate for
@@ -48,11 +49,19 @@ static int new_fsimg_tess(struct mosaic *m, char *name,
 	}
 
 	if (make_flags & NEW_TESS_WITH_FS) {
-		/*
-		 * FIXME -- fork and exec mkfs
-		 */
-		sprintf(mkfs_call, "mkfs -t %s -F %s/%s", m->default_fs, m->m_loc, name);
-		if (system(mkfs_call)) {
+		char path[PATH_MAX];
+		char *argv[8];
+		int i = 0;
+
+		snprintf(path, sizeof(path), "%s/%s", m->m_loc, name);
+
+		argv[i++] = "mkfs";
+		argv[i++] = "-t";
+		argv[i++] = m->default_fs;
+		argv[i++] = "-F";
+		argv[i++] = path;
+		argv[i++] = NULL;
+		if (run_prg(argv)) {
 			close(imgf);
 			return -1;
 		}
@@ -103,10 +112,15 @@ static int attach_fsimg_tess(struct mosaic *m, struct tessera *t,
 
 static int detach_fsimg_tess(struct mosaic *m, struct tessera *t, char *devs)
 {
-	char aux[1024];
+	char *argv[4];
+	int i = 0;
 
-	sprintf(aux, "losetup -d %s\n", devs);
-	if (system(aux))
+	argv[i++] = "losetup";
+	argv[i++] = "-d";
+	argv[i++] = devs;
+	argv[i++] = NULL;
+
+	if (run_prg(argv))
 		return -1;
 
 	return 0;

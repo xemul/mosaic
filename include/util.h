@@ -13,4 +13,9 @@ char *read_val(int dirfd, const char *dir, const char *name);
 int write_val(int dirfd, const char *dir,
 		const char *name, const char *val);
 
+int run_prg(char *const argv[]);
+#define HIDE_STDOUT	1 << 0	/* hide process' stdout */
+#define HIDE_STDERR	1 << 1	/* hide process' stderr */
+int run_prg_rc(char *const argv[], int hide_mask, int *rc);
+
 #endif

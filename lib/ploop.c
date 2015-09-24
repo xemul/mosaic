@@ -18,9 +18,12 @@
 static int create_ploop(struct mosaic *m, char *name,
 		unsigned long size_in_blocks, int make_flags)
 {
-	char cmd[PATH_MAX];
 	char dir[PATH_MAX];
+	char img[PATH_MAX];
 	char fstype[32];
+	char size[32];
+	char *argv[8];
+	int i;
 
 	snprintf(dir, sizeof(dir), "%s/%s", m->m_loc, name);
 	// Assuming m->m_loc exists
@@ -40,11 +43,18 @@ static int create_ploop(struct mosaic *m, char *name,
 		strcpy(fstype, "-t none"); // no fs
 	}
 
-	snprintf(cmd, sizeof(cmd), "ploop init -s %luK -f expanded"
-			" %s \"%s/%s\"",
-			BLOCKS_TO_KB(size_in_blocks),
-			fstype, dir, IMG_NAME);
-	if (system(cmd) != 0)
+	i = 0;
+	argv[i++] = "ploop";
+	argv[i++] = "init";
+	argv[i++] = "-s";
+	snprintf(size, sizeof(size), "%lu", size_in_blocks);
+	argv[i++] = size;
+	argv[i++] = "-f";
+	argv[i++] = "expanded";
+	snprintf(img, sizeof(img), "%s/%s", dir, IMG_NAME);
+	argv[i++] = img;
+	argv[i++] = NULL;
+	if (run_prg(argv) != 0)
 		return -1;
 
 	return 0;
@@ -92,7 +102,8 @@ static int clone_ploop(struct mosaic *m, struct tessera *parent,
 	char dd[PATH_MAX], pdd[PATH_MAX];
 	const char *uuidvar = "uuid-for-children";
 	int pdfd, dfd;
-	char cmd[PATH_MAX];
+	char *argv[8];
+	int i;
 	(void)clone_flags; // unused
 
 	snprintf(pdir, sizeof(pdir), "%s/%s", m->m_loc, parent->t_name);
@@ -132,15 +143,22 @@ static int clone_ploop(struct mosaic *m, struct tessera *parent,
 	/* 1. Check if we have parent already snapshotted for clone */
 	char *uuid = read_val(pdfd, pdir, uuidvar);
 	if (uuid == NULL) {
+
 		/* 1.1 Create a new snapshot in parent */
 		uuid = malloc(UUID_SIZE);
 		if (ploop_uuid_generate(uuid, UUID_SIZE) != 0) {
 			fprintf(stderr, "%s: can't generate uuid\n", __func__);
 			goto out;
 		}
-		snprintf(cmd, sizeof(cmd), "ploop snapshot -u %s \"%s\"",
-				uuid, pdd);
-		if (system(cmd) != 0) {
+
+		i = 0;
+		argv[i++] = "ploop";
+		argv[i++] = "snapshot";
+		argv[i++] = "-u";
+		argv[i++] = uuid;
+		argv[i++] = pdd;
+		argv[i++] = NULL;
+		if (run_prg(argv) != 0) {
 			// error is printed by ploop
 			goto out;
 		}
@@ -181,9 +199,14 @@ static int clone_ploop(struct mosaic *m, struct tessera *parent,
 	/* 4. Switch to created snapshot, removing old top delta
 	 * and creating a new empty one instead.
 	 */
-	snprintf(cmd, sizeof(cmd), "ploop snapshot-switch -u %s \"%s\"",
-			uuid, dd);
-	if (system(cmd) != 0) {
+	i = 0;
+	argv[i++] = "ploop";
+	argv[i++] = "snapshot-switch";
+	argv[i++] = "-u";
+	argv[i++] = uuid;
+	argv[i++] = dd;
+	argv[i++] = NULL;
+	if (run_prg(argv) != 0) {
 		goto out;
 	}
 
@@ -207,13 +230,21 @@ static int mount_ploop(struct mosaic *m, struct tessera *t,
 		const char *path, int mount_flags)
 {
 	char dd[PATH_MAX];
-	char cmd[PATH_MAX];
+	char *argv[8];
+	int i;
 	(void)mount_flags; // unused
 
 	snprintf(dd, sizeof(dd), "%s/%s/" DDXML, m->m_loc, t->t_name);
-	snprintf(cmd, sizeof(cmd), "ploop mount -m \"%s\" \"%s\"", path, dd);
 
-	if (system(cmd) != 0)
+	i = 0;
+	argv[i++] = "ploop";
+	argv[i++] = "mount";
+	argv[i++] = "-m";
+	argv[i++] = (char *)path;
+	argv[i++] = dd;
+	argv[i++] = NULL;
+
+	if (run_prg(argv) != 0)
 		return -1;
 
 	return 0;
@@ -223,7 +254,8 @@ static int umount_ploop(struct mosaic *m, struct tessera *t,
 		char *path, int umount_flags)
 {
 	char dd[PATH_MAX];
-	char cmd[PATH_MAX];
+	char *argv[4];
+	int i;
 	(void)umount_flags; // unused
 	(void)path; // unused
 
@@ -232,9 +264,13 @@ static int umount_ploop(struct mosaic *m, struct tessera *t,
 	/* FIXME: we can either umount by path, ddxml, or device.
 	 * Not sure which one is the best way, let's settle for ddxml for now.
 	 */
-	snprintf(cmd, sizeof(cmd), "ploop umount \"%s\"", dd);
+	i = 0;
+	argv[i++] = "ploop";
+	argv[i++] = "umount";
+	argv[i++] = dd;
+	argv[i++] = NULL;
 
-	if (system(cmd) != 0)
+	if (run_prg(argv) != 0)
 		return -1;
 
 	return 0;
@@ -267,14 +303,23 @@ static int resize_ploop(struct mosaic *m, struct tessera *t,
 		unsigned long size_in_blocks, int resize_flags)
 {
 	char dd[PATH_MAX];
-	char cmd[PATH_MAX];
+	char size[32];
+	char *argv[8];
+	int i;
 	(void)resize_flags; // unused
 
 	snprintf(dd, sizeof(dd), "%s/%s/" DDXML, m->m_loc, t->t_name);
-	snprintf(cmd, sizeof(cmd), "ploop resize -s %luK \"%s\"",
-			BLOCKS_TO_KB(size_in_blocks), dd);
+	snprintf(size, sizeof(size), "%lu", size_in_blocks);
 
-	if (system(cmd) != 0)
+	i = 0;
+	argv[i++] = "ploop";
+	argv[i++] = "resize";
+	argv[i++] = "-s";
+	argv[i++] = size;
+	argv[i++] = dd;
+	argv[i++] = NULL;
+
+	if (run_prg(argv) != 0)
 		return -1;
 
 	return 0;

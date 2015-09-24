@@ -3,8 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mount.h>
+#include <limits.h>
 #include "mosaic.h"
 #include "tessera.h"
+#include "util.h"
 
 static int open_btrfs(struct mosaic *m, int flags)
 {
@@ -18,7 +20,9 @@ static int open_btrfs(struct mosaic *m, int flags)
 static int new_btrfs_subvol(struct mosaic *m, char *name,
 		unsigned long size_in_blocks, int make_flags)
 {
-	char aux[1024];
+	char *argv[8];
+	char vol[PATH_MAX];
+	int i;
 
 	if (!(make_flags & NEW_TESS_WITH_FS))
 		return -1;
@@ -27,8 +31,15 @@ static int new_btrfs_subvol(struct mosaic *m, char *name,
 	 * FIXME: locate tesserae subvolumes in subdirectories
 	 * FIXME: qgroups
 	 */
-	sprintf(aux, "btrfs subvolume create %s/%s", m->m_loc, name);
-	if (system(aux))
+
+	i = 0;
+	argv[i++] = "btrfs";
+	argv[i++] = "subvolume";
+	argv[i++] = "create";
+	snprintf(vol, sizeof(vol), "%s/%s", m->m_loc, name);
+	argv[i++] = vol;
+	argv[i++] = NULL;
+	if (run_prg(argv))
 		return -1;
 
 	return 0;
@@ -43,14 +54,23 @@ static int open_btrfs_subvol(struct mosaic *m, struct tessera *t,
 static int clone_btrfs_subvol(struct mosaic *m, struct tessera *from,
 		char *name, int clone_flags)
 {
-	char aux[1024];
+	char *argv[8];
+	char vol[PATH_MAX], pvol[PATH_MAX];
+	int i;
 
 	/*
 	 * FIXME: locate tesserae subvolumes in subdirectories
 	 */
-	sprintf(aux, "btrfs subvolume snapshot %s/%s %s/%s",
-			m->m_loc, from->t_name, m->m_loc, name);
-	if (system(aux))
+	i = 0;
+	argv[i++] = "btrfs";
+	argv[i++] = "subvolume";
+	argv[i++] = "snapshot";
+	snprintf(pvol, sizeof(pvol), "%s/%s", m->m_loc, from->t_name);
+	argv[i++] = pvol;
+	snprintf(vol, sizeof(vol), "%s/%s", m->m_loc, name);
+	argv[i++] = vol;
+	argv[i++] = NULL;
+	if (run_prg(argv))
 		return -1;
 
 	return 0;
@@ -59,13 +79,21 @@ static int clone_btrfs_subvol(struct mosaic *m, struct tessera *from,
 static int drop_btrfs_subvol(struct mosaic *m, struct tessera *t,
 		int drop_flags)
 {
-	char aux[1024];
+	char *argv[8];
+	char vol[PATH_MAX];
+	int i;
 
 	/*
 	 * FIXME: locate tesserae subvolumes in subdirectories
 	 */
-	sprintf(aux, "btrfs subvolume delete %s/%s", m->m_loc, t->t_name);
-	if (system(aux))
+	i = 0;
+	argv[i++] = "btrfs";
+	argv[i++] = "subvolume";
+	argv[i++] = "delete";
+	snprintf(vol, sizeof(vol), "%s/%s", m->m_loc, t->t_name);
+	argv[i++] = vol;
+	argv[i++] = NULL;
+	if (run_prg(argv))
 		return -1;
 
 	return 0;
