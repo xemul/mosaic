@@ -8,9 +8,9 @@ The API is described in include/uapi/mosaic.h
 * mosaic_t mosaic_open(const char *cfg, int open_flags)
   void mosaic_close(mosaic_t m)
 
-  Open and close the mosaic hanlde.
+  Open and close the mosaic handle.
 
-  @cfg is path to config file of mosaic name. In the former 
+  @cfg is path to config file of mosaic name. In the former
   case the path is just opened, in the latter the mosaic
   config is looked up in the default directory (/etc).
 
@@ -45,7 +45,7 @@ The API is described in include/uapi/mosaic.h
 
 * int mosaic_drop_tess(tessera_t t, int drop_flags)
 
-  Removes tessera and ALL DATA ON IT! 
+  Removes tessera and ALL DATA ON IT!
 
 
 * int mosaic_resize_tess(tessera_t t, unsigned long new_size_in_blocks, int resize_flags)
@@ -61,9 +61,9 @@ The API is described in include/uapi/mosaic.h
   stops/detaches the device.
 
   The device path is but in the @devs buffer of @len length and the real
-  lenght of the path is returned.
- 
- 
+  length of the path is returned.
+
+
 * int mosaic_get_tess_size(tessera_t t, unsigned long *size_in_blocks);
 
   Puts the size (in 512-bytes blocks) into the @size_in_blocks variable.

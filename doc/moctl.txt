@@ -35,15 +35,15 @@ Actions:
   Usage: clone <tessera_from> <tessera>
 
   Clone is performed using the COW technology if the backend
-  supports this. If no the error is reported back and new
+  supports this. If it does not, the error is reported back and new
   tessera is not created.
 
 * drop: Drops tessera
 
   Usage: drop <tessera>
 
-  And removes all the data! The tesserae that were cloned from
+  Removes all the data! The tesserae that were cloned from
   this one are not affected (or error is reported if the backend
-  doesn't support such thing, but we don't have and don't plan
+  doesn't support such behavior, but we don't have and don't plan
   to have such backends).
 

@@ -1,5 +1,9 @@
-CFLAGS = -Wall -Werror
 CC = gcc
+CFLAGS = -Wall -Werror -Wextra
+
+# Temporarily hide some minor warnings (to show, use -Wno-error=...)
+CFLAGS += -Wno-unused-parameter -Wno-sign-compare
+#CFLAGS += -Wno-error=unused-parameter -Wno-error=sign-compare
 
 # Installation directories
 BINDIR=/usr/bin
