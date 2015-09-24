@@ -1,5 +1,5 @@
 TESTS = basic
-DRIVERS = plain loop btrfs
+DRIVERS = plain fsimg btrfs
 
 all: $(DRIVERS)
 
