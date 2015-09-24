@@ -1,14 +1,9 @@
 TESTS = basic
+DRIVERS = plain loop btrfs
 
-all: plain loop btrfs
+all: $(DRIVERS)
 
-loop:
-	./run.sh ${TESTS} fsimg
+$(DRIVERS):
+	./run.sh ${TESTS} $@
 
-plain:
-	./run.sh ${TESTS} plain
-
-btrfs:
-	./run.sh ${TESTS} btrfs
-
-.PHONY: all loop plain btrfs
+.PHONY: all $(DRIVERS)
