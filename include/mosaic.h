@@ -89,6 +89,7 @@ int bind_tess_loc(struct mosaic *m, struct tessera *t, const char *path, int mou
 extern const struct mosaic_ops mosaic_fsimg;
 extern const struct mosaic_ops mosaic_btrfs;
 extern const struct mosaic_ops mosaic_plain;
+extern const struct mosaic_ops mosaic_ploop;
 
 #define MOSAIC_BLOCK_SHIFT	9
 #endif
