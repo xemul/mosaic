@@ -133,10 +133,8 @@ static int get_fsimg_size(struct mosaic *m, struct tessera *t, unsigned long *si
 
 const struct mosaic_ops mosaic_fsimg = {
 	.name = "fsimg",
-	.init = init_mosaic_subdir,
 	.open = open_fsimg,
-	.release = release_mosaic_subdir,
-	.mount = bind_mosaic_subdir_loc, /* FIXME: location can be device */
+/*	.mount = FIXME: location can be device */
 
 	.open_tessera = open_fsimg_tess,
 	.new_tessera = new_fsimg_tess,

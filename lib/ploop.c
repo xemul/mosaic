@@ -15,15 +15,6 @@
 
 #include "ploop-internal.h"
 
-static int open_ploop_mosaic(struct mosaic *m, int flags)
-{
-	(void)m;
-	(void)flags;
-	/* FIXME nothing to do here, really */
-
-	return 0;
-}
-
 static int create_ploop(struct mosaic *m, char *name,
 		unsigned long size_in_blocks, int make_flags)
 {
@@ -300,11 +291,6 @@ static int get_size_ploop(struct mosaic *m, struct tessera *t,
 
 const struct mosaic_ops mosaic_ploop = {
 	.name		= "ploop",
-
-	/* FIXME: honestly I don't understand the need for these ops */
-	.init = init_mosaic_subdir,
-	.open = open_ploop_mosaic,
-	.mount = bind_mosaic_subdir_loc,
 
 	/* ploop ops */
 	.new_tessera	= create_ploop,
