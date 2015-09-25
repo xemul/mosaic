@@ -82,10 +82,7 @@ static int get_plain_size(struct mosaic *m, struct tessera *t,
 const struct mosaic_ops mosaic_plain = {
 	.name = "plain",
 
-	.init = init_mosaic_subdir,
 	.open = open_plain,
-	.release = release_mosaic_subdir,
-	.mount = bind_mosaic_subdir_loc,
 
 	.new_tessera = new_plain_tess,
 	.open_tessera = open_plain_tess,

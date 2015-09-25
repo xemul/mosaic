@@ -19,6 +19,8 @@ const struct mosaic_ops *mosaic_find_ops(char *type)
 		return &mosaic_btrfs;
 	if (!strcmp(type, "plain"))
 		return &mosaic_plain;
+	if (!strcmp(type, "ploop"))
+		return &mosaic_ploop;
 
 	return NULL;
 }
@@ -40,7 +42,7 @@ mosaic_t mosaic_open(const char *cfg, int open_flags)
 	if (mosaic_parse_config(cfg, m))
 		goto err;
 
-	if (m->m_ops->open(m, open_flags))
+	if (m->m_ops->open && m->m_ops->open(m, open_flags))
 		goto err;
 
 	return m;
@@ -55,6 +57,8 @@ void mosaic_close(mosaic_t m)
 	if (m->m_ops) {
 		if (m->m_ops->release)
 			m->m_ops->release(m);
+		else
+			release_mosaic_subdir(m);
 		if (m->default_fs)
 			free(m->default_fs);
 	}
@@ -63,7 +67,10 @@ void mosaic_close(mosaic_t m)
 
 int mosaic_mount(mosaic_t m, char *path, int mount_flags)
 {
-	return m->m_ops->mount(m, path, mount_flags);
+	if (m->m_ops->mount)
+		return m->m_ops->mount(m, path, mount_flags);
+	else
+		return bind_mosaic_subdir_loc(m, path, mount_flags);
 }
 
 int bind_mosaic_subdir_loc(struct mosaic *m, const char *path, int mount_flags)

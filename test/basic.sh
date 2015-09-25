@@ -18,7 +18,7 @@ function run_tests()
 	$moctl $mname umount - mmnt || fail "Can't clean mosaic"
 
 	echo "* Testing tesserae"
-	$moctl $mname new fs test_fs 128m || fail "Can't create fs"
+	$moctl $mname new fs test_fs 512m || fail "Can't create fs"
 	$moctl $mname mount test_fs tmnt - || fail "Can't mount fs (1)"
 	echo "t-test" > tmnt/t-tfile
 	$moctl $mname umount test_fs tmnt || fail "Can't umount fs"

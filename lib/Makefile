@@ -22,6 +22,7 @@ OBJS += config.o
 OBJS += yaml.o
 OBJS += log.o
 OBJS += util.o
+OBJS += ploop.o ploop_uuid.o
 
 CFLAGS+= -I../include
 CFLAGS+= -fPIC -fvisibility=hidden

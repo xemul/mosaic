@@ -25,6 +25,7 @@ static int parse_layout(yaml_parser_t *p, void *x)
 
 static int parse_top_val(yaml_parser_t *p, char *key, void *x)
 {
+	int ret;
 	char *val;
 	struct mosaic *m = x;
 
@@ -39,7 +40,11 @@ static int parse_top_val(yaml_parser_t *p, char *key, void *x)
 		if (!m->m_ops)
 			return -1;
 
-		if (m->m_ops->init(m))
+		if (m->m_ops->init)
+			ret = m->m_ops->init(m);
+		else
+			ret = init_mosaic_subdir(m);
+		if (ret)
 			return -1;
 
 		return 0;
