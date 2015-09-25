@@ -60,7 +60,7 @@ The API is described in include/uapi/mosaic.h
   device really exists and is ready to work, respectively the _put_ one
   stops/detaches the device.
 
-  The device path is but in the @devs buffer of @len length and the real
+  The device path is put in the @devs buffer of @len length and the real
   length of the path is returned.
 
 
