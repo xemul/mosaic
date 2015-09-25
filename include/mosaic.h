@@ -49,8 +49,8 @@ struct mosaic_ops {
 	 * Both can be optional, in case raw device access is not
 	 * possible for this mosaic type.
 	 */
-	int (*attach_tessera)(struct mosaic *, struct tessera *, char *devs, int len, int flags);
-	int (*detach_tessera)(struct mosaic *, struct tessera *, char *devs);
+	int (*attach_tessera)(struct mosaic *, struct tessera *, char *dev, int len, int flags);
+	int (*detach_tessera)(struct mosaic *, struct tessera *, char *dev);
 
 	int (*get_tessera_size)(struct mosaic *, struct tessera *, unsigned long *size_in_blocks);
 

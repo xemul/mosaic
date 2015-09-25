@@ -53,14 +53,14 @@ The API is described in include/uapi/mosaic.h
   Changes the size of a given tessera.
 
 
-* int mosaic_get_tess_bdev(tessera_t t, char *devs, int len, int flags);
-  int mosaic_put_tess_bdev(tessera_t t, char *devs);
+* int mosaic_get_tess_bdev(tessera_t t, char *dev, int len, int flags);
+  int mosaic_put_tess_bdev(tessera_t t, char *dev);
 
   Gets path to block device that can be opened. This call makes sure the
   device really exists and is ready to work, respectively the _put_ one
   stops/detaches the device.
 
-  The device path is put in the @devs buffer of @len length and the real
+  The device path is put in the @dev buffer of @len length and the real
   length of the path is returned.
 
 
