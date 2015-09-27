@@ -14,7 +14,7 @@ int usage(int ret)
 	printf("\n"
 "Usage: moctl NAME ACTION [ARGUMENT ...]\n"
 "	NAME     := mosaic name (path to .mos file)\n"
-"	ACTION   := mount|umount|new|clone|drop\n"
+"	ACTION   := mount|umount|attach|detach|new|clone|drop\n"
 "	ARGUMENT := zero or more arguments, depending on ACTION\n");
 
 	return ret;
@@ -227,6 +227,63 @@ static int do_mosaic_drop_tess(mosaic_t m, int argc, char **argv)
 	return 0;
 }
 
+static int do_mosaic_attach_tess(mosaic_t m, int argc, char **argv)
+{
+	const char *volume;
+	tessera_t t;
+	char dev[32];
+	int len;
+
+	if (argc < 1) {
+		printf("Usage: moctl NAME attach VOLUME\n");
+		return 1;
+	}
+
+	volume = argv[1];
+	t = mosaic_open_tess(m, volume, 0);
+	if (!t) {
+		fprintf(stderr, "No volume %s\n", volume);
+		return 1;
+	}
+
+	len = mosaic_get_tess_bdev(t, dev, sizeof(dev), 0);
+	if (len < 0) {
+		fprintf(stderr, "Can't attach %s\n", volume);
+		mosaic_close_tess(t);
+		return 1;
+	}
+
+	printf("Device: %s\n", dev);
+
+	return 0;
+}
+
+static int do_mosaic_detach_tess(mosaic_t m, int argc, char **argv)
+{
+	const char *volume;
+	tessera_t t;
+
+	if (argc < 1) {
+		printf("Usage: moctl NAME detach VOLUME\n");
+		return 1;
+	}
+
+	volume = argv[1];
+	t = mosaic_open_tess(m, volume, 0);
+	if (!t) {
+		fprintf(stderr, "No volume %s\n", volume);
+		return 1;
+	}
+
+	/* FIXME: where do we get dev string from? */
+	if (mosaic_put_tess_bdev(t, NULL) < 0) {
+		fprintf(stderr, "Can't detach %s\n", volume);
+		mosaic_close_tess(t);
+		return 1;
+	}
+
+	return 0;
+}
 static int do_mosaic_create(char *name, int argc, char **argv)
 {
 	int ret;
@@ -275,6 +332,10 @@ static int do_mosaic(char *name, int argc, char **argv)
 		return do_mosaic_mount(mos, argc, argv);
 	if (argis(action, "umount"))
 		return do_mosaic_umount(mos, argc, argv);
+	if (argis(action, "attach"))
+		return do_mosaic_attach_tess(mos, argc, argv);
+	if (argis(action, "detach"))
+		return do_mosaic_detach_tess(mos, argc, argv);
 	if (argis(action, "new"))
 		return do_mosaic_new_tess(mos, argc, argv);
 	if (argis(action, "clone"))
