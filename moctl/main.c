@@ -162,7 +162,7 @@ static int do_mosaic_clone_tess(mosaic_t m, int argc, char **argv)
 
 	old = mosaic_open_tess(m, argv[0], 0);
 	if (!old) {
-		printf("No tessera %s\n", argv[0]);
+		fprintf(stderr, "No tessera %s\n", argv[0]);
 		return 1;
 	}
 
@@ -170,7 +170,7 @@ static int do_mosaic_clone_tess(mosaic_t m, int argc, char **argv)
 	mosaic_close_tess(old);
 
 	if (ret < 0) {
-		printf("Can't clone %s\n", argv[0]);
+		fprintf(stderr, "Can't clone %s\n", argv[0]);
 		return 1;
 	}
 
@@ -188,12 +188,12 @@ static int do_mosaic_drop_tess(mosaic_t m, int argc, char **argv)
 
 	t = mosaic_open_tess(m, argv[0], 0);
 	if (!t) {
-		printf("No tessera %s\n", argv[0]);
+		fprintf(stderr, "No tessera %s\n", argv[0]);
 		return 1;
 	}
 
 	if (mosaic_drop_tess(t, 0) < 0) {
-		printf("Can't drop %s\n", argv[0]);
+		fprintf(stderr, "Can't drop %s\n", argv[0]);
 		mosaic_close_tess(t);
 		return 1;
 	}
@@ -218,7 +218,7 @@ static int do_mosaic_create(char *name, int argc, char **argv)
 	else if (!strcmp(m->m_ops->name, "plain"))
 		ret = create_plain(m, argc, argv);
 	else {
-		printf("Unknown mosaic type %s\n", name);
+		fprintf(stderr, "Unknown mosaic type %s\n", name);
 		ret = -1;
 	}
 
@@ -239,7 +239,7 @@ static int do_mosaic(char *name, int argc, char **argv)
 
 	mos = mosaic_open(name, 0);
 	if (!mos) {
-		printf("Error opening mosaic %s\n", name);
+		fprintf(stderr, "Error opening mosaic %s\n", name);
 		return 1;
 	}
 
