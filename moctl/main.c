@@ -7,6 +7,17 @@
 #include "moctl.h"
 #include "mosaic.h"
 
+int usage(int ret)
+{
+	printf("\n"
+"Usage: moctl NAME ACTION [ARGUMENT ...]\n"
+"	NAME     := mosaic name (path to .mos file)\n"
+"	ACTION   := mount|umount|new|clone|drop\n"
+"	ARGUMENT := zero or more arguments, depending on ACTION\n");
+
+	return ret;
+}
+
 static inline int argis(char *arg, char *is)
 {
 	while (1) {
@@ -229,11 +240,6 @@ static int do_mosaic(char *name, int argc, char **argv)
 {
 	mosaic_t mos;
 
-	if (argc < 1) {
-		printf("Usage: moctl <name> [mount|new|clone|drop] ...\n");
-		return 1;
-	}
-
 	if (argis(argv[0], "create"))
 		return do_mosaic_create(name, argc - 1, argv + 1);
 
@@ -254,14 +260,15 @@ static int do_mosaic(char *name, int argc, char **argv)
 	if (argis(argv[0], "drop"))
 		return do_mosaic_drop_tess(mos, argc - 1, argv + 1);
 
-	return 1;
+	fprintf(stderr, "Unknown action: %s\n", argv[0]);
+	return usage(1);
 }
 
 int main(int argc, char **argv)
 {
-	if (argc < 2) {
-		printf("Usage: moctl <mosaic_name> <action> [<arguments>]\n");
-		return 1;
+	if (argc < 3) {
+		fprintf(stderr, "Not enough arguments!\n");
+		return usage(1);
 	}
 
 	return do_mosaic(argv[1], argc - 2, argv + 2);
