@@ -104,5 +104,7 @@ int mosaic_parse_config(const char *cfg, struct mosaic *m)
 out_c:
 	fclose(cfg_f);
 out:
+	if (!m->m_ops)
+		return -1;
 	return ret;
 }
