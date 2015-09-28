@@ -18,7 +18,10 @@ int usage(int ret)
 	return ret;
 }
 
-static inline int argis(char *arg, char *is)
+/* This allows for abbreviated commands to be used,
+ * such as 'm' instead of 'mount'.
+ */
+static inline int argis(const char *arg, const char *is)
 {
 	while (1) {
 		if (*is == '\0')
@@ -239,6 +242,10 @@ static int do_mosaic_create(char *name, int argc, char **argv)
 static int do_mosaic(char *name, int argc, char **argv)
 {
 	mosaic_t mos;
+
+	/* Note the order of arguments checking is important here,
+	 * as abbreviations are allowed by argis().
+	 */
 
 	if (argis(argv[0], "create"))
 		return do_mosaic_create(name, argc - 1, argv + 1);
