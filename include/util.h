@@ -13,6 +13,8 @@ char *read_var(int dirfd, const char *dir, const char *name);
 int write_var(int dirfd, const char *dir,
 		const char *name, const char *val);
 
+int unset_var(int dirfs, const char *dir, const char *name);
+
 int run_prg(char *const argv[]);
 #define HIDE_STDOUT	1 << 0	/* hide process' stdout */
 #define HIDE_STDERR	1 << 1	/* hide process' stderr */

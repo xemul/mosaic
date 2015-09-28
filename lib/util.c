@@ -217,6 +217,18 @@ out:
 	return buf;
 }
 
+int unset_var(int dirfd, const char *dir, const char *name)
+{
+	if (unlinkat(dirfd, name, 0) < 0) {
+		if (errno != ENOENT)
+			fprintf(stderr, "%s: can't unlink %s/%s: %m\n",
+					__func__, dir, name);
+		return -1;
+	}
+
+	return 0;
+}
+
 static void arg2str(char *const argv[], char *buf, int len)
 {
 	int i, r;
