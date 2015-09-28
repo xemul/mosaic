@@ -141,7 +141,7 @@ static int clone_ploop(struct mosaic *m, struct tessera *parent,
 
 	int ret = -1;
 	/* 1. Check if we have parent already snapshotted for clone */
-	char *uuid = read_val(pdfd, pdir, uuidvar);
+	char *uuid = read_var(pdfd, pdir, uuidvar);
 	if (uuid == NULL) {
 
 		/* 1.1 Create a new snapshot in parent */
@@ -163,7 +163,7 @@ static int clone_ploop(struct mosaic *m, struct tessera *parent,
 			goto out;
 		}
 		/* Save for reuse */
-		write_val(pdfd, pdir, uuidvar, uuid);
+		write_var(pdfd, pdir, uuidvar, uuid);
 	}
 
 	/* 2. Copy dd.xml from parent */
