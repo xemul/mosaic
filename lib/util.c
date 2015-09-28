@@ -138,7 +138,7 @@ int copy_file(int src_dirfd, const char *src_dir,
 
 const ssize_t max_val_len = 1024;
 
-int write_val(int dirfd, const char *dir,
+int write_var(int dirfd, const char *dir,
 		const char *name, const char *val)
 {
 	int fd, ret = 0;
@@ -171,7 +171,7 @@ int write_val(int dirfd, const char *dir,
 	return ret;
 }
 
-char *read_val(int dirfd, const char *dir, const char *name)
+char *read_var(int dirfd, const char *dir, const char *name)
 {
 	int fd;
 	struct stat st;

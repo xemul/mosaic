@@ -17,7 +17,7 @@ static int open_btrfs(struct mosaic *m, int flags)
 	return 0;
 }
 
-static int new_btrfs_subvol(struct mosaic *m, char *name,
+static int new_btrfs_subvol(struct mosaic *m, const char *name,
 		unsigned long size_in_blocks, int make_flags)
 {
 	char *argv[8];
@@ -52,7 +52,7 @@ static int open_btrfs_subvol(struct mosaic *m, struct tessera *t,
 }
 
 static int clone_btrfs_subvol(struct mosaic *m, struct tessera *from,
-		char *name, int clone_flags)
+		const char *name, int clone_flags)
 {
 	char *argv[8];
 	char vol[PATH_MAX], pvol[PATH_MAX];

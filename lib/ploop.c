@@ -15,7 +15,7 @@
 
 #include "ploop-internal.h"
 
-static int create_ploop(struct mosaic *m, char *name,
+static int create_ploop(struct mosaic *m, const char *name,
 		unsigned long size_in_blocks, int make_flags)
 {
 	char dir[PATH_MAX];
@@ -80,7 +80,7 @@ static int open_ploop(struct mosaic *m, struct tessera *t, int open_flags)
 }
 
 static int clone_ploop(struct mosaic *m, struct tessera *parent,
-		char *name, int clone_flags)
+		const char *name, int clone_flags)
 {
 	/* While ploop is a set of layered images and it's easy to implement
 	 * cloning mechanism, it is not (yet?) done in either library
@@ -141,7 +141,7 @@ static int clone_ploop(struct mosaic *m, struct tessera *parent,
 
 	int ret = -1;
 	/* 1. Check if we have parent already snapshotted for clone */
-	char *uuid = read_val(pdfd, pdir, uuidvar);
+	char *uuid = read_var(pdfd, pdir, uuidvar);
 	if (uuid == NULL) {
 
 		/* 1.1 Create a new snapshot in parent */
@@ -163,7 +163,7 @@ static int clone_ploop(struct mosaic *m, struct tessera *parent,
 			goto out;
 		}
 		/* Save for reuse */
-		write_val(pdfd, pdir, uuidvar, uuid);
+		write_var(pdfd, pdir, uuidvar, uuid);
 	}
 
 	/* 2. Copy dd.xml from parent */
@@ -251,7 +251,7 @@ static int mount_ploop(struct mosaic *m, struct tessera *t,
 }
 
 static int umount_ploop(struct mosaic *m, struct tessera *t,
-		char *path, int umount_flags)
+		const char *path, int umount_flags)
 {
 	char dd[PATH_MAX];
 	char *argv[4];

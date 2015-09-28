@@ -23,13 +23,13 @@ struct mosaic_ops {
 	int (*open)(struct mosaic *self, int open_flags);
 	int (*mount)(struct mosaic *self, const char *path, int mount_flags);
 
-	int (*new_tessera)(struct mosaic *, char *name, unsigned long size_in_blocks, int make_flags);
+	int (*new_tessera)(struct mosaic *, const char *name, unsigned long size_in_blocks, int make_flags);
 	int (*open_tessera)(struct mosaic *, struct tessera *, int open_flags);
 
 	/*
 	 * Clone is optional, NULL means COW-style cloning is not supported.
 	 */
-	int (*clone_tessera)(struct mosaic *, struct tessera *from, char *name, int clone_flags);
+	int (*clone_tessera)(struct mosaic *, struct tessera *from, const char *name, int clone_flags);
 	int (*drop_tessera)(struct mosaic *, struct tessera *, int drop_flags);
 	int (*resize_tessera)(struct mosaic *, struct tessera *, unsigned long size_in_blocks, int resize_flags);
 
@@ -43,14 +43,14 @@ struct mosaic_ops {
 	 * Umount can be optional, in this case library will just call
 	 * umount() and detach_tessera (if present).
 	 */
-	int (*umount_tessera)(struct mosaic *, struct tessera *, char *path, int umount_flags);
+	int (*umount_tessera)(struct mosaic *, struct tessera *, const char *path, int umount_flags);
 
 	/*
 	 * Both can be optional, in case raw device access is not
 	 * possible for this mosaic type.
 	 */
-	int (*attach_tessera)(struct mosaic *, struct tessera *, char *devs, int len, int flags);
-	int (*detach_tessera)(struct mosaic *, struct tessera *, char *devs);
+	int (*attach_tessera)(struct mosaic *, struct tessera *, char *dev, int len, int flags);
+	int (*detach_tessera)(struct mosaic *, struct tessera *, char *dev);
 
 	int (*get_tessera_size)(struct mosaic *, struct tessera *, unsigned long *size_in_blocks);
 

@@ -28,7 +28,7 @@ static int open_fsimg_tess(struct mosaic *m, struct tessera *t,
 	return fstatat(fp->m_loc_dir, t->t_name, &b, 0);
 }
 
-static int new_fsimg_tess(struct mosaic *m, char *name,
+static int new_fsimg_tess(struct mosaic *m, const char *name,
 		unsigned long size_in_blocks, int make_flags)
 {
 	struct mosaic_subdir_priv *fp = m->priv;
@@ -84,7 +84,7 @@ static int drop_fsimg_tess(struct mosaic *m, struct tessera *t,
 }
 
 static int attach_fsimg_tess(struct mosaic *m, struct tessera *t,
-		char *devs, int len, int flags)
+		char *dev, int len, int flags)
 {
 	struct mosaic_subdir_priv *fp = m->priv;
 	char aux[1024], *nl;
@@ -106,18 +106,18 @@ static int attach_fsimg_tess(struct mosaic *m, struct tessera *t,
 	if (nl)
 		*nl = '\0';
 
-	strncpy(devs, aux, len);
+	strncpy(dev, aux, len);
 	return strlen(aux);
 }
 
-static int detach_fsimg_tess(struct mosaic *m, struct tessera *t, char *devs)
+static int detach_fsimg_tess(struct mosaic *m, struct tessera *t, char *dev)
 {
 	char *argv[4];
 	int i = 0;
 
 	argv[i++] = "losetup";
 	argv[i++] = "-d";
-	argv[i++] = devs;
+	argv[i++] = dev;
 	argv[i++] = NULL;
 
 	if (run_prg(argv))

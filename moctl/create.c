@@ -45,12 +45,12 @@ int create_btrfs(struct mosaic *m, int argc, char **argv)
 	FILE *f;
 	char aux[1024], *dev;
 
-	if (argc < 1) {
+	if (argc < 2) {
 		printf("Usage: moctl <name> create d:<device>|f:<imgfile>\n");
 		return -1;
 	}
 
-	dev = argv[0] + 2;
+	dev = argv[1] + 2;
 	sprintf(aux, "mkfs -t btrfs %s", dev);
 	f = popen(aux, "r");
 	if (!f) {
@@ -65,7 +65,7 @@ int create_btrfs(struct mosaic *m, int argc, char **argv)
 		return -1;
 	}
 
-	if (argv[0][0] == 'f') {
+	if (argv[1][0] == 'f') {
 		char *nl;
 
 		/* FIXME -- stub stderr */

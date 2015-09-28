@@ -17,7 +17,7 @@ static int open_plain(struct mosaic *m, int open_flags)
 }
 
 
-static int new_plain_tess(struct mosaic *m, char *name,
+static int new_plain_tess(struct mosaic *m, const char *name,
 		unsigned long size_in_blocks, int new_flags)
 {
 	struct mosaic_subdir_priv *pp = m->priv;
