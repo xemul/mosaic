@@ -15,7 +15,7 @@
 
 #include "ploop-internal.h"
 
-static int create_ploop(struct mosaic *m, char *name,
+static int create_ploop(struct mosaic *m, const char *name,
 		unsigned long size_in_blocks, int make_flags)
 {
 	char dir[PATH_MAX];
@@ -80,7 +80,7 @@ static int open_ploop(struct mosaic *m, struct tessera *t, int open_flags)
 }
 
 static int clone_ploop(struct mosaic *m, struct tessera *parent,
-		char *name, int clone_flags)
+		const char *name, int clone_flags)
 {
 	/* While ploop is a set of layered images and it's easy to implement
 	 * cloning mechanism, it is not (yet?) done in either library
@@ -251,7 +251,7 @@ static int mount_ploop(struct mosaic *m, struct tessera *t,
 }
 
 static int umount_ploop(struct mosaic *m, struct tessera *t,
-		char *path, int umount_flags)
+		const char *path, int umount_flags)
 {
 	char dd[PATH_MAX];
 	char *argv[4];

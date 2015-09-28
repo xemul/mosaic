@@ -28,7 +28,7 @@ static int open_fsimg_tess(struct mosaic *m, struct tessera *t,
 	return fstatat(fp->m_loc_dir, t->t_name, &b, 0);
 }
 
-static int new_fsimg_tess(struct mosaic *m, char *name,
+static int new_fsimg_tess(struct mosaic *m, const char *name,
 		unsigned long size_in_blocks, int make_flags)
 {
 	struct mosaic_subdir_priv *fp = m->priv;

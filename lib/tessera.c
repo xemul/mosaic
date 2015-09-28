@@ -6,7 +6,7 @@
 #include "util.h"
 #include "uapi/mosaic.h"
 
-tessera_t mosaic_open_tess(mosaic_t m, char *name, int open_flags)
+tessera_t mosaic_open_tess(mosaic_t m, const char *name, int open_flags)
 {
 	struct tessera *t;
 
@@ -36,7 +36,7 @@ void mosaic_close_tess(tessera_t t)
 	free(t);
 }
 
-int mosaic_make_tess(mosaic_t m, char *name, unsigned long size_in_blocks, int make_flags)
+int mosaic_make_tess(mosaic_t m, const char *name, unsigned long size_in_blocks, int make_flags)
 {
 	if (make_flags)
 		return -1;
@@ -44,7 +44,7 @@ int mosaic_make_tess(mosaic_t m, char *name, unsigned long size_in_blocks, int m
 	return m->m_ops->new_tessera(m, name, size_in_blocks, make_flags);
 }
 
-int mosaic_make_tess_fs(mosaic_t m, char *name, unsigned long size_in_blocks, int make_flags)
+int mosaic_make_tess_fs(mosaic_t m, const char *name, unsigned long size_in_blocks, int make_flags)
 {
 	if (make_flags)
 		return -1;
@@ -52,7 +52,7 @@ int mosaic_make_tess_fs(mosaic_t m, char *name, unsigned long size_in_blocks, in
 	return m->m_ops->new_tessera(m, name, size_in_blocks, make_flags | NEW_TESS_WITH_FS);
 }
 
-int mosaic_clone_tess(tessera_t from, char *name, int clone_flags)
+int mosaic_clone_tess(tessera_t from, const char *name, int clone_flags)
 {
 	struct mosaic *m = from->m;
 
@@ -78,7 +78,7 @@ int mosaic_drop_tess(tessera_t t, int drop_flags)
 	return 0;
 }
 
-int mosaic_mount_tess(tessera_t t, char *path, int mount_flags)
+int mosaic_mount_tess(tessera_t t, const char *path, int mount_flags)
 {
 	struct mosaic *m = t->m;
 	char tdev[1024];
@@ -95,7 +95,7 @@ int mosaic_mount_tess(tessera_t t, char *path, int mount_flags)
 	return mount(tdev, path, m->default_fs, mount_flags, NULL);
 }
 
-int mosaic_umount_tess(tessera_t t, char *path, int umount_flags)
+int mosaic_umount_tess(tessera_t t, const char *path, int umount_flags)
 {
 	struct mosaic *m = t->m;
 	char *rpath, tdev[1024];
@@ -114,7 +114,7 @@ int mosaic_umount_tess(tessera_t t, char *path, int umount_flags)
 			return -1;
 		}
 	} else
-		rpath = path;
+		rpath = (char *)path;
 
 	ret = umount(rpath);
 

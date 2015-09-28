@@ -65,7 +65,7 @@ void mosaic_close(mosaic_t m)
 	free(m);
 }
 
-int mosaic_mount(mosaic_t m, char *path, int mount_flags)
+int mosaic_mount(mosaic_t m, const char *path, int mount_flags)
 {
 	if (m->m_ops->mount)
 		return m->m_ops->mount(m, path, mount_flags);
