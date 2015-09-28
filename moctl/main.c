@@ -7,6 +7,8 @@
 #include "moctl.h"
 #include "mosaic.h"
 
+char *self_name;
+
 int usage(int ret)
 {
 	printf("\n"
@@ -47,12 +49,12 @@ static int do_mosaic_mount(mosaic_t m, int argc, char **argv)
 	tessera_t t = NULL;
 	int flags;
 
-	if (argc < 3) {
+	if (argc < 4) {
 		printf("Usage: moctl <name> mount <tessera>|- <path> <flags>\n");
 		return 1;
 	}
 
-	volume = argv[0];
+	volume = argv[1];
 	if (strcmp(volume, "-")) {
 		t = mosaic_open_tess(m, volume, 0);
 		if (!t) {
@@ -61,8 +63,8 @@ static int do_mosaic_mount(mosaic_t m, int argc, char **argv)
 		}
 	}
 
-	path = argv[1];
-	flags = parse_mount_flags(argv[2]);
+	path = argv[2];
+	flags = parse_mount_flags(argv[3]);
 
 	if (t) {
 		if (mosaic_mount_tess(t, path, flags)) {
@@ -84,7 +86,7 @@ static int do_mosaic_umount(mosaic_t m, int argc, char **argv)
 	const char *volume, *path;
 	tessera_t t = NULL;
 
-	if (argc < 2) {
+	if (argc < 3) {
 		printf("Usage: moctl <name> umount <tessera>|- <path>\n");
 		return 1;
 	}
@@ -98,7 +100,7 @@ static int do_mosaic_umount(mosaic_t m, int argc, char **argv)
 		}
 	}
 
-	path = argv[1];
+	path = argv[2];
 	if (t) {
 		if (mosaic_umount_tess(t, path, 0)) {
 			perror("Can't umount tessera");
@@ -149,14 +151,14 @@ static int do_mosaic_new_tess(mosaic_t m, int argc, char **argv)
 	const char *type, *volume;
 	unsigned long size;
 
-	if (argc < 3) {
+	if (argc < 4) {
 		printf("Usage: moctl <name> new fs|disk <name> <size>\n");
 		return 1;
 	}
 
-	type = argv[0];
-	volume = argv[1];
-	size = parse_size(argv[2]);
+	type = argv[1];
+	volume = argv[2];
+	size = parse_size(argv[3]);
 
 	if (argis(type, "disk"))
 		ret = mosaic_make_tess(m, volume, size, 0);
@@ -174,13 +176,13 @@ static int do_mosaic_clone_tess(mosaic_t m, int argc, char **argv)
 	const char *oldvol, *newvol;
 	tessera_t old;
 
-	if (argc < 2) {
+	if (argc < 3) {
 		printf("Usage: moctl <name> clone <old> <new>\n");
 		return 1;
 	}
 
-	oldvol = argv[0];
-	newvol = argv[1];
+	oldvol = argv[1];
+	newvol = argv[2];
 
 	old = mosaic_open_tess(m, oldvol, 0);
 	if (!old) {
@@ -204,12 +206,12 @@ static int do_mosaic_drop_tess(mosaic_t m, int argc, char **argv)
 	tessera_t t;
 	const char *volume;
 
-	if (argc < 1) {
+	if (argc < 2) {
 		printf("Usage: moctl <mosaic> drop <tessera>\n");
 		return 1;
 	}
 
-	volume = argv[0];
+	volume = argv[1];
 	t = mosaic_open_tess(m, volume, 0);
 	if (!t) {
 		fprintf(stderr, "No tessera %s\n", volume);
@@ -254,12 +256,14 @@ static int do_mosaic(char *name, int argc, char **argv)
 	mosaic_t mos;
 	const char *action = argv[0];
 
+	argv[0] = self_name; // needed for getopt_long error reporting
+
 	/* Note the order of arguments checking is important here,
 	 * as abbreviations are allowed by argis().
 	 */
 
 	if (argis(action, "create"))
-		return do_mosaic_create(name, argc - 1, argv + 1);
+		return do_mosaic_create(name, argc, argv);
 
 	mos = mosaic_open(name, 0);
 	if (!mos) {
@@ -268,15 +272,15 @@ static int do_mosaic(char *name, int argc, char **argv)
 	}
 
 	if (argis(action, "mount"))
-		return do_mosaic_mount(mos, argc - 1, argv + 1);
+		return do_mosaic_mount(mos, argc, argv);
 	if (argis(action, "umount"))
-		return do_mosaic_umount(mos, argc - 1, argv + 1);
+		return do_mosaic_umount(mos, argc, argv);
 	if (argis(action, "new"))
-		return do_mosaic_new_tess(mos, argc - 1, argv + 1);
+		return do_mosaic_new_tess(mos, argc, argv);
 	if (argis(action, "clone"))
-		return do_mosaic_clone_tess(mos, argc - 1, argv + 1);
+		return do_mosaic_clone_tess(mos, argc, argv);
 	if (argis(action, "drop"))
-		return do_mosaic_drop_tess(mos, argc - 1, argv + 1);
+		return do_mosaic_drop_tess(mos, argc, argv);
 
 	fprintf(stderr, "Unknown action: %s\n", action);
 	return usage(1);
@@ -289,5 +293,6 @@ int main(int argc, char **argv)
 		return usage(1);
 	}
 
+	self_name = argv[0];
 	return do_mosaic(argv[1], argc - 2, argv + 2);
 }
