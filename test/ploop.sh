@@ -1,3 +1,5 @@
+TEST_MOS_ATTACH_DETACH=yes
+
 echo "*** Testing ploop driver"
 mkdir ploop.dir
 echo 'type: ploop' > ploop.mos

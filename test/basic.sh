@@ -19,6 +19,20 @@ function run_tests()
 
 	echo "* Testing tesserae"
 	$moctl $mname new fs test_fs 512m || fail "Can't create fs"
+
+# Ideally we should have a way to ask a particular driver if a specific
+# operation is supported. Until we have that, do a little trick
+	if test -n "$TEST_MOS_ATTACH_DETACH"; then
+		$moctl $mname attach test_fs \
+			|| fail "Can't attach device"
+		$moctl $mname attach test_fs \
+			&& fail "Unexpected success of attach (2)"
+		$moctl $mname detach test_fs \
+			|| fail "Can't detach device"
+		$moctl $mname detach test_fs \
+			&& fail "Unexpected success of detach (2)"
+	fi
+
 	$moctl $mname mount test_fs tmnt - || fail "Can't mount fs (1)"
 	echo "t-test" > tmnt/t-tfile
 	$moctl $mname umount test_fs tmnt || fail "Can't umount fs"

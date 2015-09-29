@@ -334,6 +334,99 @@ static int get_size_ploop(struct mosaic *m, struct tessera *t,
 	return -1;
 }
 
+static int detach_ploop(struct mosaic *m, struct tessera *t, char *dev)
+{
+	(void)dev; // unused
+
+	/* FIXME: if a filesystem within this ploop device
+	 * is mounted, it is automatically unmounted.
+	 * Ideally, we should return say EBUSY in this case.
+	 */
+	return umount_ploop(m, t, NULL, 0);
+}
+
+static int attach_ploop(struct mosaic *m, struct tessera *t,
+		char *dev, int size, int flags)
+{
+	const char *needle = "Adding delta dev=/dev/ploop";
+	const int dev_offset = sizeof("Adding delta dev=");
+	char cmd[PATH_MAX];
+	char dd[PATH_MAX];
+	char out[PATH_MAX];
+	FILE *fp;
+	int ret = -1, rc;
+	(void)flags; // unused
+
+	/* Theoretically this is the same as mount_ploop() only
+	 * without -m argument, but we need to figure out device
+	 * name and the only way possible when using the command
+	 * line tool is to parse the command output string,
+	 * looking for a specific string.
+	 */
+
+	snprintf(dd, sizeof(dd), "%s/%s/" DDXML, m->m_loc, t->t_name);
+	snprintf(cmd, sizeof(cmd), "ploop mount %s", dd);
+
+	dev[0] = '\0'; // assume len > 0
+	fp = popen(cmd, "re");
+	if (!fp) {
+		fprintf(stderr, "%s: can't popen %s: %m\n", __func__, cmd);
+		return -1;
+	}
+
+	/* Parse the output to find the device name */
+	while (fgets(out, sizeof(out), fp) != NULL) {
+		char *str, *begin, *end;
+		if (ret > 0) // already found
+			continue;
+		str = strstr(out, needle);
+		if (!str)
+			continue;
+		begin = str + dev_offset - 1;
+		end = strchr(begin, ' ');
+		if (!end)
+			continue; // hmm, read on a boundary?
+		*end = '\0';
+		if (end - begin + 1 > size)
+			fprintf(stderr, "%s: not enough buffer space (%d)"
+					"to store %s",
+					__func__, size, begin);
+		strcpy(dev, begin);
+		ret = end - begin;
+	}
+
+	/* Error handling is a bit cumbersome below and cries for a comment.
+	 *
+	 * First, we check that plose did not return an error.
+	 * Second, we check that ploop exit code is not zero.
+	 * Finally, we check that we got the device name.
+	 *
+	 * Note that the ret = -1 assignments below are probably redundant,
+	 * as in case of ploop error we probably haven't got a device
+	 * string so ret is -1 anyway, but better be safe than sorry.
+	 */
+	rc = pclose(fp);
+	if (rc < 0) {
+		fprintf(stderr, "%s: command execution error, pclose(): %m\n",
+				__func__);
+		ret = -1;
+	} else if (rc) {
+		fprintf(stderr, "%s: ploop returned non-zero exit code %d\n",
+				__func__, WEXITSTATUS(rc));
+		ret = -1;
+	} else if (ret == -1) {
+		/* The ploop command succeeded, i.e. device is mounted,
+		 * but we were unable to parse the device name string
+		 * from the command output, so need to rollback.
+		 */
+		detach_ploop(m, t, NULL);
+		fprintf(stderr, "%s: internal error: can't parse dev\n",
+				__func__);
+	}
+
+	return ret;
+}
+
 const struct mosaic_ops mosaic_ploop = {
 	.name		= "ploop",
 
@@ -346,4 +439,6 @@ const struct mosaic_ops mosaic_ploop = {
 	.drop_tessera	= remove_ploop,
 	.resize_tessera	= resize_ploop,
 	.get_tessera_size = get_size_ploop,
+	.attach_tessera = attach_ploop,
+	.detach_tessera = detach_ploop,
 };
