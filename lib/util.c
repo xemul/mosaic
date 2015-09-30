@@ -142,13 +142,16 @@ int write_var(int dirfd, const char *dir,
 		const char *name, const char *val)
 {
 	int fd, ret = 0;
-	ssize_t len;
+	ssize_t len = 0;
 
-	len = strlen(val) + 1; // +1 for \0
-	if (len > max_val_len) {
-		fprintf(stderr, "%s: variable %s too long (%zd > %zd)!\n",
-				__func__, name, len, max_val_len);
-		return -1;
+	if (val) {
+		len = strlen(val) + 1; // +1 for \0
+		if (len > max_val_len) {
+			fprintf(stderr, "%s: variable %s too long "
+					"(%zd > %zd)!\n",
+					__func__, name, len, max_val_len);
+			return -1;
+		}
 	}
 
 	fd = openat(dirfd, name, O_WRONLY);
@@ -157,11 +160,21 @@ int write_var(int dirfd, const char *dir,
 				__func__, dir, name);
 		return -1;
 	}
-	if (write(fd, val, len) != len) {
-		fprintf(stderr, "%s: can't write %s/%s: %m\n",
-				__func__, dir, name);
-		ret = -1;
+
+	if (len == 0) {
+		if (ftruncate(fd, 0) < 0) {
+			fprintf(stderr, "%s: can't truncate %s/%s: %m\n",
+					__func__, dir, name);
+			ret = -1;
+		}
+	} else {
+		if (write(fd, val, len) != len) {
+			fprintf(stderr, "%s: can't write %s/%s: %m\n",
+					__func__, dir, name);
+			ret = -1;
+		}
 	}
+
 	if (close(fd) < 0) {
 		fprintf(stderr, "%s: can't close %s/%s: %m\n",
 				__func__, dir, name);
