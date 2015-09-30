@@ -367,7 +367,7 @@ static int attach_ploop(struct mosaic *m, struct tessera *t,
 	snprintf(dd, sizeof(dd), "%s/%s/" DDXML, m->m_loc, t->t_name);
 	snprintf(cmd, sizeof(cmd), "ploop mount %s", dd);
 
-	dev[0] = '\0'; // assume len > 0
+	dev[0] = '\0';
 	fp = popen(cmd, "re");
 	if (!fp) {
 		fprintf(stderr, "%s: can't popen %s: %m\n", __func__, cmd);
