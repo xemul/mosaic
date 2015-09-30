@@ -97,7 +97,7 @@ static int do_mosaic_mount(mosaic_t m, int argc, char **argv)
 		return mount_usage(1);
 	}
 
-	volume = argv[1];
+	volume = argv[0];
 	if (strcmp(volume, "-")) {
 		t = mosaic_open_vol(m, volume, 0);
 		if (!t) {
@@ -106,7 +106,7 @@ static int do_mosaic_mount(mosaic_t m, int argc, char **argv)
 		}
 	}
 
-	path = argv[2];
+	path = argv[1];
 
 	if (t) {
 		if (mosaic_mount_vol(t, path, flags)) {
