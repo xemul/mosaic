@@ -7,42 +7,42 @@ Usage:
 
 Actions:
 
-* mount: Mounts mosaic or tessera.
+* mount: Mounts mosaic or volume.
 
-  Usage: mount <tessera>|- <path> <flags>
+  Usage: mount <volume>|- <path> <flags>
 
-  If tessera name is "-", then the mosaic itself is mounted.
+  If volume name is "-", then the mosaic itself is mounted.
 
 * umount: Umounts stuff mounted with mount action
 
-  Usage: umount <tessera>|- <path>
+  Usage: umount <volume>|- <path>
 
 
-* new: Creates new empty tessera
+* new: Creates new empty volume
 
-  Usage: new fs|disk <tessera> <size>
+  Usage: new fs|disk <volume> <size>
 
   If "disk" is given then the plain block device is created,
   if "fs" is given, then the created block device is marked
   with the default filesystem. Some backends do not support
   both types, e.g. btrfs only supports the "fs" type.
 
-  Size accepts KMG suffixes. The <tessera> is the new volume
+  Size accepts KMG suffixes. The <volume> is the new volume
   name the user wants.
 
-* clone: Clones tessera from some other one
+* clone: Clones volume from some other one
 
-  Usage: clone <tessera_from> <tessera>
+  Usage: clone <volume_from> <volume>
 
   Clone is performed using the COW technology if the backend
   supports this. If it does not, the error is reported back and new
-  tessera is not created.
+  volume is not created.
 
-* drop: Drops tessera
+* drop: Drops volume
 
-  Usage: drop <tessera>
+  Usage: drop <volume>
 
-  Removes all the data! The tesserae that were cloned from
+  Removes all the data! The volumes that were cloned from
   this one are not affected (or error is reported if the backend
   doesn't support such behavior, but we don't have and don't plan
   to have such backends).

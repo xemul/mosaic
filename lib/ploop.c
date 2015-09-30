@@ -11,7 +11,7 @@
 #include <sys/mount.h>
 
 #include "mosaic.h"
-#include "tessera.h"
+#include "volume.h"
 #include "util.h"
 
 #include "ploop-internal.h"
@@ -36,7 +36,7 @@ static int create_ploop(struct mosaic *m, const char *name,
 		return -1;
 	}
 
-	if (make_flags & NEW_TESS_WITH_FS) {
+	if (make_flags & NEW_VOL_WITH_FS) {
 		if (m->default_fs)
 			snprintf(fstype, sizeof(fstype),
 					"-t %s", m->default_fs);
@@ -63,7 +63,7 @@ static int create_ploop(struct mosaic *m, const char *name,
 	return 0;
 }
 
-static int open_ploop(struct mosaic *m, struct tessera *t, int open_flags)
+static int open_ploop(struct mosaic *m, struct volume *t, int open_flags)
 {
 	char dd[PATH_MAX];
 	(void)open_flags; // unused
@@ -75,14 +75,14 @@ static int open_ploop(struct mosaic *m, struct tessera *t, int open_flags)
 
 	/* FIXME: what is this function supposed to do?
 	 * Do we need to mount ploop here /dev/ploopXXX is available?
-	 * If yes, why there's no matching close_tessera()?
+	 * If yes, why there's no matching close_volume()?
 	 * Also, not all places calling this function need a device.
 	 */
 
 	return 0;
 }
 
-static int clone_ploop(struct mosaic *m, struct tessera *parent,
+static int clone_ploop(struct mosaic *m, struct volume *parent,
 		const char *name, int clone_flags)
 {
 	/* While ploop is a set of layered images and it's easy to implement
@@ -228,7 +228,7 @@ out:
 	return ret;
 }
 
-static int mount_ploop(struct mosaic *m, struct tessera *t,
+static int mount_ploop(struct mosaic *m, struct volume *t,
 		const char *path, int mount_flags)
 {
 	char dd[PATH_MAX];
@@ -264,7 +264,7 @@ static int mount_ploop(struct mosaic *m, struct tessera *t,
 	return 0;
 }
 
-static int umount_ploop(struct mosaic *m, struct tessera *t,
+static int umount_ploop(struct mosaic *m, struct volume *t,
 		const char *path, int umount_flags)
 {
 	char dd[PATH_MAX];
@@ -290,7 +290,7 @@ static int umount_ploop(struct mosaic *m, struct tessera *t,
 	return 0;
 }
 
-static int remove_ploop(struct mosaic *m, struct tessera *t,
+static int remove_ploop(struct mosaic *m, struct volume *t,
 		int remove_flags)
 {
 	char dir[PATH_MAX];
@@ -313,7 +313,7 @@ static int remove_ploop(struct mosaic *m, struct tessera *t,
 	return ret;
 }
 
-static int resize_ploop(struct mosaic *m, struct tessera *t,
+static int resize_ploop(struct mosaic *m, struct volume *t,
 		unsigned long size_in_blocks, int resize_flags)
 {
 	char dd[PATH_MAX];
@@ -339,7 +339,7 @@ static int resize_ploop(struct mosaic *m, struct tessera *t,
 	return 0;
 }
 
-static int get_size_ploop(struct mosaic *m, struct tessera *t,
+static int get_size_ploop(struct mosaic *m, struct volume *t,
 		unsigned long *size_in_blocks)
 {
 	/* FIXME: we have total, used, and free for blocks and inodes,
@@ -348,7 +348,7 @@ static int get_size_ploop(struct mosaic *m, struct tessera *t,
 	return -1;
 }
 
-static int detach_ploop(struct mosaic *m, struct tessera *t)
+static int detach_ploop(struct mosaic *m, struct volume *t)
 {
 	/* FIXME: if a filesystem within this ploop device
 	 * is mounted, it is automatically unmounted.
@@ -357,7 +357,7 @@ static int detach_ploop(struct mosaic *m, struct tessera *t)
 	return umount_ploop(m, t, NULL, 0);
 }
 
-static int attach_ploop(struct mosaic *m, struct tessera *t,
+static int attach_ploop(struct mosaic *m, struct volume *t,
 		char *dev, int size, int flags)
 {
 	const char *needle = "Adding delta dev=/dev/ploop";
@@ -446,14 +446,14 @@ const struct mosaic_ops mosaic_ploop = {
 	.name		= "ploop",
 
 	/* ploop ops */
-	.new_tessera	= create_ploop,
-	.open_tessera	= open_ploop,
-	.clone_tessera	= clone_ploop,
-	.mount_tessera	= mount_ploop,
-	.umount_tessera	= umount_ploop,
-	.drop_tessera	= remove_ploop,
-	.resize_tessera	= resize_ploop,
-	.get_tessera_size = get_size_ploop,
-	.attach_tessera = attach_ploop,
-	.detach_tessera = detach_ploop,
+	.new_volume	= create_ploop,
+	.open_volume	= open_ploop,
+	.clone_volume	= clone_ploop,
+	.mount_volume	= mount_ploop,
+	.umount_volume	= umount_ploop,
+	.drop_volume	= remove_ploop,
+	.resize_volume	= resize_ploop,
+	.get_volume_size = get_size_ploop,
+	.attach_volume = attach_ploop,
+	.detach_volume = detach_ploop,
 };

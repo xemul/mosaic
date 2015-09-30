@@ -10,9 +10,9 @@ scalable disks for VMs and CTs data.
 
 Mosaic: a place where metadata and data are. Mosaic consists of one
 (for now) place for metadata -- FS, and zero or more places for VM/CT
-data -- tesserae.
+data -- volumes.
 
-Tessera: this is where VM/CT files are. It can be thought of as a disk
+Volume: this is where VM/CT files are. It can be thought of as a disk
 for VM or FS subtree for CT.
 
 
@@ -35,12 +35,12 @@ operations are "stateless" from the library point of view.
     location: /foo/bar
 
 Describes a btrfs mosaic located at /foo/bar. The metadata part is then
-in the /foo/bar, so are the tesserae (volumes). Adding
+in the /foo/bar, so are the volumes. Adding
 
     layout:
         fs: subdir
 
-will mean that the metadata is at /foo/bar/subdir. Tesserae remain in
+will mean that the metadata is at /foo/bar/subdir. Volumes remain in
 the /foo/bar and thus do not intersect with metadata.
 
 The detailed description of config file is in doc/config.txt
@@ -55,9 +55,9 @@ The moctl usage is
 The config file should exist, moctl loads one before doing actions. The
 actions are mount, umount, new, clone and drop.
 
-The first two mount and umount metadata or tessera, new and clone create
-new empty tessera or clone one from the existing, drop removes the
-tessera. Each action accepts its own set of arguments.
+The first two mount and umount metadata or volume, new and clone create
+new empty volume or clone one from the existing, drop removes the
+volume. Each action accepts its own set of arguments.
 
 The detailed description of moctl is in doc/moctl.txt
 
@@ -70,7 +70,7 @@ looks like
     mosaic_t m;
 
     m = mosaic_open(config_file, 0);
-    mosaic_make_tess(m, name, size_in_bytes, 0);
+    mosaic_make_vol(m, name, size_in_bytes, 0);
     ...
     mosaic_close(m, 0);
 

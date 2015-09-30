@@ -7,7 +7,7 @@
 #include <sys/mount.h>
 
 #include "mosaic.h"
-#include "tessera.h"
+#include "volume.h"
 #include "log.h"
 #include "uapi/mosaic.h"
 
@@ -82,7 +82,7 @@ int bind_mosaic_subdir_loc(struct mosaic *m, const char *path, int mount_flags)
 	return mount(src, path, NULL, MS_BIND | mount_flags, NULL);
 }
 
-int bind_tess_loc(struct mosaic *m, struct tessera *t,
+int bind_vol_loc(struct mosaic *m, struct volume *t,
 		const char *path, int mount_flags)
 {
 	char aux[1024];
@@ -121,10 +121,10 @@ int parse_mosaic_subdir_layout(struct mosaic *m, char *key, char *val)
 
 	/* FIXME: implement? */
 #if 0
-	if (!strcmp(key, "tess")) {
-		if (p->tess_subdir)
-			free(p->tess_subdir);
-		p->tess_subdir = val;
+	if (!strcmp(key, "vol")) {
+		if (p->vol_subdir)
+			free(p->vol_subdir);
+		p->vol_subdir = val;
 		return 0;
 	}
 #endif

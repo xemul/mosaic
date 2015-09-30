@@ -17,7 +17,7 @@ function run_tests()
 	rm -f mmnt/tfile
 	$moctl $mname umount - mmnt || fail "Can't clean mosaic"
 
-	echo "* Testing tesserae"
+	echo "* Testing volumes"
 	$moctl $mname new fs test_fs 512m || fail "Can't create fs"
 
 # Ideally we should have a way to ask a particular driver if a specific
@@ -40,9 +40,9 @@ function run_tests()
 	$moctl $mname mount test_fs tmnt || fail "Can't mount fs (2)"
 	fgrep -q "t-test" tmnt/t-tfile || fail "File not preserved in fs"
 
-	echo "* Cleaning up tessera"
+	echo "* Cleaning up volume"
 	$moctl $mname umount test_fs tmnt || fail "Can't clean fs"
-	$moctl $mname drop test_fs || fail "Can't drop tessera"
+	$moctl $mname drop test_fs || fail "Can't drop volume"
 
 	rmdir mmnt
 	rmdir tmnt

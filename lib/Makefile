@@ -14,7 +14,7 @@ PCDIR=$(LIBDIR)/pkgconfig
 
 OBJS =
 OBJS += mosaic.o
-OBJS += tessera.o
+OBJS += volume.o
 OBJS += fsimg.o
 OBJS += btrfs.o
 OBJS += plain.o

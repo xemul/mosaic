@@ -8,7 +8,7 @@
 #include <limits.h>
 #include <errno.h>
 #include "mosaic.h"
-#include "tessera.h"
+#include "volume.h"
 #include "util.h"
 
 static int open_fsimg(struct mosaic *m, int flags)
@@ -20,7 +20,7 @@ static int open_fsimg(struct mosaic *m, int flags)
 }
 
 
-static int open_fsimg_tess(struct mosaic *m, struct tessera *t,
+static int open_fsimg_vol(struct mosaic *m, struct volume *t,
 		int open_flags)
 {
 	struct mosaic_subdir_priv *fp = m->priv;
@@ -29,7 +29,7 @@ static int open_fsimg_tess(struct mosaic *m, struct tessera *t,
 	return fstatat(fp->m_loc_dir, t->t_name, &b, 0);
 }
 
-static int new_fsimg_tess(struct mosaic *m, const char *name,
+static int new_fsimg_vol(struct mosaic *m, const char *name,
 		unsigned long size_in_blocks, int make_flags)
 {
 	struct mosaic_subdir_priv *fp = m->priv;
@@ -49,7 +49,7 @@ static int new_fsimg_tess(struct mosaic *m, const char *name,
 		return -1;
 	}
 
-	if (make_flags & NEW_TESS_WITH_FS) {
+	if (make_flags & NEW_VOL_WITH_FS) {
 		char path[PATH_MAX];
 		char *argv[8];
 		int i = 0;
@@ -72,7 +72,7 @@ static int new_fsimg_tess(struct mosaic *m, const char *name,
 	return 0;
 }
 
-static int drop_fsimg_tess(struct mosaic *m, struct tessera *t,
+static int drop_fsimg_vol(struct mosaic *m, struct volume *t,
 		int drop_flags)
 {
 	struct mosaic_subdir_priv *fp = m->priv;
@@ -87,7 +87,7 @@ static int drop_fsimg_tess(struct mosaic *m, struct tessera *t,
 /* Figure out device name that corresponds to given volume.
  * Returns device string length, 0 if no device, or -1 on error.
  */
-static int get_dev(struct mosaic *m, struct tessera *t, char *dev, int size)
+static int get_dev(struct mosaic *m, struct volume *t, char *dev, int size)
 {
 	struct mosaic_subdir_priv *pdata = m->priv;
 	char cmd[1024];
@@ -176,7 +176,7 @@ out:
 	return ret;
 }
 
-static int attach_fsimg_tess(struct mosaic *m, struct tessera *t,
+static int attach_fsimg_vol(struct mosaic *m, struct volume *t,
 		char *dev, int len, int flags)
 {
 	struct mosaic_subdir_priv *fp = m->priv;
@@ -209,7 +209,7 @@ static int attach_fsimg_tess(struct mosaic *m, struct tessera *t,
 	return strlen(aux);
 }
 
-static int detach_fsimg_tess(struct mosaic *m, struct tessera *t)
+static int detach_fsimg_vol(struct mosaic *m, struct volume *t)
 {
 	char *argv[4];
 	char dev[NAME_MAX];
@@ -239,14 +239,14 @@ static int detach_fsimg_tess(struct mosaic *m, struct tessera *t)
 	return 0;
 }
 
-static int resize_fsimg_tess(struct mosaic *m, struct tessera *t,
+static int resize_fsimg_vol(struct mosaic *m, struct volume *t,
 		unsigned long size_in_blocks, int resize_flags)
 {
 	/* FIXME */
 	return -1;
 }
 
-static int get_fsimg_size(struct mosaic *m, struct tessera *t, unsigned long *size_in_blocks)
+static int get_fsimg_size(struct mosaic *m, struct volume *t, unsigned long *size_in_blocks)
 {
 	struct mosaic_subdir_priv *fp = m->priv;
 	struct stat buf;
@@ -263,13 +263,13 @@ const struct mosaic_ops mosaic_fsimg = {
 	.open = open_fsimg,
 /*	.mount = FIXME: location can be device */
 
-	.open_tessera = open_fsimg_tess,
-	.new_tessera = new_fsimg_tess,
-	.drop_tessera = drop_fsimg_tess,
-	.attach_tessera = attach_fsimg_tess,
-	.detach_tessera = detach_fsimg_tess,
-	.resize_tessera = resize_fsimg_tess,
-	.get_tessera_size = get_fsimg_size,
+	.open_volume = open_fsimg_vol,
+	.new_volume = new_fsimg_vol,
+	.drop_volume = drop_fsimg_vol,
+	.attach_volume = attach_fsimg_vol,
+	.detach_volume = detach_fsimg_vol,
+	.resize_volume = resize_fsimg_vol,
+	.get_volume_size = get_fsimg_size,
 
 	.parse_layout = parse_mosaic_subdir_layout,
 };

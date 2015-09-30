@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include "mosaic.h"
-#include "tessera.h"
+#include "volume.h"
 #include "util.h"
 
 static int open_plain(struct mosaic *m, int open_flags)
@@ -17,19 +17,19 @@ static int open_plain(struct mosaic *m, int open_flags)
 }
 
 
-static int new_plain_tess(struct mosaic *m, const char *name,
+static int new_plain_vol(struct mosaic *m, const char *name,
 		unsigned long size_in_blocks, int new_flags)
 {
 	struct mosaic_subdir_priv *pp = m->priv;
 
-	if (!(new_flags & NEW_TESS_WITH_FS))
+	if (!(new_flags & NEW_VOL_WITH_FS))
 		return -1;
 
 	/* FIXME -- size_in_blocks ignored */
 	return mkdirat(pp->m_loc_dir, name, 0600);
 }
 
-static int open_plain_tess(struct mosaic *m, struct tessera *t,
+static int open_plain_vol(struct mosaic *m, struct volume *t,
 		int open_flags)
 {
 	struct mosaic_subdir_priv *pp = m->priv;
@@ -38,7 +38,7 @@ static int open_plain_tess(struct mosaic *m, struct tessera *t,
 	return fstatat(pp->m_loc_dir, t->t_name, &b, 0);
 }
 
-static int drop_plain_tess(struct mosaic *m, struct tessera *t,
+static int drop_plain_vol(struct mosaic *m, struct volume *t,
 		int drop_flags)
 {
 	struct mosaic_subdir_priv *pp = m->priv;
@@ -54,14 +54,14 @@ static int drop_plain_tess(struct mosaic *m, struct tessera *t,
 	return unlinkat(pp->m_loc_dir, t->t_name, AT_REMOVEDIR);
 }
 
-static int resize_plain_tess(struct mosaic *m, struct tessera *t,
+static int resize_plain_vol(struct mosaic *m, struct volume *t,
 		unsigned long size_in_blocks, int resize_flags)
 {
 	/* FIXME */
 	return -1;
 }
 
-static int get_plain_size(struct mosaic *m, struct tessera *t,
+static int get_plain_size(struct mosaic *m, struct volume *t,
 		unsigned long *size_in_blocks)
 {
 	struct mosaic_subdir_priv *pp = m->priv;
@@ -84,12 +84,12 @@ const struct mosaic_ops mosaic_plain = {
 
 	.open = open_plain,
 
-	.new_tessera = new_plain_tess,
-	.open_tessera = open_plain_tess,
-	.drop_tessera = drop_plain_tess,
-	.resize_tessera = resize_plain_tess,
-	.mount_tessera = bind_tess_loc,
-	.get_tessera_size = get_plain_size,
+	.new_volume = new_plain_vol,
+	.open_volume = open_plain_vol,
+	.drop_volume = drop_plain_vol,
+	.resize_volume = resize_plain_vol,
+	.mount_volume = bind_vol_loc,
+	.get_volume_size = get_plain_size,
 
 	.parse_layout = parse_mosaic_subdir_layout,
 };
