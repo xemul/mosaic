@@ -235,7 +235,7 @@ static int do_mosaic_attach_tess(mosaic_t m, int argc, char **argv)
 	char dev[NAME_MAX];
 	int len;
 
-	if (argc < 1) {
+	if (argc < 2) {
 		printf("Usage: moctl NAME attach VOLUME\n");
 		return 1;
 	}
@@ -264,7 +264,7 @@ static int do_mosaic_detach_tess(mosaic_t m, int argc, char **argv)
 	const char *volume;
 	tessera_t t;
 
-	if (argc < 1) {
+	if (argc < 2) {
 		printf("Usage: moctl NAME detach VOLUME\n");
 		return 1;
 	}
