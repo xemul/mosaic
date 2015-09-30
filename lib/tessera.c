@@ -98,7 +98,6 @@ int mosaic_mount_tess(tessera_t t, const char *path, int mount_flags)
 int mosaic_umount_tess(tessera_t t, const char *path, int umount_flags)
 {
 	struct mosaic *m = t->m;
-	char *rpath, tdev[1024];
 	int ret;
 
 	if (umount_flags)
@@ -107,22 +106,10 @@ int mosaic_umount_tess(tessera_t t, const char *path, int umount_flags)
 	if (m->m_ops->umount_tessera)
 		return m->m_ops->umount_tessera(m, t, path, umount_flags);
 
-	if (m->m_ops->detach_tessera) {
-		rpath = realpath(path, NULL);
-		if (scan_mounts(rpath, tdev)) {
-			free(rpath);
-			return -1;
-		}
-	} else
-		rpath = (char *)path;
+	ret = umount(path);
 
-	ret = umount(rpath);
-
-	if (rpath != path) {
-		if (ret == 0)
-			ret = m->m_ops->detach_tessera(m, t, tdev);
-		free(rpath);
-	}
+	if (ret == 0 && m->m_ops->detach_tessera)
+		ret = m->m_ops->detach_tessera(m, t);
 
 	return ret;
 }
@@ -140,14 +127,14 @@ int mosaic_get_tess_bdev(tessera_t t, char *dev, int len, int flags)
 	return m->m_ops->attach_tessera(m, t, dev, len, flags);
 }
 
-int mosaic_put_tess_bdev(tessera_t t, char *dev)
+int mosaic_put_tess_bdev(tessera_t t)
 {
 	struct mosaic *m = t->m;
 
 	if (!m->m_ops->detach_tessera)
 		return -1;
 
-	return m->m_ops->detach_tessera(m, t, dev);
+	return m->m_ops->detach_tessera(m, t);
 }
 
 int mosaic_resize_tess(tessera_t t, unsigned long new_size_in_blocks, int resize_flags)

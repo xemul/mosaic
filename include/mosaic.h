@@ -50,7 +50,7 @@ struct mosaic_ops {
 	 * possible for this mosaic type.
 	 */
 	int (*attach_tessera)(struct mosaic *, struct tessera *, char *dev, int len, int flags);
-	int (*detach_tessera)(struct mosaic *, struct tessera *, char *dev);
+	int (*detach_tessera)(struct mosaic *, struct tessera *);
 
 	int (*get_tessera_size)(struct mosaic *, struct tessera *, unsigned long *size_in_blocks);
 

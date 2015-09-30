@@ -276,8 +276,7 @@ static int do_mosaic_detach_tess(mosaic_t m, int argc, char **argv)
 		return 1;
 	}
 
-	/* FIXME: where do we get dev string from? */
-	if (mosaic_put_tess_bdev(t, NULL) < 0) {
+	if (mosaic_put_tess_bdev(t) < 0) {
 		fprintf(stderr, "Can't detach %s\n", volume);
 		mosaic_close_tess(t);
 		return 1;

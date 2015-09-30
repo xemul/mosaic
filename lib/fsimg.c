@@ -209,10 +209,24 @@ static int attach_fsimg_tess(struct mosaic *m, struct tessera *t,
 	return strlen(aux);
 }
 
-static int detach_fsimg_tess(struct mosaic *m, struct tessera *t, char *dev)
+static int detach_fsimg_tess(struct mosaic *m, struct tessera *t)
 {
 	char *argv[4];
+	char dev[NAME_MAX];
 	int i = 0;
+	int rc;
+
+	rc = get_dev(m, t, dev, sizeof(dev));
+	if (rc < 0) { // error
+		fprintf(stderr, "%s: error getting device\n", __func__);
+		return -1;
+	}
+	if (rc == 0) {
+		// no device
+		fprintf(stderr, "%s: volume %s not attached\n",
+				__func__, t->t_name);
+		return -1;
+	}
 
 	argv[i++] = "losetup";
 	argv[i++] = "-d";

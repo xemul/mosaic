@@ -334,10 +334,8 @@ static int get_size_ploop(struct mosaic *m, struct tessera *t,
 	return -1;
 }
 
-static int detach_ploop(struct mosaic *m, struct tessera *t, char *dev)
+static int detach_ploop(struct mosaic *m, struct tessera *t)
 {
-	(void)dev; // unused
-
 	/* FIXME: if a filesystem within this ploop device
 	 * is mounted, it is automatically unmounted.
 	 * Ideally, we should return say EBUSY in this case.
@@ -422,7 +420,7 @@ out:
 		 * but we were unable to parse the device name string
 		 * from the command output, so need to rollback.
 		 */
-		detach_ploop(m, t, NULL);
+		detach_ploop(m, t);
 		fprintf(stderr, "%s: internal error: can't parse dev\n",
 				__func__);
 	}
