@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <getopt.h>
 #include <sys/mount.h>
 #include <limits.h>
 #include "uapi/mosaic.h"
@@ -39,20 +40,54 @@ static inline int argis(const char *arg, const char *is)
 	}
 }
 
-static int parse_mount_flags(char *flags)
-{
+static int parse_mount_flags(int argc, char **argv, int *flags)
+ {
+	int i;
+
+	while ((i = getopt(argc, argv, "r")) != EOF) {
+		switch (i) {
+		case 'r':
+			*flags |= MS_RDONLY;
+			break;
+		default:
+			fprintf(stderr, "%s: invalid mount flag -%c\n",
+					__func__, i);
+			return -1;
+		}
+	}
+
 	return 0;
+}
+
+static int mount_usage(int ret) {
+	printf("\n"
+"Usage: moctl NAME mount [-r] {VOLUME|-} MOUNTPOINT\n"
+"	NAME       := mosaic name (path to .mos file)\n"
+"	VOLUME     := volume to mount; \"-\" for the mosaic itself\n"
+"	MOUNTPOINT := directory to mount to\n"
+"	-r         := mount read-only\n");
+
+	return ret;
 }
 
 static int do_mosaic_mount(mosaic_t m, int argc, char **argv)
 {
 	const char *volume, *path;
 	tessera_t t = NULL;
-	int flags;
+	int flags = 0;
 
-	if (argc < 4) {
-		printf("Usage: moctl <name> mount <tessera>|- <path> <flags>\n");
-		return 1;
+	if (parse_mount_flags(argc, argv, &flags) < 0) {
+		// error is printed by parse_mount_flags()
+		return mount_usage(1);
+	}
+
+	argc -= optind;
+	argv += optind;
+
+	if (argc < 3) {
+		fprintf(stderr, "%s: too %s arguments\n", __func__,
+				argc < 3 ? "few" : "many");
+		return mount_usage(1);
 	}
 
 	volume = argv[1];
@@ -65,7 +100,6 @@ static int do_mosaic_mount(mosaic_t m, int argc, char **argv)
 	}
 
 	path = argv[2];
-	flags = parse_mount_flags(argv[3]);
 
 	if (t) {
 		if (mosaic_mount_tess(t, path, flags)) {

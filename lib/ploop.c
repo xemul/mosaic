@@ -8,12 +8,15 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <dirent.h>
+#include <sys/mount.h>
 
 #include "mosaic.h"
 #include "tessera.h"
 #include "util.h"
 
 #include "ploop-internal.h"
+
+const char *uuidvar = "uuid-for-children";
 
 static int create_ploop(struct mosaic *m, const char *name,
 		unsigned long size_in_blocks, int make_flags)
@@ -100,7 +103,6 @@ static int clone_ploop(struct mosaic *m, struct tessera *parent,
 	 */
 	char pdir[PATH_MAX], dir[PATH_MAX];
 	char dd[PATH_MAX], pdd[PATH_MAX];
-	const char *uuidvar = "uuid-for-children";
 	int pdfd, dfd;
 	char *argv[8];
 	int i;
@@ -231,8 +233,8 @@ static int mount_ploop(struct mosaic *m, struct tessera *t,
 {
 	char dd[PATH_MAX];
 	char *argv[8];
+	int ro = (mount_flags & MS_RDONLY);
 	int i;
-	(void)mount_flags; // unused
 
 	snprintf(dd, sizeof(dd), "%s/%s/" DDXML, m->m_loc, t->t_name);
 
@@ -241,11 +243,23 @@ static int mount_ploop(struct mosaic *m, struct tessera *t,
 	argv[i++] = "mount";
 	argv[i++] = "-m";
 	argv[i++] = (char *)path;
+	if (ro)
+		argv[i++] = "-r";
 	argv[i++] = dd;
 	argv[i++] = NULL;
 
 	if (run_prg(argv) != 0)
 		return -1;
+
+	if (!ro) {
+		char *slash;
+
+		// make a directory out of 'dd' by removing file component
+		slash = strrchr(dd, '/');
+		*slash = '\0';
+		// invalidate the snapshot used for cloning
+		unset_var(-1, dd, uuidvar);
+	}
 
 	return 0;
 }
