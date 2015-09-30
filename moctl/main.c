@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mount.h>
+#include <limits.h>
 #include "uapi/mosaic.h"
 #include "moctl.h"
 #include "mosaic.h"
@@ -231,10 +232,10 @@ static int do_mosaic_attach_tess(mosaic_t m, int argc, char **argv)
 {
 	const char *volume;
 	tessera_t t;
-	char dev[32];
+	char dev[NAME_MAX];
 	int len;
 
-	if (argc < 1) {
+	if (argc < 2) {
 		printf("Usage: moctl NAME attach VOLUME\n");
 		return 1;
 	}
@@ -263,7 +264,7 @@ static int do_mosaic_detach_tess(mosaic_t m, int argc, char **argv)
 	const char *volume;
 	tessera_t t;
 
-	if (argc < 1) {
+	if (argc < 2) {
 		printf("Usage: moctl NAME detach VOLUME\n");
 		return 1;
 	}
@@ -275,8 +276,7 @@ static int do_mosaic_detach_tess(mosaic_t m, int argc, char **argv)
 		return 1;
 	}
 
-	/* FIXME: where do we get dev string from? */
-	if (mosaic_put_tess_bdev(t, NULL) < 0) {
+	if (mosaic_put_tess_bdev(t) < 0) {
 		fprintf(stderr, "Can't detach %s\n", volume);
 		mosaic_close_tess(t);
 		return 1;

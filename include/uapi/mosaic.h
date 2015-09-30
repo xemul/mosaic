@@ -50,7 +50,7 @@ int mosaic_umount_tess(tessera_t t, const char *path, int umount_flags);
  * of the device (even if it doesn't fit the buffer len).
  */
 int mosaic_get_tess_bdev(tessera_t t, char *dev, int len, int flags);
-int mosaic_put_tess_bdev(tessera_t t, char *dev);
+int mosaic_put_tess_bdev(tessera_t t);
 
 int mosaic_get_tess_size(tessera_t t, unsigned long *size_in_blocks);
 
