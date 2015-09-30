@@ -387,19 +387,22 @@ static int attach_ploop(struct mosaic *m, struct tessera *t,
 		if (!end)
 			continue; // hmm, read on a boundary?
 		*end = '\0';
-		if (end - begin + 1 > size)
+		if (end - begin + 1 > size) {
 			fprintf(stderr, "%s: not enough buffer space (%d)"
 					"to store %s",
 					__func__, size, begin);
+			goto out;
+		}
 		strcpy(dev, begin);
 		ret = end - begin;
 	}
 
+out:
 	/* Error handling is a bit cumbersome below and cries for a comment.
-	 *
-	 * First, we check that plose did not return an error.
-	 * Second, we check that ploop exit code is not zero.
-	 * Finally, we check that we got the device name.
+	 * We check that:
+	 *  1 pclose did not return an error;
+	 *  2 ploop exit code is zero;
+	 *  3 we got the device name.
 	 *
 	 * Note that the ret = -1 assignments below are probably redundant,
 	 * as in case of ploop error we probably haven't got a device
