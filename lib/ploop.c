@@ -257,13 +257,21 @@ static int mount_ploop(struct mosaic *m, struct volume *t,
 		return -1;
 
 	if (!ro) {
+		int dfd;
 		char *slash;
 
 		// make a directory out of 'dd' by removing file component
 		slash = strrchr(dd, '/');
 		*slash = '\0';
+
+		dfd = open(dd, O_DIRECTORY);
+		if (dfd < 0) {
+			fprintf(stderr, "%s: can't open %s: %m\n", __func__, dd);
+			return -1;
+		}
 		// invalidate the snapshot used for cloning
-		write_var(-1, dd, uuidvar, NULL);
+		write_var(dfd, dd, uuidvar, NULL);
+		close(dfd);
 	}
 
 	return 0;
