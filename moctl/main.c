@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mount.h>
+#include <limits.h>
 #include "uapi/mosaic.h"
 #include "moctl.h"
 #include "mosaic.h"
@@ -231,7 +232,7 @@ static int do_mosaic_attach_tess(mosaic_t m, int argc, char **argv)
 {
 	const char *volume;
 	tessera_t t;
-	char dev[32];
+	char dev[NAME_MAX];
 	int len;
 
 	if (argc < 1) {
