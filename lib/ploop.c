@@ -70,8 +70,11 @@ static int open_ploop(struct mosaic *m, struct volume *t, int open_flags)
 
 	/* Just check that corresponding dd.xml exists */
 	snprintf(dd, sizeof(dd), "%s/%s/" DDXML, m->m_loc, t->t_name);
-	if (access(dd, R_OK) < 0)
+	if (access(dd, R_OK) < 0) {
+		fprintf(stderr, "%s: volume %s doesn't exist: %m\n",
+				__func__, t->t_name);
 		return -1;
+	}
 
 	/* FIXME: what is this function supposed to do?
 	 * Do we need to mount ploop here /dev/ploopXXX is available?
@@ -111,14 +114,16 @@ static int clone_ploop(struct mosaic *m, struct volume *parent,
 	snprintf(pdir, sizeof(pdir), "%s/%s", m->m_loc, parent->t_name);
 	snprintf(pdd, sizeof(pdd), "%s/%s", pdir, DDXML);
 	if (access(pdd, R_OK) < 0) {
-		/* parent doesn't exist! */
+		fprintf(stderr, "%s: parent volume %s doesn't exist: %m\n",
+				__func__, parent->t_name);
 		return -1;
 	}
 
 	snprintf(dir, sizeof(dir), "%s/%s", m->m_loc, name);
 	snprintf(dd, sizeof(dd), "%s/%s", dir, DDXML);
 	if (access(dd, R_OK) == 0) {
-		/* name already exist! */
+		fprintf(stderr, "%s: volume %s already exists\n",
+				__func__, name);
 		return -1;
 	}
 
