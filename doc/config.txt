@@ -3,14 +3,14 @@ keys being
 
 * type: the backend type. Can be one of btrfs, fsimg, plain.
 
-* location: a string describing where the tessera is. It's
+* location: a string describing where the volume is. It's
   type-specific.
 
-* default_fs: the filesystem to be put on tesserae. Some
+* default_fs: the filesystem to be put on volumes. Some
   backends do not support arbitrary value of this, some
   have defaults (ext4).
 
-* layout: the way metadata and tesserae are put on the
+* layout: the way metadata and volumes are put on the
   storage. It's a mapping of
 
   * fs: path where to put metadata under the location
