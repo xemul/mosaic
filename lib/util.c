@@ -158,7 +158,7 @@ int write_var(int dirfd, const char *dir,
 		return -1;
 	}
 	if (write(fd, val, len) != len) {
-		fprintf(stderr, "%s: can't read %s/%s: %m\n",
+		fprintf(stderr, "%s: can't write %s/%s: %m\n",
 				__func__, dir, name);
 		ret = -1;
 	}
