@@ -185,6 +185,8 @@ char *read_var(int dirfd, const char *dir, const char *name)
 		return NULL;
 	}
 	s = st.st_size;
+	if (s == 0)
+		return NULL;
 
 	fd = openat(dirfd, name, O_RDONLY);
 	if (fd < 0) {
