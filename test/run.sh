@@ -3,8 +3,10 @@
 echo "Tests:  $1"
 echo "Driver: $2"
 
-. "env.sh"
-. "${1}.sh"
-. "${2}.sh"
+for T in ${1//,/ }; do
+	. "env.sh"
+	. "${T}.sh"
+	. "${2}.sh"
+done
 
 echo "PASS"

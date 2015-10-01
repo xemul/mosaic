@@ -1,3 +1,5 @@
+TEST_MOS_CLONE=yes
+
 echo "*** Testing btrfs driver (dir case)"
 touch btrfs.img
 truncate --size $((64 * 1024 * 1024)) btrfs.img
