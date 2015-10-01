@@ -154,7 +154,7 @@ int write_var(int dirfd, const char *dir,
 		}
 	}
 
-	fd = openat(dirfd, name, O_WRONLY);
+	fd = openat(dirfd, name, O_WRONLY|O_CREAT);
 	if (fd < 0) {
 		fprintf(stderr, "%s: can't open %s/%s: %m\n",
 				__func__, dir, name);
