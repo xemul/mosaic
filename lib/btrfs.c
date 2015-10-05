@@ -59,7 +59,7 @@ static int clone_btrfs_subvol(struct mosaic *m, struct volume *from,
 	int i;
 
 	/*
-	 * FIXME: locate volumee subvolumes in subdirectories
+	 * FIXME: locate subvolumes in subdirectories
 	 */
 	i = 0;
 	argv[i++] = "btrfs";
@@ -84,7 +84,7 @@ static int drop_btrfs_subvol(struct mosaic *m, struct volume *t,
 	int i;
 
 	/*
-	 * FIXME: locate volumee subvolumes in subdirectories
+	 * FIXME: locate subvolumes in subdirectories
 	 */
 	i = 0;
 	argv[i++] = "btrfs";
