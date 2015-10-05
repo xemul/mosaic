@@ -342,7 +342,8 @@ static int do_mosaic_create(char *name, int argc, char **argv)
 	else if (!strcmp(m->m_ops->name, "plain"))
 		ret = create_plain(m, argc, argv);
 	else {
-		fprintf(stderr, "Unknown mosaic type %s\n", name);
+		fprintf(stderr, "Don't know how to create %s\n",
+				m->m_ops->name);
 		ret = -1;
 	}
 
