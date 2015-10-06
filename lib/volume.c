@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mount.h>
+#include <stdio.h>
+#include <limits.h>
 #include "mosaic.h"
 #include "volume.h"
 #include "util.h"
@@ -19,7 +21,10 @@ volume_t mosaic_open_vol(mosaic_t m, const char *name, int open_flags)
 	 * FIXME -- refcounting against mosaic_close()
 	 */
 	t->m = m;
-	t->t_name = strdup(name);
+	t->t_name = map_vol_name(m, name);
+	if (!t->t_name)
+		// error is printed by map_vol_name()
+		return NULL;
 
 	if (m->m_ops->open_volume(m, t, open_flags)) {
 		free(t);
@@ -36,32 +41,54 @@ void mosaic_close_vol(volume_t t)
 	free(t);
 }
 
-int mosaic_make_vol(mosaic_t m, const char *name, unsigned long size_in_blocks, int make_flags)
+int mosaic_make_vol(mosaic_t m, const char *name,
+		unsigned long size_in_blocks, int make_flags)
 {
+	char *newname;
+	int ret;
+
 	if (make_flags)
 		return -1;
 
-	return m->m_ops->new_volume(m, name, size_in_blocks, make_flags);
+	newname = map_vol_name(m, name);
+	ret = m->m_ops->new_volume(m, newname, size_in_blocks, make_flags);
+	free(newname);
+
+	return ret;
 }
 
 int mosaic_make_vol_fs(mosaic_t m, const char *name, unsigned long size_in_blocks, int make_flags)
 {
+	char *newname;
+	int ret;
+
 	if (make_flags)
 		return -1;
 
-	return m->m_ops->new_volume(m, name, size_in_blocks, make_flags | NEW_VOL_WITH_FS);
+	newname = map_vol_name(m, name);
+	ret = m->m_ops->new_volume(m, newname, size_in_blocks,
+			make_flags | NEW_VOL_WITH_FS);
+	free(newname);
+
+	return ret;
 }
 
 int mosaic_clone_vol(volume_t from, const char *name, int clone_flags)
 {
 	struct mosaic *m = from->m;
+	char *newname;
+	int ret;
 
 	if (!m->m_ops->clone_volume)
 		return -1;
 	if (clone_flags)
 		return -1;
 
-	return m->m_ops->clone_volume(m, from, name, clone_flags);
+	newname = map_vol_name(m, name);
+	ret = m->m_ops->clone_volume(m, from, newname, clone_flags);
+	free(newname);
+
+	return ret;
 }
 
 int mosaic_drop_vol(volume_t t, int drop_flags)

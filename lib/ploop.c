@@ -471,4 +471,6 @@ const struct mosaic_ops mosaic_ploop = {
 	.get_volume_size = get_size_ploop,
 	.attach_volume = attach_ploop,
 	.detach_volume = detach_ploop,
+
+	.parse_layout = parse_mosaic_subdir_layout,
 };

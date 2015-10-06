@@ -3,6 +3,7 @@
 #include "util.h"
 #include "yaml-util.h"
 #include "mosaic.h"
+#include "volume.h"
 
 static int parse_layout_val(yaml_parser_t *p, char *key, void *x)
 {
@@ -72,6 +73,14 @@ static int parse_top_val(yaml_parser_t *p, char *key, void *x)
 
 		m->m_loc = val;
 		return 0;
+	}
+
+	if (!strcmp(key, "volumeMap")) {
+		val = yaml_parse_scalar(p);
+		CHKVAL(key, val);
+		CHKDUP(key, m->vol_map);
+
+		return parse_vol_map(m, key, val);
 	}
 
 	if (!strcmp(key, "default_fs")) {
