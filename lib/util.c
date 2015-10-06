@@ -82,6 +82,49 @@ err:
 	return -1;
 }
 
+/** rmdirat_r -- recursively remove empty directories. Starts at
+ * base/dirs and ens at base, or at the first non-empty directory.
+ * All errors are reported, except for non-existent or non-empty directores.
+ *
+ * Example: rmdir(fd, "/tmp", "a/b/c");
+ * should remove /tmp/a/b/c, /tmp/a/b, and /tmp/a if they are empty.
+ */
+int rmdirat_r(int basefd, const char *base, const char *dirs)
+{
+	char *slash;
+	int ret;
+	char *dir = strdup(dirs);
+
+	while (1) {
+		ret = unlinkat(basefd, dir, AT_REMOVEDIR);
+		if (ret) {
+			if (errno == ENOTEMPTY)
+				// non-empty dir: return
+				return 0;
+			if (errno != ENOENT) {
+				fprintf(stderr, "%s: can't rmdir %s/%s: %m\n",
+						__func__, base, dir);
+				ret = -1;
+				break;
+			}
+			// ENOENT is skipped
+		}
+		// get upper dir
+		slash = strrchr(dir, '/');
+		if (!slash) {
+			ret = 0;
+			break;
+		}
+		// skip repeating slashes
+		while (slash[-1] == '/')
+			slash--;
+		*slash = '\0';
+	}
+
+	free(dir);
+	return ret;
+}
+
 int get_subdir_size(int fd, unsigned long *sizep)
 {
 	/* FIXME: implement */

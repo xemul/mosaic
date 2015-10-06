@@ -2,6 +2,7 @@
 #define __MOSAIC_UTIL_H__
 int scan_mounts(char *path, char *device);
 int remove_rec(int dir_fd);
+int rmdirat_r(int basefd, const char *base, const char *dirs);
 int get_subdir_size(int fd, unsigned long *sizep);
 
 int copy_file(int src_dirfd, const char *src_dir,
