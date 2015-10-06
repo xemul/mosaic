@@ -348,6 +348,60 @@ int run_prg(char *const argv[])
 	return run_prg_rc(argv, 0, NULL);
 }
 
+/** Check if a given file or directory exists
+ * Returns:
+ *  1 - exists
+ *  0 - does not exist
+ * -1 - some unexpected system error (it is also reported)
+ */
+int path_exists(const char *path)
+{
+	if (access(path, F_OK) == 0)
+		return 1;
+	if (errno == ENOENT)
+		return 0;
+
+	fprintf(stderr, "%s: can't access %s: %m\n", __func__, path);
+	return -1;
+}
+
+int mkdir_p(const char *path, int use_last_component, int mode)
+{
+	char buf[PATH_MAX];
+	const char *ps, *p;
+	int len;
+
+	if (path == NULL)
+		return 0;
+
+	ps = path + 1;
+	while ((p = strchr(ps, '/'))) {
+		len = p - path + 1;
+		snprintf(buf, len, "%s", path);
+		ps = p + 1;
+		if (path_exists(buf) != 1) {
+			if (mkdir(buf, mode)) {
+				fprintf(stderr, "%s: can't create directory"
+						" %s: %m\n", __func__, buf);
+				return -1;
+			}
+		}
+	}
+
+	if (!use_last_component)
+		return 0;
+
+	if (path_exists(path) != 1) {
+		if (mkdir(path, mode)) {
+			fprintf(stderr, "%s: can't create directory %s: %m\n",
+					__func__, path);
+			return -1;
+		}
+	}
+
+	return 0;
+}
+
 #ifdef DOTEST
 int main(int argc, char **argv)
 {

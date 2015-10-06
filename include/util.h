@@ -18,6 +18,9 @@ int run_prg(char *const argv[]);
 #define HIDE_STDERR	1 << 1	/* hide process' stderr */
 int run_prg_rc(char *const argv[], int hide_mask, int *rc);
 
+int path_exists(const char *path);
+int mkdir_p(const char *path, int use_last_component, int mode);
+
 /* Config parsing: check if val is set */
 #define CHKVAL(key, val)					\
 do {								\
