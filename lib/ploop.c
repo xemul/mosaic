@@ -29,8 +29,7 @@ static int create_ploop(struct mosaic *m, const char *name,
 	int i;
 
 	snprintf(dir, sizeof(dir), "%s/%s", m->m_loc, name);
-	// Assuming m->m_loc exists
-	if (mkdir(dir, 0700) < 0) {
+	if (mkdir_p(dir, 1, 0700) < 0) {
 		// errno can be EEXIST or something else,
 		// but we can only return -1 here
 		return -1;
@@ -127,8 +126,7 @@ static int clone_ploop(struct mosaic *m, struct volume *parent,
 		return -1;
 	}
 
-	if (mkdir(dir, 0700) < 0) {
-		fprintf(stderr, "%s: mkdir %s failed: %m\n", __func__, dir);
+	if (mkdir_p(dir, 1, 0700) < 0) {
 		return -1;
 	}
 
@@ -322,6 +320,10 @@ static int remove_ploop(struct mosaic *m, struct volume *t,
 	if (ret == 0)
 		if (rmdir(dir))
 			ret = -1;
+
+	/* FIXME: also remove all the parent directories up to m->m_loc
+	 * ignoring the first non-empty one.
+	 */
 
 	return ret;
 }

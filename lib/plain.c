@@ -4,6 +4,7 @@
 #include <sys/stat.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <limits.h>
 #include "mosaic.h"
 #include "volume.h"
 #include "util.h"
@@ -20,13 +21,14 @@ static int open_plain(struct mosaic *m, int open_flags)
 static int new_plain_vol(struct mosaic *m, const char *name,
 		unsigned long size_in_blocks, int new_flags)
 {
-	struct mosaic_subdir_priv *pp = m->priv;
+	char dir[PATH_MAX];
 
 	if (!(new_flags & NEW_VOL_WITH_FS))
 		return -1;
 
 	/* FIXME -- size_in_blocks ignored */
-	return mkdirat(pp->m_loc_dir, name, 0600);
+	snprintf(dir, sizeof(dir), "%s/%s", m->m_loc, name);
+	return mkdir_p(dir, 1, 0600);
 }
 
 static int open_plain_vol(struct mosaic *m, struct volume *t,
@@ -51,6 +53,9 @@ static int drop_plain_vol(struct mosaic *m, struct volume *t,
 	if (remove_rec(fd))
 		return -1;
 
+	/* FIXME: also remove all the parent directories up to m->m_loc
+	 * ignoring the first non-empty one.
+	 */
 	return unlinkat(pp->m_loc_dir, t->t_name, AT_REMOVEDIR);
 }
 

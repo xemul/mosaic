@@ -33,13 +33,18 @@ static int new_fsimg_vol(struct mosaic *m, const char *name,
 		unsigned long size_in_blocks, int make_flags)
 {
 	struct mosaic_subdir_priv *fp = m->priv;
+	char dir[PATH_MAX];
 	int imgf;
 
 	/*
 	 * FIXME -- add separate subdir for images and separate for
 	 * regular fs mount?
 	 */
-
+	snprintf(dir, sizeof(dir), "%s/%s", m->m_loc, name);
+	if (mkdir_p(dir, 0, 0700) < 0) {
+		// error is printed by mkdir_p()
+		return -1;
+	}
 	imgf = openat(fp->m_loc_dir, name, O_WRONLY | O_CREAT | O_EXCL, 0600);
 	if (imgf < 0)
 		return -1;
@@ -81,6 +86,9 @@ static int drop_fsimg_vol(struct mosaic *m, struct volume *t,
 	 * FIXME -- what if mounted?
 	 */
 
+	/* FIXME: also remove all the parent directories up to m->m_loc
+	 * ignoring the first non-empty one.
+	 */
 	return unlinkat(fp->m_loc_dir, t->t_name, 0);
 }
 

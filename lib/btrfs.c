@@ -32,6 +32,13 @@ static int new_btrfs_subvol(struct mosaic *m, const char *name,
 	 * FIXME: qgroups
 	 */
 
+	// Make sure upper directories exist
+	snprintf(vol, sizeof(vol), "%s/%s", m->m_loc, name);
+	if (mkdir_p(vol, 0, 0700) < 0) {
+		// error is printed by mkdir_p()
+		return -1;
+	}
+
 	i = 0;
 	argv[i++] = "btrfs";
 	argv[i++] = "subvolume";
@@ -61,6 +68,14 @@ static int clone_btrfs_subvol(struct mosaic *m, struct volume *from,
 	/*
 	 * FIXME: locate subvolumes in subdirectories
 	 */
+
+	// Make sure upper directories exist
+	snprintf(vol, sizeof(vol), "%s/%s", m->m_loc, name);
+	if (mkdir_p(vol, 0, 0700) < 0) {
+		// error is printed by mkdir_p()
+		return -1;
+	}
+
 	i = 0;
 	argv[i++] = "btrfs";
 	argv[i++] = "subvolume";
