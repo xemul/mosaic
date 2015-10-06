@@ -41,4 +41,19 @@ do {								\
 	}							\
 } while (0)
 
+/* Safer memory operations */
+#define __xalloc(op, size, ...)						\
+	({								\
+		void *___p = op( __VA_ARGS__ );				\
+		if (!___p)						\
+			fprintf(stderr, "%s: can't alloc %li bytes\n",	\
+			       __func__, (long)(size));			\
+		___p;							\
+	})
+
+#define xstrdup(str)		__xalloc(strdup, strlen(str) + 1, str)
+#define xmalloc(size)		__xalloc(malloc, size, size)
+#define xzalloc(size)		__xalloc(calloc, size, 1, size)
+#define xrealloc(p, size)	__xalloc(realloc, size, p, size)
+
 #endif
