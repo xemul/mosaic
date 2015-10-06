@@ -22,14 +22,14 @@ volume_t mosaic_open_vol(mosaic_t m, const char *name, int open_flags);
 void mosaic_close_vol(volume_t);
 
 /*
- * Make new volumee. The first one makes raw block device, the
+ * Make a new volume. The first one makes raw block device, the
  * second one also puts filesystem on it.
  */
 int mosaic_make_vol(mosaic_t m, const char *name, unsigned long size_in_blocks, int make_flags);
 int mosaic_make_vol_fs(mosaic_t m, const char *name, unsigned long size_in_blocks, int make_flags);
 
 /*
- * Create a clone of existing volumee with COW (when possible)
+ * Create a clone of existing volume with COW (when possible)
  */
 int mosaic_clone_vol(volume_t from, const char *name, int clone_flags);
 

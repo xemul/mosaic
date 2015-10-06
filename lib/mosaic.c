@@ -9,6 +9,7 @@
 #include "mosaic.h"
 #include "volume.h"
 #include "log.h"
+#include "util.h"
 #include "uapi/mosaic.h"
 
 const struct mosaic_ops *mosaic_find_ops(char *type)
@@ -109,8 +110,8 @@ int parse_mosaic_subdir_layout(struct mosaic *m, char *key, char *val)
 	if (!strcmp(key, "fs")) {
 		int len;
 
-		if (p->fs_subdir)
-			free(p->fs_subdir);
+		CHKVAL(key, val);
+		CHKDUP(key, p->fs_subdir);
 
 		len = strlen(m->m_loc) + strlen(val) + 2;
 		p->fs_subdir = malloc(len);
@@ -128,6 +129,8 @@ int parse_mosaic_subdir_layout(struct mosaic *m, char *key, char *val)
 		return 0;
 	}
 #endif
+
+	fprintf(stderr, "%s: unknown layout element: %s\n", __func__, key);
 
 	return -1;
 }
