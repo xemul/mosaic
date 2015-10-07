@@ -6,8 +6,11 @@ truncate --size $((64 * 1024 * 1024)) btrfs.img
 mkfs -t btrfs btrfs.img || fail "Can't make btrfs FS"
 mkdir btrfs.loc
 mount -t btrfs btrfs.img btrfs.loc -o loop || fail "Can't mount btrfs FS"
-echo 'type: btrfs' > btrfs.mos
-echo 'location: btrfs.loc' >> btrfs.mos
+cat > btrfs.mos << EOF
+type: btrfs
+location: btrfs.loc
+volumeMap: \\([a-z]\\)\\([a-z][a-z]\\)\\(.*\\) \\1/\\2/\\3
+EOF
 
 run_tests "btrfs.mos"
 
@@ -30,7 +33,7 @@ while [ $ITER -lt 3 ]; do
 	sleep 0.5
 done
 
-rmdir btrfs.loc
+rmdir btrfs.loc || fail "mosaic dir not empty"
 rm -f btrfs.img
 rm -f btrfs.mos
 
