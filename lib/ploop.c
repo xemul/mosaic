@@ -18,6 +18,8 @@
 
 const char *uuidvar = "uuid-for-children";
 
+static int do_remove_ploop(struct mosaic *m, const char *name);
+
 static int create_ploop(struct mosaic *m, const char *name,
 		unsigned long size_in_blocks, int make_flags)
 {
@@ -56,8 +58,10 @@ static int create_ploop(struct mosaic *m, const char *name,
 	snprintf(img, sizeof(img), "%s/%s", dir, IMG_NAME);
 	argv[i++] = img;
 	argv[i++] = NULL;
-	if (run_prg(argv) != 0)
+	if (run_prg(argv) != 0) {
+		do_remove_ploop(m, name);
 		return -1;
+	}
 
 	return 0;
 }
@@ -220,8 +224,7 @@ static int clone_ploop(struct mosaic *m, struct volume *parent,
 out:
 	if (ret != 0) {
 		/* rollback: remove what we created */
-		if (remove_rec(dfd) == 0)
-			rmdir(dir);
+		do_remove_ploop(m, name);
 	}
 
 	free(uuid);
@@ -301,15 +304,12 @@ static int umount_ploop(struct mosaic *m, struct volume *t,
 	return 0;
 }
 
-static int remove_ploop(struct mosaic *m, struct volume *t,
-		int remove_flags)
+static int do_remove_ploop(struct mosaic *m, const char *name)
 {
 	char dir[PATH_MAX];
 	int dfd, ret;
-	(void)remove_flags; // unused
 
-	// FIXME: upper level should make sure we're not mounted!
-	snprintf(dir, sizeof(dir), "%s/%s", m->m_loc, t->t_name);
+	snprintf(dir, sizeof(dir), "%s/%s", m->m_loc, name);
 	dfd = open(dir, O_DIRECTORY);
 	if (dfd < 0) {
 		fprintf(stderr, "%s: can't open %s: %m\n", __func__, dir);
@@ -326,6 +326,15 @@ static int remove_ploop(struct mosaic *m, struct volume *t,
 	 */
 
 	return ret;
+}
+
+static int remove_ploop(struct mosaic *m, struct volume *t,
+		int remove_flags)
+{
+	(void)remove_flags; // unused
+
+	// FIXME: upper level should make sure we're not mounted!
+	return do_remove_ploop(m, t->t_name);
 }
 
 static int resize_ploop(struct mosaic *m, struct volume *t,
