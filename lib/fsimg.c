@@ -87,8 +87,10 @@ static int drop_fsimg_vol(struct mosaic *m, struct volume *t,
 	/*
 	 * FIXME -- what if mounted?
 	 */
-	if (unlinkat(base_fd, t->t_name, 0))
+	if (unlinkat(base_fd, t->t_name, 0)) {
+		fprintf(stderr, "%s: can't rm %s: %m\n", __func__, t->t_name);
 		return -1;
+	}
 	// Remove all the non-empty parent directories up to base
 	return rmdirat_r(base_fd, base, t->t_name);
 }
