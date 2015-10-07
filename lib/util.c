@@ -61,8 +61,11 @@ int remove_rec(int dir_fd)
 
 			/* FIXME -- limit of descriptors may not be enough */
 			sub_fd = openat(dir_fd, de->d_name, O_DIRECTORY);
-			if (sub_fd < 0)
+			if (sub_fd < 0) {
+				fprintf(stderr, "%s: can't open %s: %m\n",
+						__func__, de->d_name);
 				goto err;
+			}
 
 			if (remove_rec(sub_fd) < 0)
 				goto err;
@@ -70,8 +73,11 @@ int remove_rec(int dir_fd)
 			flg = AT_REMOVEDIR;
 		}
 
-		if (unlinkat(dir_fd, de->d_name, flg))
+		if (unlinkat(dir_fd, de->d_name, flg)) {
+			fprintf(stderr, "%s: can't rm %s: %m\n",
+					__func__, de->d_name);
 			goto err;
+		}
 	};
 
 	closedir(d);
