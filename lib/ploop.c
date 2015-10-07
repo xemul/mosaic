@@ -307,23 +307,31 @@ static int umount_ploop(struct mosaic *m, struct volume *t,
 static int do_remove_ploop(struct mosaic *m, const char *name)
 {
 	char dir[PATH_MAX];
+	char *base = m->m_loc;
 	int dfd, ret;
 
-	snprintf(dir, sizeof(dir), "%s/%s", m->m_loc, name);
+	snprintf(dir, sizeof(dir), "%s/%s", base, name);
 	dfd = open(dir, O_DIRECTORY);
 	if (dfd < 0) {
+		if (errno == ENOENT)
+			goto rm_dirs;
 		fprintf(stderr, "%s: can't open %s: %m\n", __func__, dir);
 		return -1;
 	}
 	ret = remove_rec(dfd);
 	close(dfd);
-	if (ret == 0)
-		if (rmdir(dir))
-			ret = -1;
+	if (ret != 0)
+		return -1;
 
-	/* FIXME: also remove all the parent directories up to m->m_loc
-	 * ignoring the first non-empty one.
-	 */
+rm_dirs:
+	// Remove all the non-empty parent directories up to base
+	dfd = open(base, O_DIRECTORY);
+	if (dfd < 0) {
+		fprintf(stderr, "%s: can't open %s: %m\n", __func__, base);
+		return -1;
+	}
+	ret = rmdirat_r(dfd, base, name);
+	close(dfd);
 
 	return ret;
 }
