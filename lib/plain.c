@@ -43,20 +43,20 @@ static int open_plain_vol(struct mosaic *m, struct volume *t,
 static int drop_plain_vol(struct mosaic *m, struct volume *t,
 		int drop_flags)
 {
-	struct mosaic_subdir_priv *pp = m->priv;
+	const char *base = m->m_loc;
+	struct mosaic_subdir_priv *fp = m->priv;
+	int base_fd = fp->m_loc_dir;
 	int fd;
 
-	fd = openat(pp->m_loc_dir, t->t_name, O_DIRECTORY);
+	fd = openat(base_fd, t->t_name, O_DIRECTORY);
 	if (fd < 0)
 		return -1;
 
 	if (remove_rec(fd))
 		return -1;
 
-	/* FIXME: also remove all the parent directories up to m->m_loc
-	 * ignoring the first non-empty one.
-	 */
-	return unlinkat(pp->m_loc_dir, t->t_name, AT_REMOVEDIR);
+	// Remove all the non-empty parent directories up to base
+	return rmdirat_r(base_fd, base, t->t_name);
 }
 
 static int resize_plain_vol(struct mosaic *m, struct volume *t,

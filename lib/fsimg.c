@@ -80,16 +80,17 @@ static int new_fsimg_vol(struct mosaic *m, const char *name,
 static int drop_fsimg_vol(struct mosaic *m, struct volume *t,
 		int drop_flags)
 {
+	const char *base = m->m_loc;
 	struct mosaic_subdir_priv *fp = m->priv;
+	int base_fd = fp->m_loc_dir;
 
 	/*
 	 * FIXME -- what if mounted?
 	 */
-
-	/* FIXME: also remove all the parent directories up to m->m_loc
-	 * ignoring the first non-empty one.
-	 */
-	return unlinkat(fp->m_loc_dir, t->t_name, 0);
+	if (unlinkat(base_fd, t->t_name, 0))
+		return -1;
+	// Remove all the non-empty parent directories up to base
+	return rmdirat_r(base_fd, base, t->t_name);
 }
 
 /* Figure out device name that corresponds to given volume.

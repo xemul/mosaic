@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <sys/mount.h>
 #include <limits.h>
 #include "mosaic.h"
@@ -96,7 +99,8 @@ static int drop_btrfs_subvol(struct mosaic *m, struct volume *t,
 {
 	char *argv[8];
 	char vol[PATH_MAX];
-	int i;
+	const char *base = m->m_loc;
+	int i, ret, dfd;
 
 	/*
 	 * FIXME: locate subvolumes in subdirectories
@@ -105,13 +109,22 @@ static int drop_btrfs_subvol(struct mosaic *m, struct volume *t,
 	argv[i++] = "btrfs";
 	argv[i++] = "subvolume";
 	argv[i++] = "delete";
-	snprintf(vol, sizeof(vol), "%s/%s", m->m_loc, t->t_name);
+	snprintf(vol, sizeof(vol), "%s/%s", base, t->t_name);
 	argv[i++] = vol;
 	argv[i++] = NULL;
 	if (run_prg(argv))
 		return -1;
 
-	return 0;
+	// Remove all the non-empty parent directories up to base
+	dfd = open(base, O_DIRECTORY);
+	if (dfd < 0) {
+		fprintf(stderr, "%s: can't open %s: %m\n", __func__, base);
+		return -1;
+	}
+	ret = rmdirat_r(dfd, base, t->t_name);
+	close(dfd);
+
+	return ret;
 }
 
 static int resize_btrfs_subvol(struct mosaic *m, struct volume *t,
