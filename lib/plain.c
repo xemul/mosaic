@@ -49,8 +49,11 @@ static int drop_plain_vol(struct mosaic *m, struct volume *t,
 	int fd;
 
 	fd = openat(base_fd, t->t_name, O_DIRECTORY);
-	if (fd < 0)
+	if (fd < 0) {
+		fprintf(stderr, "%s: can't open %s/%s: %m\n",
+				__func__, base, t->t_name);
 		return -1;
+	}
 
 	if (remove_rec(fd))
 		return -1;
