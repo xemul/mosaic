@@ -48,6 +48,7 @@ int remove_rec(int dir_fd)
 {
 	DIR *d;
 	struct dirent *de;
+	int ret = -1;
 
 	d = fdopendir(dir_fd);
 	while ((de = readdir(d)) != NULL) {
@@ -80,12 +81,11 @@ int remove_rec(int dir_fd)
 		}
 	};
 
-	closedir(d);
-	return 0;
+	ret = 0;
 
 err:
 	closedir(d);
-	return -1;
+	return ret;
 }
 
 /** rmdirat_r -- recursively remove empty directories. Starts at
