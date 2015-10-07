@@ -46,10 +46,13 @@ static int new_fsimg_vol(struct mosaic *m, const char *name,
 		return -1;
 	}
 	imgf = openat(fp->m_loc_dir, name, O_WRONLY | O_CREAT | O_EXCL, 0600);
-	if (imgf < 0)
+	if (imgf < 0) {
+		fprintf(stderr, "%s: can't create %s: %m\n", __func__, name);
 		return -1;
+	}
 
 	if (ftruncate(imgf, size_in_blocks << MOSAIC_BLOCK_SHIFT) < 0) {
+		fprintf(stderr, "%s: can't grow %s: %m\n", __func__, name);
 		close(imgf);
 		return -1;
 	}
