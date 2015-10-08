@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/mount.h>
+#include <regex.h>
 
 #include "mosaic.h"
 #include "volume.h"
@@ -63,6 +64,7 @@ void mosaic_close(mosaic_t m)
 		if (m->default_fs)
 			free(m->default_fs);
 	}
+	free_vol_map(m);
 	free(m);
 }
 

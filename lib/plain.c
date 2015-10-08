@@ -4,6 +4,7 @@
 #include <sys/stat.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <limits.h>
 #include "mosaic.h"
 #include "volume.h"
 #include "util.h"
@@ -20,13 +21,14 @@ static int open_plain(struct mosaic *m, int open_flags)
 static int new_plain_vol(struct mosaic *m, const char *name,
 		unsigned long size_in_blocks, int new_flags)
 {
-	struct mosaic_subdir_priv *pp = m->priv;
+	char dir[PATH_MAX];
 
 	if (!(new_flags & NEW_VOL_WITH_FS))
 		return -1;
 
 	/* FIXME -- size_in_blocks ignored */
-	return mkdirat(pp->m_loc_dir, name, 0600);
+	snprintf(dir, sizeof(dir), "%s/%s", m->m_loc, name);
+	return mkdir_p(dir, 1, 0600);
 }
 
 static int open_plain_vol(struct mosaic *m, struct volume *t,
@@ -41,17 +43,23 @@ static int open_plain_vol(struct mosaic *m, struct volume *t,
 static int drop_plain_vol(struct mosaic *m, struct volume *t,
 		int drop_flags)
 {
-	struct mosaic_subdir_priv *pp = m->priv;
+	const char *base = m->m_loc;
+	struct mosaic_subdir_priv *fp = m->priv;
+	int base_fd = fp->m_loc_dir;
 	int fd;
 
-	fd = openat(pp->m_loc_dir, t->t_name, O_DIRECTORY);
-	if (fd < 0)
+	fd = openat(base_fd, t->t_name, O_DIRECTORY);
+	if (fd < 0) {
+		fprintf(stderr, "%s: can't open %s/%s: %m\n",
+				__func__, base, t->t_name);
 		return -1;
+	}
 
 	if (remove_rec(fd))
 		return -1;
 
-	return unlinkat(pp->m_loc_dir, t->t_name, AT_REMOVEDIR);
+	// Remove all the non-empty parent directories up to base
+	return rmdirat_r(base_fd, base, t->t_name);
 }
 
 static int resize_plain_vol(struct mosaic *m, struct volume *t,

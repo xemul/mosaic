@@ -33,18 +33,26 @@ static int new_fsimg_vol(struct mosaic *m, const char *name,
 		unsigned long size_in_blocks, int make_flags)
 {
 	struct mosaic_subdir_priv *fp = m->priv;
+	char dir[PATH_MAX];
 	int imgf;
 
 	/*
 	 * FIXME -- add separate subdir for images and separate for
 	 * regular fs mount?
 	 */
-
-	imgf = openat(fp->m_loc_dir, name, O_WRONLY | O_CREAT | O_EXCL, 0600);
-	if (imgf < 0)
+	snprintf(dir, sizeof(dir), "%s/%s", m->m_loc, name);
+	if (mkdir_p(dir, 0, 0700) < 0) {
+		// error is printed by mkdir_p()
 		return -1;
+	}
+	imgf = openat(fp->m_loc_dir, name, O_WRONLY | O_CREAT | O_EXCL, 0600);
+	if (imgf < 0) {
+		fprintf(stderr, "%s: can't create %s: %m\n", __func__, name);
+		return -1;
+	}
 
 	if (ftruncate(imgf, size_in_blocks << MOSAIC_BLOCK_SHIFT) < 0) {
+		fprintf(stderr, "%s: can't grow %s: %m\n", __func__, name);
 		close(imgf);
 		return -1;
 	}
@@ -75,13 +83,19 @@ static int new_fsimg_vol(struct mosaic *m, const char *name,
 static int drop_fsimg_vol(struct mosaic *m, struct volume *t,
 		int drop_flags)
 {
+	const char *base = m->m_loc;
 	struct mosaic_subdir_priv *fp = m->priv;
+	int base_fd = fp->m_loc_dir;
 
 	/*
 	 * FIXME -- what if mounted?
 	 */
-
-	return unlinkat(fp->m_loc_dir, t->t_name, 0);
+	if (unlinkat(base_fd, t->t_name, 0)) {
+		fprintf(stderr, "%s: can't rm %s: %m\n", __func__, t->t_name);
+		return -1;
+	}
+	// Remove all the non-empty parent directories up to base
+	return rmdirat_r(base_fd, base, t->t_name);
 }
 
 /* Figure out device name that corresponds to given volume.

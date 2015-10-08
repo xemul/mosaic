@@ -48,6 +48,7 @@ int remove_rec(int dir_fd)
 {
 	DIR *d;
 	struct dirent *de;
+	int ret = -1;
 
 	d = fdopendir(dir_fd);
 	while ((de = readdir(d)) != NULL) {
@@ -61,8 +62,11 @@ int remove_rec(int dir_fd)
 
 			/* FIXME -- limit of descriptors may not be enough */
 			sub_fd = openat(dir_fd, de->d_name, O_DIRECTORY);
-			if (sub_fd < 0)
+			if (sub_fd < 0) {
+				fprintf(stderr, "%s: can't open %s: %m\n",
+						__func__, de->d_name);
 				goto err;
+			}
 
 			if (remove_rec(sub_fd) < 0)
 				goto err;
@@ -70,16 +74,61 @@ int remove_rec(int dir_fd)
 			flg = AT_REMOVEDIR;
 		}
 
-		if (unlinkat(dir_fd, de->d_name, flg))
+		if (unlinkat(dir_fd, de->d_name, flg)) {
+			fprintf(stderr, "%s: can't rm %s: %m\n",
+					__func__, de->d_name);
 			goto err;
+		}
 	};
 
-	closedir(d);
-	return 0;
+	ret = 0;
 
 err:
 	closedir(d);
-	return -1;
+	return ret;
+}
+
+/** rmdirat_r -- recursively remove empty directories. Starts at
+ * base/dirs and ens at base, or at the first non-empty directory.
+ * All errors are reported, except for non-existent or non-empty directores.
+ *
+ * Example: rmdir(fd, "/tmp", "a/b/c");
+ * should remove /tmp/a/b/c, /tmp/a/b, and /tmp/a if they are empty.
+ */
+int rmdirat_r(int basefd, const char *base, const char *dirs)
+{
+	char *slash;
+	int ret;
+	char *dir = strdup(dirs);
+
+	while (1) {
+		ret = unlinkat(basefd, dir, AT_REMOVEDIR);
+		if (ret) {
+			if (errno == ENOTEMPTY)
+				// non-empty dir: return
+				return 0;
+			if (errno != ENOENT) {
+				fprintf(stderr, "%s: can't rmdir %s/%s: %m\n",
+						__func__, base, dir);
+				ret = -1;
+				break;
+			}
+			// ENOENT is skipped
+		}
+		// get upper dir
+		slash = strrchr(dir, '/');
+		if (!slash) {
+			ret = 0;
+			break;
+		}
+		// skip repeating slashes
+		while (slash[-1] == '/')
+			slash--;
+		*slash = '\0';
+	}
+
+	free(dir);
+	return ret;
 }
 
 int get_subdir_size(int fd, unsigned long *sizep)
@@ -346,6 +395,60 @@ int run_prg_rc(char *const argv[], int hide_mask, int *rc)
 int run_prg(char *const argv[])
 {
 	return run_prg_rc(argv, 0, NULL);
+}
+
+/** Check if a given file or directory exists
+ * Returns:
+ *  1 - exists
+ *  0 - does not exist
+ * -1 - some unexpected system error (it is also reported)
+ */
+int path_exists(const char *path)
+{
+	if (access(path, F_OK) == 0)
+		return 1;
+	if (errno == ENOENT)
+		return 0;
+
+	fprintf(stderr, "%s: can't access %s: %m\n", __func__, path);
+	return -1;
+}
+
+int mkdir_p(const char *path, int use_last_component, int mode)
+{
+	char buf[PATH_MAX];
+	const char *ps, *p;
+	int len;
+
+	if (path == NULL)
+		return 0;
+
+	ps = path + 1;
+	while ((p = strchr(ps, '/'))) {
+		len = p - path + 1;
+		snprintf(buf, len, "%s", path);
+		ps = p + 1;
+		if (path_exists(buf) != 1) {
+			if (mkdir(buf, mode)) {
+				fprintf(stderr, "%s: can't create directory"
+						" %s: %m\n", __func__, buf);
+				return -1;
+			}
+		}
+	}
+
+	if (!use_last_component)
+		return 0;
+
+	if (path_exists(path) != 1) {
+		if (mkdir(path, mode)) {
+			fprintf(stderr, "%s: can't create directory %s: %m\n",
+					__func__, path);
+			return -1;
+		}
+	}
+
+	return 0;
 }
 
 #ifdef DOTEST

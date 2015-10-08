@@ -2,6 +2,7 @@
 #define __MOSAIC_UTIL_H__
 int scan_mounts(char *path, char *device);
 int remove_rec(int dir_fd);
+int rmdirat_r(int basefd, const char *base, const char *dirs);
 int get_subdir_size(int fd, unsigned long *sizep);
 
 int copy_file(int src_dirfd, const char *src_dir,
@@ -17,6 +18,9 @@ int run_prg(char *const argv[]);
 #define HIDE_STDOUT	1 << 0	/* hide process' stdout */
 #define HIDE_STDERR	1 << 1	/* hide process' stderr */
 int run_prg_rc(char *const argv[], int hide_mask, int *rc);
+
+int path_exists(const char *path);
+int mkdir_p(const char *path, int use_last_component, int mode);
 
 /* Config parsing: check if val is set */
 #define CHKVAL(key, val)					\
@@ -37,5 +41,20 @@ do {								\
 		return -1;					\
 	}							\
 } while (0)
+
+/* Safer memory operations */
+#define __xalloc(op, size, ...)						\
+	({								\
+		void *___p = op( __VA_ARGS__ );				\
+		if (!___p)						\
+			fprintf(stderr, "%s: can't alloc %li bytes\n",	\
+			       __func__, (long)(size));			\
+		___p;							\
+	})
+
+#define xstrdup(str)		__xalloc(strdup, strlen(str) + 1, str)
+#define xmalloc(size)		__xalloc(malloc, size, size)
+#define xzalloc(size)		__xalloc(calloc, size, 1, size)
+#define xrealloc(p, size)	__xalloc(realloc, size, p, size)
 
 #endif

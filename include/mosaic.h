@@ -2,6 +2,7 @@
 #define __MOSAIC_H__
 struct mosaic;
 struct volume;
+struct vol_map;
 
 /* Mark for library functions that are not part of public API
  * but are still used by our own tools like moctl.
@@ -67,6 +68,7 @@ struct mosaic {
 	const struct mosaic_ops *m_ops;
 	char *m_loc;
 	char *default_fs;
+	struct vol_map *vol_map;
 
 	void *priv;
 };

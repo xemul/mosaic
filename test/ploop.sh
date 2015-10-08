@@ -3,12 +3,15 @@ TEST_MOS_CLONE=yes
 
 echo "*** Testing ploop driver"
 mkdir ploop.dir
-echo 'type: ploop' > ploop.mos
-echo 'location: ploop.dir' >> ploop.mos
+cat > ploop.mos << EOF
+type: ploop
+location: ploop.dir
+volumeMap: \\([a-z]\\)\\([a-z][a-z]\\)\\(.*\\) \\1/\\2/\\3
+EOF
 
 run_tests "ploop.mos"
 
-rmdir ploop.dir
+rmdir ploop.dir || fail "mosaic dir not empty"
 rm -f ploop.mos
 
 echo "ploop tests PASS"
