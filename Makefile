@@ -21,3 +21,6 @@ test: all
 
 .PHONY: all install clean test $(SUBS)
 .DEFAULT_GOAL: all
+
+# include optional local rules
+-include Makefile.local
