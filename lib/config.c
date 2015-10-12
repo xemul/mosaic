@@ -38,8 +38,7 @@ static int parse_top_val(yaml_parser_t *p, char *key, void *x)
 
 	if (!strcmp(key, "type")) {
 		val = yaml_parse_scalar(p);
-		CHKVAL(key, val);
-		CHKDUP(key, m->m_ops);
+		CHKVALTO(key, val, m->m_ops);
 
 		m->m_ops = mosaic_find_ops(val);
 
@@ -64,8 +63,7 @@ static int parse_top_val(yaml_parser_t *p, char *key, void *x)
 
 	if (!strcmp(key, "location")) {
 		val = yaml_parse_scalar(p);
-		CHKVAL(key, val);
-		CHKDUP(key, m->m_loc);
+		CHKVALTO(key, val, m->m_loc);
 
 		m->m_loc = val;
 		return 0;
@@ -73,16 +71,14 @@ static int parse_top_val(yaml_parser_t *p, char *key, void *x)
 
 	if (!strcmp(key, "volumeMap")) {
 		val = yaml_parse_scalar(p);
-		CHKVAL(key, val);
-		CHKDUP(key, m->vol_map);
+		CHKVALTO(key, val, m->vol_map);
 
 		return parse_vol_map(m, key, val);
 	}
 
 	if (!strcmp(key, "default_fs")) {
 		val = yaml_parse_scalar(p);
-		CHKVAL(key, val);
-		CHKDUP(key, m->default_fs);
+		CHKVALTO(key, val, m->default_fs);
 
 		m->default_fs = val;
 		return 0;

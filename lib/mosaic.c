@@ -125,8 +125,7 @@ int parse_mosaic_subdir_layout(struct mosaic *m, char *key, char *val)
 	if (!strcmp(key, "fs")) {
 		int len;
 
-		CHKVAL(key, val);
-		CHKDUP(key, p->fs_subdir);
+		CHKVALTO(key, val, p->fs_subdir);
 
 		len = strlen(m->m_loc) + strlen(val) + 2;
 		p->fs_subdir = malloc(len);
