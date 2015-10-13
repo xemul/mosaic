@@ -26,6 +26,7 @@
 #include <sys/stat.h>
 #include <assert.h>
 #include <string.h>
+#include "log.h"
 
 /* UUID generator. We use DCE style random UUIDs, it is easy. */
 
@@ -127,7 +128,7 @@ int ploop_uuid_generate(char *uuid, int len)
 
 	ret = uuid_new(uu);
 	if (ret) {
-		fprintf(stderr, "%s: can't generate uuid: %m\n", __func__);
+		loge("%s: can't generate uuid: %m\n", __func__);
 		return ret;
 	}
 	prl_uuid2str(uu, uuid, len);

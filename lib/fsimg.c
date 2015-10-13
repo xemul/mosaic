@@ -47,12 +47,12 @@ static int new_fsimg_vol(struct mosaic *m, const char *name,
 	}
 	imgf = openat(fp->m_loc_dir, name, O_WRONLY | O_CREAT | O_EXCL, 0600);
 	if (imgf < 0) {
-		fprintf(stderr, "%s: can't create %s: %m\n", __func__, name);
+		loge("%s: can't create %s: %m\n", __func__, name);
 		return -1;
 	}
 
 	if (ftruncate(imgf, size_in_blocks << MOSAIC_BLOCK_SHIFT) < 0) {
-		fprintf(stderr, "%s: can't grow %s: %m\n", __func__, name);
+		loge("%s: can't grow %s: %m\n", __func__, name);
 		close(imgf);
 		return -1;
 	}
@@ -91,7 +91,7 @@ static int drop_fsimg_vol(struct mosaic *m, struct volume *t,
 	 * FIXME -- what if mounted?
 	 */
 	if (unlinkat(base_fd, t->t_name, 0)) {
-		fprintf(stderr, "%s: can't rm %s: %m\n", __func__, t->t_name);
+		loge("%s: can't rm %s: %m\n", __func__, t->t_name);
 		return -1;
 	}
 	// Remove all the non-empty parent directories up to base
@@ -115,8 +115,7 @@ static int get_dev(struct mosaic *m, struct volume *t, char *dev, int size)
 
 	// sanity check first
 	if (!pdata || pdata ->m_loc_dir < 0) {
-		fprintf(stderr, "%s: internal error, m_loc_dir unset\n",
-				__func__);
+		loge("%s: internal error, m_loc_dir unset\n", __func__);
 		return -1;
 	}
 
@@ -126,7 +125,7 @@ static int get_dev(struct mosaic *m, struct volume *t, char *dev, int size)
 	dev[0] = '\0';
 	fp = popen(cmd, "re");
 	if (!fp) {
-		fprintf(stderr, "%s: can't run %s: %m\n", __func__, cmd);
+		loge("%s: can't run %s: %m\n", __func__, cmd);
 		return -1;
 	}
 
@@ -139,8 +138,7 @@ static int get_dev(struct mosaic *m, struct volume *t, char *dev, int size)
 		// we are only interested in the last line, skip the rest
 	}
 	if (rc == -1 && errno != 0) {
-		fprintf(stderr, "%s: error reading from %s: %m\n",
-				__func__, cmd);
+		loge("%s: error reading from %s: %m\n", __func__, cmd);
 		goto out;
 	}
 	if (lcnt == 0) { // no output
@@ -154,14 +152,13 @@ static int get_dev(struct mosaic *m, struct volume *t, char *dev, int size)
 	 */
 	end = strchr(line, ':');
 	if (strncmp(line, "/dev/", 5) != 0 || !end) {
-		fprintf(stderr, "%s: unexpected losetup output: \"%s\"\n",
-				__func__, line);
+		loge("%s: unexpected losetup output: \"%s\"\n", __func__, line);
 		goto out;
 	}
 
 	*end = '\0';
 	if (end - line + 1 > size) {
-		fprintf(stderr, "%s: not enough buffer space (%d)"
+		loge("%s: not enough buffer space (%d)"
 				" to store %s\n", __func__, size, line);
 		goto out;
 	}
@@ -177,11 +174,11 @@ out:
 	 * Note that ret = -1 assignments below are probably redundant.
 	 */
 	if (rc < 0) {
-		fprintf(stderr, "%s: command execution error, pclose(): %m\n",
+		loge("%s: command execution error, pclose(): %m\n",
 				__func__);
 		ret = -1;
 	} else if (rc) {
-		fprintf(stderr, "%s: ploop returned non-zero exit code %d\n",
+		loge("%s: ploop returned non-zero exit code %d\n",
 				__func__, WEXITSTATUS(rc));
 		ret = -1;
 	}
@@ -199,7 +196,7 @@ static int attach_fsimg_vol(struct mosaic *m, struct volume *t,
 
 	// First, check if the volume is already attached
 	if (get_dev(m, t, aux, sizeof(aux)) > 0) {
-		fprintf(stderr, "%s: %s already attached to %s\n",
+		loge("%s: %s already attached to %s\n",
 				__func__, t->t_name, aux);
 		return -1;
 	}
@@ -232,13 +229,12 @@ static int detach_fsimg_vol(struct mosaic *m, struct volume *t)
 
 	rc = get_dev(m, t, dev, sizeof(dev));
 	if (rc < 0) { // error
-		fprintf(stderr, "%s: error getting device\n", __func__);
+		loge("%s: error getting device\n", __func__);
 		return -1;
 	}
 	if (rc == 0) {
 		// no device
-		fprintf(stderr, "%s: volume %s not attached\n",
-				__func__, t->t_name);
+		loge("%s: volume %s not attached\n", __func__, t->t_name);
 		return -1;
 	}
 

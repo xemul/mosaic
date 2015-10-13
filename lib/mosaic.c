@@ -132,7 +132,7 @@ int parse_mosaic_subdir_layout(struct mosaic *m, char *key, char *val)
 	}
 #endif
 
-	fprintf(stderr, "%s: unknown layout element: %s\n", __func__, key);
+	loge("%s: unknown layout element: %s\n", __func__, key);
 
 	return -1;
 }

@@ -118,7 +118,7 @@ static int drop_btrfs_subvol(struct mosaic *m, struct volume *t,
 	// Remove all the non-empty parent directories up to base
 	dfd = open(base, O_DIRECTORY);
 	if (dfd < 0) {
-		fprintf(stderr, "%s: can't open %s: %m\n", __func__, base);
+		loge("%s: can't open %s: %m\n", __func__, base);
 		return -1;
 	}
 	ret = rmdirat_r(dfd, base, t->t_name);

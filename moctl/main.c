@@ -389,12 +389,29 @@ static int do_mosaic(char *name, int argc, char **argv)
 	return usage(1);
 }
 
+static void do_printf(int level, const char *f, ...)
+{
+	va_list args;
+
+	va_start(args, f);
+	if (level <= LOG_WRN)
+		vfprintf(stderr, f, args);
+	else
+		vprintf(f, args);
+	va_end(args);
+}
+
 int main(int argc, char **argv)
 {
 	if (argc < 3) {
 		fprintf(stderr, "Not enough arguments!\n");
 		return usage(1);
 	}
+
+	/*
+	 * FIXME: Add --debug or -vN option
+	 */
+	mosaic_set_log_fn(do_printf);
 
 	self_name = argv[0];
 	return do_mosaic(argv[1], argc - 2, argv + 2);

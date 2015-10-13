@@ -63,7 +63,7 @@ int remove_rec(int dir_fd)
 			/* FIXME -- limit of descriptors may not be enough */
 			sub_fd = openat(dir_fd, de->d_name, O_DIRECTORY);
 			if (sub_fd < 0) {
-				fprintf(stderr, "%s: can't open %s: %m\n",
+				loge("%s: can't open %s: %m\n",
 						__func__, de->d_name);
 				goto err;
 			}
@@ -75,7 +75,7 @@ int remove_rec(int dir_fd)
 		}
 
 		if (unlinkat(dir_fd, de->d_name, flg)) {
-			fprintf(stderr, "%s: can't rm %s: %m\n",
+			loge("%s: can't rm %s: %m\n",
 					__func__, de->d_name);
 			goto err;
 		}
@@ -108,7 +108,7 @@ int rmdirat_r(int basefd, const char *base, const char *dirs)
 				// non-empty dir: return
 				return 0;
 			if (errno != ENOENT) {
-				fprintf(stderr, "%s: can't rmdir %s/%s: %m\n",
+				loge("%s: can't rmdir %s/%s: %m\n",
 						__func__, base, dir);
 				ret = -1;
 				break;
@@ -146,7 +146,7 @@ int copy_file(int src_dirfd, const char *src_dir,
 	struct stat st;
 
 	if (fstatat(src_dirfd, name, &st, 0) < 0) {
-		fprintf(stderr, "%s: can't stat %s/%s: %m\n",
+		loge("%s: can't stat %s/%s: %m\n",
 				__func__, src_dir, name);
 		return -1;
 	}
@@ -154,14 +154,14 @@ int copy_file(int src_dirfd, const char *src_dir,
 
 	ifd = openat(src_dirfd, name, O_RDONLY);
 	if (ifd < 0) {
-		fprintf(stderr, "%s: can't open %s/%s: %m\n",
+		loge("%s: can't open %s/%s: %m\n",
 				__func__, src_dir, name);
 		return -1;
 	}
 
 	ofd = openat(dst_dirfd, name, O_RDWR | O_CREAT | O_EXCL, st.st_mode);
 	if (ofd < 0) {
-		fprintf(stderr, "%s: can't create %s/%s: %m\n",
+		loge("%s: can't create %s/%s: %m\n",
 				__func__, dst_dir, name);
 		close(ifd);
 		return -1;
@@ -173,11 +173,11 @@ int copy_file(int src_dirfd, const char *src_dir,
 	close(ofd);
 
 	if (ret < 0) {
-		fprintf(stderr, "%s: sendfile %s/%s -> %s failed: %m\n",
+		loge("%s: sendfile %s/%s -> %s failed: %m\n",
 				__func__, src_dir, name, dst_dir);
 		return -1;
 	} else if (ret != s) {
-		fprintf(stderr, "%s: sendfile %s/%s -> %s short write (%zd/%zd)\n",
+		loge("%s: sendfile %s/%s -> %s short write (%zd/%zd)\n",
 				__func__, src_dir, name, dst_dir, ret, s);
 		return -1;
 	}
@@ -196,7 +196,7 @@ int write_var(int dirfd, const char *dir,
 	if (val) {
 		len = strlen(val) + 1; // +1 for \0
 		if (len > max_val_len) {
-			fprintf(stderr, "%s: variable %s too long "
+			loge("%s: variable %s too long "
 					"(%zd > %zd)!\n",
 					__func__, name, len, max_val_len);
 			return -1;
@@ -205,27 +205,27 @@ int write_var(int dirfd, const char *dir,
 
 	fd = openat(dirfd, name, O_WRONLY|O_CREAT);
 	if (fd < 0) {
-		fprintf(stderr, "%s: can't open %s/%s: %m\n",
+		loge("%s: can't open %s/%s: %m\n",
 				__func__, dir, name);
 		return -1;
 	}
 
 	if (len == 0) {
 		if (ftruncate(fd, 0) < 0) {
-			fprintf(stderr, "%s: can't truncate %s/%s: %m\n",
+			loge("%s: can't truncate %s/%s: %m\n",
 					__func__, dir, name);
 			ret = -1;
 		}
 	} else {
 		if (write(fd, val, len) != len) {
-			fprintf(stderr, "%s: can't write %s/%s: %m\n",
+			loge("%s: can't write %s/%s: %m\n",
 					__func__, dir, name);
 			ret = -1;
 		}
 	}
 
 	if (close(fd) < 0) {
-		fprintf(stderr, "%s: can't close %s/%s: %m\n",
+		loge("%s: can't close %s/%s: %m\n",
 				__func__, dir, name);
 		ret = -1;
 	}
@@ -242,7 +242,7 @@ char *read_var(int dirfd, const char *dir, const char *name)
 
 	if (fstatat(dirfd, name, &st, 0) < 0) {
 		if (errno != ENOENT)
-			fprintf(stderr, "%s: can't stat %s/%s: %m\n",
+			loge("%s: can't stat %s/%s: %m\n",
 					__func__, dir, name);
 		return NULL;
 	}
@@ -252,25 +252,25 @@ char *read_var(int dirfd, const char *dir, const char *name)
 
 	fd = openat(dirfd, name, O_RDONLY);
 	if (fd < 0) {
-		fprintf(stderr, "%s: can't open %s/%s: %m\n",
+		loge("%s: can't open %s/%s: %m\n",
 				__func__, dir, name);
 		return NULL;
 	}
 
 	if (s > max_val_len) {
-		fprintf(stderr, "%s: file %s/%s size too large (%zd > %zd)\n",
+		loge("%s: file %s/%s size too large (%zd > %zd)\n",
 				__func__, dir, name, s, max_val_len);
 		goto out;
 	}
 
 	buf = malloc(s);
 	if (!buf) {
-		fprintf(stderr, "%s: can't allocate %zdb memory: %m\n",
+		loge("%s: can't allocate %zdb memory: %m\n",
 				__func__, s);
 		goto out;
 	}
 	if (read(fd, &buf, s) != s) {
-		fprintf(stderr, "%s: can't read %s/%s: %m\n",
+		loge("%s: can't read %s/%s: %m\n",
 				__func__, dir, name);
 		free(buf);
 		buf = NULL;
@@ -352,17 +352,17 @@ int run_prg_rc(char *const argv[], int hide_mask, int *rc)
 
 			close(fd);
 		} else {
-			fprintf(stderr, "%s: can't open /dev/null: %m\n",
+			loge("%s: can't open /dev/null: %m\n",
 					__func__);
 			return -1;
 		}
 
 		my_execvp(argv[0], argv);
 
-		fprintf(stderr, "%s: can't exec %s: %m\n", __func__, argv[0]);
+		loge("%s: can't exec %s: %m\n", __func__, argv[0]);
 		return 127;
 	} else if (pid == -1) {
-		fprintf(stderr, "%s: can't fork: %m\n", __func__);
+		loge("%s: can't fork: %m\n", __func__);
 		return -1;
 	}
 //	h = register_cleanup_hook(cleanup_kill_process, &pid);
@@ -371,7 +371,7 @@ int run_prg_rc(char *const argv[], int hide_mask, int *rc)
 			break;
 //	unregister_cleanup_hook(h);
 	if (ret == -1) {
-		fprintf(stderr, "%s: can't waitpid %s: %m\n", __func__, cmd);
+		loge("%s: can't waitpid %s: %m\n", __func__, cmd);
 		return -1;
 	} else if (WIFEXITED(status)) {
 		ret = WEXITSTATUS(status);
@@ -381,13 +381,13 @@ int run_prg_rc(char *const argv[], int hide_mask, int *rc)
 		}
 		if (ret == 0)
 			return 0;
-		fprintf(stderr, "%s: command %s exited with code %d\n",
+		loge("%s: command %s exited with code %d\n",
 				__func__, cmd, ret);
 	} else if (WIFSIGNALED(status)) {
-		fprintf(stderr, "%s: command %s received signal %d\n",
+		loge("%s: command %s received signal %d\n",
 				__func__, cmd, WTERMSIG(status));
 	} else
-		fprintf(stderr, "%s: command %s died\n", __func__, cmd);
+		loge("%s: command %s died\n", __func__, cmd);
 
 	return -1;
 }
@@ -410,7 +410,7 @@ int path_exists(const char *path)
 	if (errno == ENOENT)
 		return 0;
 
-	fprintf(stderr, "%s: can't access %s: %m\n", __func__, path);
+	loge("%s: can't access %s: %m\n", __func__, path);
 	return -1;
 }
 
@@ -430,7 +430,7 @@ int mkdir_p(const char *path, int use_last_component, int mode)
 		ps = p + 1;
 		if (path_exists(buf) != 1) {
 			if (mkdir(buf, mode)) {
-				fprintf(stderr, "%s: can't create directory"
+				loge("%s: can't create directory"
 						" %s: %m\n", __func__, buf);
 				return -1;
 			}
@@ -442,7 +442,7 @@ int mkdir_p(const char *path, int use_last_component, int mode)
 
 	if (path_exists(path) != 1) {
 		if (mkdir(path, mode)) {
-			fprintf(stderr, "%s: can't create directory %s: %m\n",
+			loge("%s: can't create directory %s: %m\n",
 					__func__, path);
 			return -1;
 		}

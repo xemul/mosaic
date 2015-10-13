@@ -55,8 +55,18 @@ int mosaic_put_vol_bdev(volume_t t);
 int mosaic_get_vol_size(volume_t t, unsigned long *size_in_blocks);
 
 /* Misc */
-typedef void (*mosaic_log_fn)(const char *f, ...)
-	__attribute__ ((format(printf, 1, 2)));
+typedef void (*mosaic_log_fn)(int lvl, const char *f, ...)
+	__attribute__ ((format(printf, 2, 3)));
+void mosaic_set_log_fn(mosaic_log_fn lfn);
+
+enum log_level {
+	LOG_ERR,
+	LOG_WRN,
+	LOG_INF,
+	LOG_DBG,
+};
+
+void mosaic_set_log_lvl(enum log_level l);
 
 #pragma GCC visibility pop
 #endif

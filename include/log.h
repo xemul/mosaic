@@ -3,23 +3,20 @@
 #include <errno.h>
 #include "uapi/mosaic.h"
 
-extern mosaic_log_fn print_log;
+extern mosaic_log_fn log_fn;
+extern enum log_level log_level;
 
-#define log(fmt, ...)							\
+#define print_log(level, fmt, ...)					\
 		do { 							\
-			if (print_log)					\
-				print_log("%s/%d:" fmt, 		\
+			if (log_fn && level <= log_level)		\
+				log_fn(level, "%s/%d:" fmt, 		\
 					__FILE__, __LINE__,		\
 					##__VA_ARGS__);			\
 		} while (0)
 
-#define loge(fmt, ...)							\
-		do { 							\
-			if (print_log)					\
-				print_log("%s/%d error %s: " fmt, 	\
-					__FILE__, __LINE__,		\
-					strerror(errno),		\
-					##__VA_ARGS__);			\
-		} while (0)
+#define logd(fmt, ...)		print_log(LOG_DBG, "debug: " fmt, ##__VA_ARGS__)
+#define log(fmt, ...)		print_log(LOG_INF, fmt, ##__VA_ARGS__)
+#define logw(fmt, ...)		print_log(LOG_WRN, "WARN: " fmt, ##__VA_ARGS__)
+#define loge(fmt, ...)		print_log(LOG_ERR, "ERROR: " fmt, ##__VA_ARGS__)
 
 #endif

@@ -74,7 +74,7 @@ static int open_ploop(struct mosaic *m, struct volume *t, int open_flags)
 	/* Just check that corresponding dd.xml exists */
 	snprintf(dd, sizeof(dd), "%s/%s/" DDXML, m->m_loc, t->t_name);
 	if (access(dd, R_OK) < 0) {
-		fprintf(stderr, "%s: volume %s doesn't exist: %m\n",
+		loge("%s: volume %s doesn't exist: %m\n",
 				__func__, t->t_name);
 		return -1;
 	}
@@ -117,7 +117,7 @@ static int clone_ploop(struct mosaic *m, struct volume *parent,
 	snprintf(pdir, sizeof(pdir), "%s/%s", m->m_loc, parent->t_name);
 	snprintf(pdd, sizeof(pdd), "%s/%s", pdir, DDXML);
 	if (access(pdd, R_OK) < 0) {
-		fprintf(stderr, "%s: parent volume %s doesn't exist: %m\n",
+		loge("%s: parent volume %s doesn't exist: %m\n",
 				__func__, parent->t_name);
 		return -1;
 	}
@@ -125,7 +125,7 @@ static int clone_ploop(struct mosaic *m, struct volume *parent,
 	snprintf(dir, sizeof(dir), "%s/%s", m->m_loc, name);
 	snprintf(dd, sizeof(dd), "%s/%s", dir, DDXML);
 	if (access(dd, R_OK) == 0) {
-		fprintf(stderr, "%s: volume %s already exists\n",
+		loge("%s: volume %s already exists\n",
 				__func__, name);
 		return -1;
 	}
@@ -136,13 +136,13 @@ static int clone_ploop(struct mosaic *m, struct volume *parent,
 
 	pdfd = open(pdir, O_DIRECTORY);
 	if (pdfd < 0) {
-		fprintf(stderr, "%s: can't open %s: %m\n", __func__, pdir);
+		loge("%s: can't open %s: %m\n", __func__, pdir);
 		return -1;
 	}
 
 	dfd = open(dir, O_DIRECTORY);
 	if (dfd < 0) {
-		fprintf(stderr, "%s: can't open %s: %m\n", __func__, dir);
+		loge("%s: can't open %s: %m\n", __func__, dir);
 		return -1;
 	}
 
@@ -156,7 +156,7 @@ static int clone_ploop(struct mosaic *m, struct volume *parent,
 		/* 1.1 Create a new snapshot in parent */
 		uuid = malloc(UUID_SIZE);
 		if (ploop_uuid_generate(uuid, UUID_SIZE) != 0) {
-			fprintf(stderr, "%s: can't generate uuid\n", __func__);
+			loge("%s: can't generate uuid\n", __func__);
 			goto out;
 		}
 
@@ -183,7 +183,7 @@ static int clone_ploop(struct mosaic *m, struct volume *parent,
 	/* 3. Hardlink all the deltas */
 	DIR *d = fdopendir(pdfd);
 	if (!d) {
-		fprintf(stderr, "%s: opendir %s failed: %m\n", __func__, pdir);
+		loge("%s: opendir %s failed: %m\n", __func__, pdir);
 		goto out;
 	}
 	struct dirent *de;
@@ -194,7 +194,7 @@ static int clone_ploop(struct mosaic *m, struct volume *parent,
 		if (strncmp(name, IMG_NAME, sizeof(IMG_NAME) - 1) != 0)
 			continue;
 		if (linkat(pdfd, name, dfd, name, 0) != 0) {
-			fprintf(stderr, "%s: can't hardlink "
+			loge("%s: can't hardlink "
 					"%s/%s -> %s/%s: %m\n",
 					__func__,
 					dir, name, pdir, name);
@@ -267,7 +267,7 @@ static int mount_ploop(struct mosaic *m, struct volume *t,
 
 		dfd = open(dd, O_DIRECTORY);
 		if (dfd < 0) {
-			fprintf(stderr, "%s: can't open %s: %m\n", __func__, dd);
+			loge("%s: can't open %s: %m\n", __func__, dd);
 			return -1;
 		}
 		// invalidate the snapshot used for cloning
@@ -315,7 +315,7 @@ static int do_remove_ploop(struct mosaic *m, const char *name)
 	if (dfd < 0) {
 		if (errno == ENOENT)
 			goto rm_dirs;
-		fprintf(stderr, "%s: can't open %s: %m\n", __func__, dir);
+		loge("%s: can't open %s: %m\n", __func__, dir);
 		return -1;
 	}
 	ret = remove_rec(dfd);
@@ -327,7 +327,7 @@ rm_dirs:
 	// Remove all the non-empty parent directories up to base
 	dfd = open(base, O_DIRECTORY);
 	if (dfd < 0) {
-		fprintf(stderr, "%s: can't open %s: %m\n", __func__, base);
+		loge("%s: can't open %s: %m\n", __func__, base);
 		return -1;
 	}
 	ret = rmdirat_r(dfd, base, name);
@@ -414,7 +414,7 @@ static int attach_ploop(struct mosaic *m, struct volume *t,
 	dev[0] = '\0';
 	fp = popen(cmd, "re");
 	if (!fp) {
-		fprintf(stderr, "%s: can't popen %s: %m\n", __func__, cmd);
+		loge("%s: can't popen %s: %m\n", __func__, cmd);
 		return -1;
 	}
 
@@ -432,7 +432,7 @@ static int attach_ploop(struct mosaic *m, struct volume *t,
 			continue; // hmm, read on a boundary?
 		*end = '\0';
 		if (end - begin + 1 > size) {
-			fprintf(stderr, "%s: not enough buffer space (%d)"
+			loge("%s: not enough buffer space (%d)"
 					"to store %s",
 					__func__, size, begin);
 			goto out;
@@ -454,11 +454,11 @@ out:
 	 */
 	rc = pclose(fp);
 	if (rc < 0) {
-		fprintf(stderr, "%s: command execution error, pclose(): %m\n",
+		loge("%s: command execution error, pclose(): %m\n",
 				__func__);
 		ret = -1;
 	} else if (rc) {
-		fprintf(stderr, "%s: ploop returned non-zero exit code %d\n",
+		loge("%s: ploop returned non-zero exit code %d\n",
 				__func__, WEXITSTATUS(rc));
 		ret = -1;
 	} else if (ret == -1) {
@@ -467,7 +467,7 @@ out:
 		 * from the command output, so need to rollback.
 		 */
 		detach_ploop(m, t);
-		fprintf(stderr, "%s: internal error: can't parse dev\n",
+		loge("%s: internal error: can't parse dev\n",
 				__func__);
 	}
 

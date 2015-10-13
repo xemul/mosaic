@@ -1,5 +1,7 @@
 #ifndef __MOSAIC_UTIL_H__
 #define __MOSAIC_UTIL_H__
+#include "log.h"
+
 int scan_mounts(char *path, char *device);
 int remove_rec(int dir_fd);
 int rmdirat_r(int basefd, const char *base, const char *dirs);
@@ -26,8 +28,7 @@ int mkdir_p(const char *path, int use_last_component, int mode);
 #define CHKVAL(key, val)					\
 do {								\
 	if (!val) {						\
-		fprintf(stderr, "%s: can't parse \"%s\"\n",	\
-				__func__, key);			\
+		loge("%s: can't parse \"%s\"\n", __func__, key);\
 		return -1;					\
 	}							\
 } while (0)
@@ -36,8 +37,7 @@ do {								\
 #define CHKDUP(key, to)						\
 do {								\
 	if (to) {						\
-		fprintf(stderr, "%s: duplicate \"%s\"\n",	\
-				__func__, key);			\
+		loge("%s: duplicate \"%s\"\n", __func__, key);	\
 		return -1;					\
 	}							\
 } while (0)
@@ -47,8 +47,8 @@ do {								\
 	({								\
 		void *___p = op( __VA_ARGS__ );				\
 		if (!___p)						\
-			fprintf(stderr, "%s: can't alloc %li bytes\n",	\
-			       __func__, (long)(size));			\
+			loge("%s: can't alloc %li bytes\n",		\
+					__func__, (long)(size));	\
 		___p;							\
 	})
 

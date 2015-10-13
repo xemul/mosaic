@@ -30,14 +30,14 @@ int parse_vol_map(struct mosaic *m, const char *key, char *val)
 	regex = strtok_r(val, " \t", &saveptr);
 	repl = strtok_r(NULL, " \t", &saveptr);
 	if (!repl) {
-		fprintf(stderr, "%s: invalid %s: no replacement\n",
+		loge("%s: invalid %s: no replacement\n",
 				__func__, key);
 		goto out;
 	}
 	// Check there's no tail characters
 	extra = strtok_r(NULL, " \t", &saveptr);
 	if (extra) {
-		fprintf(stderr, "%s: invalid %s: extra characters:"
+		loge("%s: invalid %s: extra characters:"
 				" \"%s\"\n", __func__, key, extra);
 		goto out;
 	}
@@ -50,7 +50,7 @@ int parse_vol_map(struct mosaic *m, const char *key, char *val)
 	if (err) {
 		char s[256];
 		regerror(err, &map->regex, s, sizeof(s));
-		fprintf(stderr, "%s: invalid %s regex \"%s\": %s\n",
+		loge("%s: invalid %s regex \"%s\": %s\n",
 				__func__, key, regex, s);
 		goto out;
 	}
@@ -94,7 +94,7 @@ char *map_vol_name(struct mosaic *m, const char *name)
 	// Initial check for bufput buffer size
 	buflen = strlen(map->repl) + 1;
 	if (buflen > sizeof(buf)) {
-		fprintf(stderr, "%s: buffer too short (%zd < %d)\n",
+		loge("%s: buffer too short (%zd < %d)\n",
 				__func__, sizeof(buf), buflen);
 		return NULL;
 	}
@@ -108,7 +108,7 @@ char *map_vol_name(struct mosaic *m, const char *name)
 	 */
 	res = regexec(&map->regex, s, n_matches, pm, 0);
 	if (res == REG_NOMATCH) {
-		fprintf(stderr, "%s: can't match \"%s\" against volumeMap"
+		loge("%s: can't match \"%s\" against volumeMap"
 				" regex\n", __func__, name);
 		/* FIXME: do we want to return the original name
 		 * in case there is no match against the regex?
@@ -137,7 +137,7 @@ char *map_vol_name(struct mosaic *m, const char *name)
 			// grow used size, check it
 			buflen += l;
 			if (buflen > sizeof(buf)) {
-				fprintf(stderr, "%s: buffer too short"
+				loge("%s: buffer too short"
 						" (%zd < %d)\n", __func__,
 						sizeof(buf), buflen);
 				return NULL;
@@ -152,7 +152,7 @@ char *map_vol_name(struct mosaic *m, const char *name)
 			found++;
 		}
 		if (!found) {
-			fprintf(stderr, "%s: warning: \\%d not found"
+			loge("%s: warning: \\%d not found"
 					"in replacement string\n",
 					__func__, i);
 			// let this be a warning for now
