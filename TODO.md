@@ -7,9 +7,7 @@ This is mosaic TODO list.
   - [ ] Get the information about mosaic (from the `.mos` file)
 
 ### Volume API
-- [ ] A way to ask for driver features
-  - [ ] Does it support cloning?
-  - [ ] Does it support block device?
+- [ ] A way to ask for driver information/stats
   - [ ] What are the limitations? Number of snapshots, min/max volume size, possible filesystems etc.
 - [ ] Status checks (`is_mounted`, etc.)
 - [ ] Listing/getting functionality
