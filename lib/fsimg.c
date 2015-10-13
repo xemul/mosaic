@@ -249,12 +249,13 @@ static int detach_fsimg_vol(struct mosaic *m, struct volume *t)
 	return 0;
 }
 
+/* FIXME: implement
 static int resize_fsimg_vol(struct mosaic *m, struct volume *t,
 		unsigned long size_in_blocks, int resize_flags)
 {
-	/* FIXME */
 	return -1;
 }
+*/
 
 static int get_fsimg_size(struct mosaic *m, struct volume *t, unsigned long *size_in_blocks)
 {
@@ -278,7 +279,6 @@ const struct mosaic_ops mosaic_fsimg = {
 	.drop_volume = drop_fsimg_vol,
 	.attach_volume = attach_fsimg_vol,
 	.detach_volume = detach_fsimg_vol,
-	.resize_volume = resize_fsimg_vol,
 	.get_volume_size = get_fsimg_size,
 
 	.parse_layout = parse_mosaic_subdir_layout,

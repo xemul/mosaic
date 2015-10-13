@@ -127,12 +127,13 @@ static int drop_btrfs_subvol(struct mosaic *m, struct volume *t,
 	return ret;
 }
 
+/* FIXME: qgroups
 static int resize_btrfs_subvol(struct mosaic *m, struct volume *t,
 		unsigned long size_in_blocks, int resize_flags)
 {
-	/* FIXME: qgroups */
 	return -1;
 }
+*/
 
 static int get_btrfs_subvol_size(struct mosaic *m, struct volume *t,
 		unsigned long *size_in_blocks)
@@ -151,7 +152,6 @@ const struct mosaic_ops mosaic_btrfs = {
 	.clone_volume = clone_btrfs_subvol,
 	.drop_volume = drop_btrfs_subvol,
 	.mount_volume = bind_vol_loc,
-	.resize_volume = resize_btrfs_subvol,
 	.get_volume_size = get_btrfs_subvol_size,
 
 	.parse_layout = parse_mosaic_subdir_layout,

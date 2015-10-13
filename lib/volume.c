@@ -168,7 +168,7 @@ int mosaic_resize_vol(volume_t t, unsigned long new_size_in_blocks, int resize_f
 {
 	struct mosaic *m = t->m;
 
-	if (resize_flags)
+	if (resize_flags || !m->m_ops->resize_volume)
 		return -1;
 
 	return m->m_ops->resize_volume(m, t, new_size_in_blocks, resize_flags);

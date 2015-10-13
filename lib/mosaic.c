@@ -155,3 +155,17 @@ void release_mosaic_subdir(struct mosaic *m)
 		free(p->fs_subdir);
 	free(p);
 }
+
+int mosaic_get_features(struct mosaic *m, unsigned long long *feat)
+{
+	*feat = 0;
+
+	if (m->m_ops->clone_volume)
+		*feat |= MOSAIC_FEATURE_CLONE;
+	if (m->m_ops->attach_volume)
+		*feat |= MOSAIC_FEATURE_BDEV;
+	if (m->m_ops->resize_volume)
+		*feat |= MOSAIC_FEATURE_DISK_SIZE_MGMT;
+
+	return 0;
+}

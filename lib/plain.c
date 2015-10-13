@@ -62,13 +62,6 @@ static int drop_plain_vol(struct mosaic *m, struct volume *t,
 	return rmdirat_r(base_fd, base, t->t_name);
 }
 
-static int resize_plain_vol(struct mosaic *m, struct volume *t,
-		unsigned long size_in_blocks, int resize_flags)
-{
-	/* FIXME */
-	return -1;
-}
-
 static int get_plain_size(struct mosaic *m, struct volume *t,
 		unsigned long *size_in_blocks)
 {
@@ -95,7 +88,6 @@ const struct mosaic_ops mosaic_plain = {
 	.new_volume = new_plain_vol,
 	.open_volume = open_plain_vol,
 	.drop_volume = drop_plain_vol,
-	.resize_volume = resize_plain_vol,
 	.mount_volume = bind_vol_loc,
 	.get_volume_size = get_plain_size,
 

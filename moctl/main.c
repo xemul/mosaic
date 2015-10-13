@@ -350,6 +350,28 @@ static int do_mosaic_create(char *name, int argc, char **argv)
 	return ret ? 1 : 0;
 }
 
+static int do_mosaic_info(mosaic_t mos, int argc, char **argv)
+{
+	unsigned long long features;
+
+	if (argc > 1) {
+		printf("Usage: moctl NAME info\n");
+		return -1;
+	}
+
+	/* FIXME: add flags for what info to show */
+	mosaic_get_features(mos, &features);
+	printf("features:");
+	if (features & MOSAIC_FEATURE_CLONE)
+		printf(" clone");
+	if (features & MOSAIC_FEATURE_BDEV)
+		printf(" bdev");
+	if (features & MOSAIC_FEATURE_DISK_SIZE_MGMT)
+		printf(" volsize");
+	printf("\n");
+	return 0;
+}
+
 static int do_mosaic(char *name, int argc, char **argv)
 {
 	mosaic_t mos;
@@ -384,6 +406,8 @@ static int do_mosaic(char *name, int argc, char **argv)
 		return do_mosaic_clone_vol(mos, argc, argv);
 	if (argis(action, "drop"))
 		return do_mosaic_drop_vol(mos, argc, argv);
+	if (argis(action, "info"))
+		return do_mosaic_info(mos, argc, argv);
 
 	fprintf(stderr, "Unknown action: %s\n", action);
 	return usage(1);

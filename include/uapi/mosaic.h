@@ -55,6 +55,16 @@ int mosaic_put_vol_bdev(volume_t t);
 int mosaic_get_vol_size(volume_t t, unsigned long *size_in_blocks);
 
 /* Misc */
+
+/* Can do mosaic_clone_vol */
+#define MOSAIC_FEATURE_CLONE		(1ULL << 0)
+/* The size_in_blocks works */
+#define MOSAIC_FEATURE_DISK_SIZE_MGMT	(1ULL << 1)
+/* Support block device opening */
+#define MOSAIC_FEATURE_BDEV		(1ULL << 2)
+
+int mosaic_get_features(mosaic_t mos, unsigned long long *feat);
+
 typedef void (*mosaic_log_fn)(int lvl, const char *f, ...)
 	__attribute__ ((format(printf, 2, 3)));
 void mosaic_set_log_fn(mosaic_log_fn lfn);
