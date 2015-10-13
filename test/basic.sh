@@ -20,9 +20,7 @@ function run_tests()
 	echo "* Testing volumes"
 	$moctl $mname new fs test_fs 512m || fail "Can't create fs"
 
-# Ideally we should have a way to ask a particular driver if a specific
-# operation is supported. Until we have that, do a little trick
-	if test -n "$TEST_MOS_ATTACH_DETACH"; then
+	if $moctl $mname info | fgrep -q 'features' | fgrep -q 'bdev'; then
 		$moctl $mname attach test_fs \
 			|| fail "Can't attach device"
 		$moctl $mname attach test_fs \

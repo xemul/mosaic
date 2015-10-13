@@ -1,6 +1,3 @@
-TEST_MOS_ATTACH_DETACH=yes
-TEST_MOS_CLONE=yes
-
 echo "*** Testing ploop driver"
 mkdir ploop.dir
 cat > ploop.mos << EOF

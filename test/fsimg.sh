@@ -1,5 +1,3 @@
-TEST_MOS_ATTACH_DETACH=yes
-
 echo "*** Testing fsimg driver"
 mkdir fsimg.loc
 cat > fsimg.mos << EOF

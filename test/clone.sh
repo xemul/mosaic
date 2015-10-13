@@ -1,6 +1,6 @@
 function run_tests()
 {
-	if test -z "$TEST_MOS_CLONE"; then
+	if ! $moctl $mname info | fgrep -q 'features' | fgrep -q 'clone'; then
 		echo "* skipping clone test"
 		return 0
 	fi
