@@ -6,7 +6,7 @@ location: ploop.dir
 volumeMap: \\([a-z]\\)\\([a-z][a-z]\\)\\(.*\\) \\1/\\2/\\3
 EOF
 
-run_tests "ploop.mos"
+run_tests "./ploop.mos"
 
 rmdir ploop.dir || fail "mosaic dir not empty"
 rm -f ploop.mos

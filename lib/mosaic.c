@@ -6,12 +6,17 @@
 #include <string.h>
 #include <sys/mount.h>
 #include <regex.h>
+#include <limits.h>
 
 #include "mosaic.h"
 #include "volume.h"
 #include "log.h"
 #include "util.h"
 #include "uapi/mosaic.h"
+
+#ifndef MOSAIC_CONFIG_DIR
+#define MOSAIC_CONFIG_DIR	"/etc/mosaic.d"
+#endif
 
 const struct mosaic_ops *mosaic_find_ops(char *type)
 {
@@ -27,8 +32,19 @@ const struct mosaic_ops *mosaic_find_ops(char *type)
 	return NULL;
 }
 
-mosaic_t mosaic_open(const char *cfg, int open_flags)
+static const char *name_to_config(const char *name, char *buf)
 {
+	if (name[0] == '.' || name[0] == '/')
+		return name;
+
+	sprintf(buf, MOSAIC_CONFIG_DIR "/%s.mos", name);
+	return buf;
+}
+
+mosaic_t mosaic_open(const char *name, int open_flags)
+{
+	const char *cfg;
+	char aux[PATH_MAX];
 	struct mosaic *m;
 
 	if (open_flags)
@@ -37,10 +53,7 @@ mosaic_t mosaic_open(const char *cfg, int open_flags)
 	m = malloc(sizeof(*m));
 	memset(m, 0, sizeof(*m));
 
-	/*
-	 * FIXME: support opening by name
-	 */
-
+	cfg = name_to_config(name, aux);
 	if (mosaic_parse_config(cfg, m))
 		goto err;
 

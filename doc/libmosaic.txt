@@ -5,14 +5,17 @@ The API is described in include/uapi/mosaic.h
 * volume_t -- a handle for volume object
 
 
-* mosaic_t mosaic_open(const char *cfg, int open_flags)
+* mosaic_t mosaic_open(const char *name, int open_flags)
   void mosaic_close(mosaic_t m)
 
   Open and close the mosaic handle.
 
-  @cfg is path to config file of mosaic name. In the former
-  case the path is just opened, in the latter the mosaic
-  config is looked up in the default directory (/etc).
+  @name is mosaic name, that is treated as described below:
+  
+  If the name starts with . or / it's treated as a path to
+  config file and is just opened. Otherwise the $name.mos
+  config file is looked up in the default config directory
+  (/etc).
 
 
 * volume_t mosaic_open_vol(mosaic_t m, char *name, int open_flags)

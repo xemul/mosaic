@@ -6,7 +6,7 @@ location: fsimg.loc
 volumeMap: \\([a-z]\\)\\([^_]*\\)_\\(.*\\) \\1/\\2/\\3
 EOF
 
-run_tests "fsimg.mos"
+run_tests "./fsimg.mos"
 
 rmdir fsimg.loc || fail "mosaic dir not empty"
 rm -f fsimg.mos

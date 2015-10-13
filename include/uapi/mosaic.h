@@ -8,7 +8,7 @@
  */
 
 typedef struct mosaic *mosaic_t;
-mosaic_t mosaic_open(const char *cfg, int open_flags);
+mosaic_t mosaic_open(const char *name, int open_flags);
 void mosaic_close(mosaic_t m);
 
 int mosaic_mount(mosaic_t m, const char *path, int mount_flags);

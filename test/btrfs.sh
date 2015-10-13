@@ -10,7 +10,7 @@ location: btrfs.loc
 volumeMap: \\([a-z]\\)\\([a-z][a-z]\\)\\(.*\\) \\1/\\2/\\3
 EOF
 
-run_tests "btrfs.mos"
+run_tests "./btrfs.mos"
 
 umount btrfs.loc
 # The umount above fails to stop loopX device:

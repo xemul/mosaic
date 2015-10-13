@@ -69,7 +69,7 @@ looks like
 
     mosaic_t m;
 
-    m = mosaic_open(config_file, 0);
+    m = mosaic_open(name, 0);
     mosaic_make_vol(m, name, size_in_bytes, 0);
     ...
     mosaic_close(m, 0);
