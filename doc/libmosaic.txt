@@ -15,7 +15,7 @@ The API is described in include/uapi/mosaic.h
   If the name starts with . or / it's treated as a path to
   config file and is just opened. Otherwise the $name.mos
   config file is looked up in the default config directory
-  (/etc).
+  (/etc/mosaic.d).
 
 
 * volume_t mosaic_open_vol(mosaic_t m, char *name, int open_flags)
