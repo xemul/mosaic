@@ -32,12 +32,12 @@ const struct mosaic_ops *mosaic_find_ops(char *type)
 	return NULL;
 }
 
-static const char *name_to_config(const char *name, char *buf)
+static const char *name_to_config(const char *name, char *buf, int blen)
 {
 	if (name[0] == '.' || name[0] == '/')
 		return name;
 
-	sprintf(buf, MOSAIC_CONFIG_DIR "/%s.mos", name);
+	snprintf(buf, blen, MOSAIC_CONFIG_DIR "/%s.mos", name);
 	return buf;
 }
 
@@ -53,7 +53,7 @@ mosaic_t mosaic_open(const char *name, int open_flags)
 	m = malloc(sizeof(*m));
 	memset(m, 0, sizeof(*m));
 
-	cfg = name_to_config(name, aux);
+	cfg = name_to_config(name, aux, sizeof(aux));
 	if (mosaic_parse_config(cfg, m))
 		goto err;
 
