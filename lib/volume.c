@@ -27,8 +27,8 @@ volume_t mosaic_open_vol(mosaic_t m, const char *name, int open_flags)
 		return NULL;
 
 	if (m->m_ops->open_volume(m, t, open_flags)) {
-		free(t);
 		free(t->t_name);
+		free(t);
 		return NULL;
 	}
 
