@@ -204,7 +204,9 @@ static int attach_fsimg_vol(struct mosaic *m, struct volume *t,
 	/*
 	 * FIXME: call losetup by hands?
 	 */
-	sprintf(aux, "losetup --find --show /proc/self/fd/%d/%s", fp->m_loc_dir, t->t_name);
+	snprintf(aux, sizeof(aux),
+			"losetup --find --show /proc/self/fd/%d/%s",
+			fp->m_loc_dir, t->t_name);
 	lsp = popen(aux, "r");
 	if (!lsp)
 		return -1;

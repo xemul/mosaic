@@ -103,7 +103,7 @@ int bind_vol_loc(struct mosaic *m, struct volume *t,
 {
 	char aux[1024];
 
-	sprintf(aux, "%s/%s", m->m_loc, t->t_name);
+	snprintf(aux, sizeof(aux), "%s/%s", m->m_loc, t->t_name);
 	return mount(aux, path, NULL, MS_BIND | mount_flags, NULL);
 }
 
