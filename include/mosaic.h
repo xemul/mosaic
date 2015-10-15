@@ -4,11 +4,6 @@ struct mosaic;
 struct volume;
 struct vol_map;
 
-/* Mark for library functions that are not part of public API
- * but are still used by our own tools like moctl.
- */
-#define LIB_PROTECTED __attribute__ ((visibility("default")))
-
 struct mosaic_ops {
 	const char *name;
 
@@ -85,7 +80,7 @@ int parse_mosaic_subdir_layout(struct mosaic *m, char *key, char *val);
 int bind_mosaic_subdir_loc(struct mosaic *m, const char *path, int mount_flags);
 
 const struct mosaic_ops *mosaic_find_ops(char *type);
-LIB_PROTECTED int mosaic_parse_config(const char *cfg, struct mosaic *);
+int mosaic_parse_config(const char *cfg, struct mosaic *);
 int bind_vol_loc(struct mosaic *m, struct volume *t, const char *path, int mount_flags);
 
 extern const struct mosaic_ops mosaic_fsimg;
