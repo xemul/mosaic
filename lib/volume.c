@@ -22,13 +22,15 @@ volume_t mosaic_open_vol(mosaic_t m, const char *name, int open_flags)
 	 */
 	t->m = m;
 	t->t_name = map_vol_name(m, name);
-	if (!t->t_name)
+	if (!t->t_name) {
 		// error is printed by map_vol_name()
+		free(t);
 		return NULL;
+	}
 
 	if (m->m_ops->open_volume(m, t, open_flags)) {
-		free(t);
 		free(t->t_name);
+		free(t);
 		return NULL;
 	}
 

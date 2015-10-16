@@ -1,3 +1,11 @@
+# Check if ploop is available
+if test -f /proc/vz/ploop_minor && ploop list >/dev/null; then
+	true # ploop seems to be working
+else
+	echo "* ploop not available, skipping tests"
+	return 0
+fi
+
 echo "*** Testing ploop driver"
 mkdir ploop.dir
 cat > ploop.mos << EOF

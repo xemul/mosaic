@@ -143,6 +143,7 @@ static int clone_ploop(struct mosaic *m, struct volume *parent,
 	dfd = open(dir, O_DIRECTORY);
 	if (dfd < 0) {
 		loge("%s: can't open %s: %m\n", __func__, dir);
+		close(pdfd);
 		return -1;
 	}
 

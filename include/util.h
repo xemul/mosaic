@@ -33,11 +33,12 @@ do {								\
 	}							\
 } while (0)
 
-/* Config parsing: check there's no duplicate */
-#define CHKDUP(key, to)						\
+/* Config parsing: check if val is set, and there's no duplicate */
+#define CHKVALTO(key, val, to)	CHKVAL(key, val);		\
 do {								\
 	if (to) {						\
 		loge("%s: duplicate \"%s\"\n", __func__, key);	\
+		free(val);					\
 		return -1;					\
 	}							\
 } while (0)

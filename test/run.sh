@@ -1,12 +1,22 @@
 #!/bin/bash
 
+TDIR=test-rm-me-XXXXXXXX
+if [ "$1" = "clean" ]; then
+	rm -rf ${TDIR//X/?}
+	exit
+fi
+
+TESTDIR=$(mktemp -d -p . $TDIR)
 echo "Tests:  $1"
 echo "Driver: $2"
+echo "Dir:    $TESTDIR"
 
+cd $TESTDIR
 for T in ${1//,/ }; do
-	. "env.sh"
-	. "${T}.sh"
-	. "${2}.sh"
+	. ../"env.sh"
+	. ../"${T}.sh"
+	. ../"${2}.sh"
 done
 
+rm -rf $TESTDIR
 echo "PASS"

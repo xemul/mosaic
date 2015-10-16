@@ -325,30 +325,6 @@ static int do_mosaic_detach_vol(mosaic_t m, int argc, char **argv)
 
 	return 0;
 }
-static int do_mosaic_create(char *name, int argc, char **argv)
-{
-	int ret;
-	mosaic_t m;
-
-	m = malloc(sizeof(*m));
-	memset(m, 0, sizeof(*m));
-
-	if (mosaic_parse_config(name, m))
-		ret = -1;
-	else if (!strcmp(m->m_ops->name, "fsimg"))
-		ret = create_fsimg(m, argc, argv);
-	else if (!strcmp(m->m_ops->name, "btrfs"))
-		ret = create_btrfs(m, argc, argv);
-	else if (!strcmp(m->m_ops->name, "plain"))
-		ret = create_plain(m, argc, argv);
-	else {
-		fprintf(stderr, "Don't know how to create %s\n",
-				m->m_ops->name);
-		ret = -1;
-	}
-
-	return ret ? 1 : 0;
-}
 
 static int do_mosaic_info(mosaic_t mos, int argc, char **argv)
 {
@@ -382,9 +358,6 @@ static int do_mosaic(char *name, int argc, char **argv)
 	/* Note the order of arguments checking is important here,
 	 * as abbreviations are allowed by argis().
 	 */
-
-	if (argis(action, "create"))
-		return do_mosaic_create(name, argc, argv);
 
 	mos = mosaic_open(name, 0);
 	if (!mos) {

@@ -6,7 +6,6 @@ BIN = moctl
 REALBIN = .$(BIN)-real
 OBJS =
 OBJS += main.o
-OBJS += create.o
 
 CFLAGS += -fPIE -I../include
 

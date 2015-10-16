@@ -6,4 +6,7 @@ all: $(DRIVERS)
 $(DRIVERS):
 	./run.sh "${TESTS}" $@
 
-.PHONY: all $(DRIVERS)
+clean:
+	./run.sh clean
+
+.PHONY: all $(DRIVERS) clean

@@ -103,7 +103,7 @@ int bind_vol_loc(struct mosaic *m, struct volume *t,
 {
 	char aux[1024];
 
-	sprintf(aux, "%s/%s", m->m_loc, t->t_name);
+	snprintf(aux, sizeof(aux), "%s/%s", m->m_loc, t->t_name);
 	return mount(aux, path, NULL, MS_BIND | mount_flags, NULL);
 }
 
@@ -125,8 +125,7 @@ int parse_mosaic_subdir_layout(struct mosaic *m, char *key, char *val)
 	if (!strcmp(key, "fs")) {
 		int len;
 
-		CHKVAL(key, val);
-		CHKDUP(key, p->fs_subdir);
+		CHKVALTO(key, val, p->fs_subdir);
 
 		len = strlen(m->m_loc) + strlen(val) + 2;
 		p->fs_subdir = malloc(len);
