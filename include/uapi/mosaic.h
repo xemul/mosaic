@@ -70,7 +70,7 @@ typedef void (*mosaic_log_fn)(int lvl, const char *f, ...)
 void mosaic_set_log_fn(mosaic_log_fn lfn);
 
 enum log_level {
-	LOG_ERR,
+	LOG_ERR = 1,
 	LOG_WRN,
 	LOG_INF,
 	LOG_DBG,
