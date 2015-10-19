@@ -54,6 +54,15 @@ int mosaic_put_vol_bdev(volume_t t);
 
 int mosaic_get_vol_size(volume_t t, unsigned long *size_in_blocks);
 
+/*
+ * (Live) migration
+ */
+
+int mosaic_migrate_vol_send_start(volume_t t, int fd_to, int flags);
+int mosaic_migrate_vol_send_more(volume_t t);
+int mosaic_migrate_vol_recv_start(volume_t t, int fd_from, int flags);
+int mosaic_migrate_vol_stop(volume_t t);
+
 /* Misc */
 
 /* Can do mosaic_clone_vol */
@@ -62,6 +71,8 @@ int mosaic_get_vol_size(volume_t t, unsigned long *size_in_blocks);
 #define MOSAIC_FEATURE_DISK_SIZE_MGMT	(1ULL << 1)
 /* Support block device opening */
 #define MOSAIC_FEATURE_BDEV		(1ULL << 2)
+/* Supports iterative copying */
+#define MOSAIC_FEATURE_MIGRATE		(1ULL << 3)
 
 int mosaic_get_features(mosaic_t mos, unsigned long long *feat);
 

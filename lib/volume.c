@@ -8,6 +8,11 @@
 #include "util.h"
 #include "uapi/mosaic.h"
 
+static void init_vol(struct volume *v)
+{
+	v->mig = NULL;
+}
+
 volume_t mosaic_open_vol(mosaic_t m, const char *name, int open_flags)
 {
 	struct volume *t;
@@ -16,6 +21,8 @@ volume_t mosaic_open_vol(mosaic_t m, const char *name, int open_flags)
 		return NULL;
 
 	t = malloc(sizeof(*t));
+
+	init_vol(t);
 
 	/*
 	 * FIXME -- refcounting against mosaic_close()

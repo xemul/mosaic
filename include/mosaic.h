@@ -50,6 +50,16 @@ struct mosaic_ops {
 
 	int (*get_volume_size)(struct mosaic *, struct volume *, unsigned long *size_in_blocks);
 
+	/*
+	 * Migration callbacks. Presence is all or nothing -- first one being
+	 * there means migration is supported, otherwise -- no
+	 */
+
+	int (*send_volume_start)(struct mosaic *, struct volume *, int flags);
+	int (*send_volume_more)(struct mosaic *, struct volume *);
+	int (*recv_volume_start)(struct mosaic *, struct volume *, int flags);
+	void (*copy_volume_stop)(struct mosaic *, struct volume *);
+
 	/***
 	 * Auxiliary ops
 	 */

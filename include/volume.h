@@ -1,11 +1,19 @@
 #ifndef __MOSAIC_VOLUME_H__
 #define __MOSAIC_VOLUME_H__
 #include <regex.h>
+#include <stdbool.h>
+
 struct mosaic;
+
+struct migrate {
+	bool sending;
+	int fd;
+};
 
 struct volume {
 	struct mosaic *m;
 	char *t_name;
+	struct migrate *mig;
 };
 
 struct vol_map {

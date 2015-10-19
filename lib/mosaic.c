@@ -178,6 +178,8 @@ int mosaic_get_features(struct mosaic *m, unsigned long long *feat)
 		*feat |= MOSAIC_FEATURE_BDEV;
 	if (m->m_ops->resize_volume)
 		*feat |= MOSAIC_FEATURE_DISK_SIZE_MGMT;
+	if (m->m_ops->send_volume_start)
+		*feat |= MOSAIC_FEATURE_MIGRATE;
 
 	return 0;
 }

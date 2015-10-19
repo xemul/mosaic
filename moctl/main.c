@@ -344,6 +344,8 @@ static int do_mosaic_info(mosaic_t mos, int argc, char **argv)
 		printf(" bdev");
 	if (features & MOSAIC_FEATURE_DISK_SIZE_MGMT)
 		printf(" volsize");
+	if (features & MOSAIC_FEATURE_MIGRATE)
+		printf(" migrate");
 	printf("\n");
 	return 0;
 }
