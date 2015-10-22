@@ -89,7 +89,7 @@ char *map_vol_name(struct mosaic *m, const char *name)
 	int i, res;
 
 	if (!m->vol_map)
-		return strdup(name);
+		return xstrdup(name);
 
 	// Initial check for bufput buffer size
 	buflen = strlen(map->repl) + 1;
@@ -159,5 +159,5 @@ char *map_vol_name(struct mosaic *m, const char *name)
 		}
 	}
 
-	return strdup(buf);
+	return xstrdup(buf);
 }
