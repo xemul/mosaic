@@ -1,5 +1,4 @@
 moctl="../../moctl/moctl"
-set -x
 
 function fail()
 {
