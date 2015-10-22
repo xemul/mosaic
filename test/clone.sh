@@ -2,7 +2,7 @@ function run_tests()
 {
 	local mname=$1
 
-	if ! $moctl $mname info | fgrep -q 'features' | fgrep -q 'clone'; then
+	if ! $moctl $mname info | grep '^features:' | fgrep -qw 'clone'; then
 		echo "* skipping clone test"
 		return 0
 	fi
