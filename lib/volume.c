@@ -60,6 +60,9 @@ int mosaic_make_vol(mosaic_t m, const char *name,
 		return -1;
 
 	newname = map_vol_name(m, name);
+	if (!newname)
+		return -1;
+
 	ret = m->m_ops->new_volume(m, newname, size_in_blocks, make_flags);
 	free(newname);
 
@@ -75,6 +78,9 @@ int mosaic_make_vol_fs(mosaic_t m, const char *name, unsigned long size_in_block
 		return -1;
 
 	newname = map_vol_name(m, name);
+	if (!newname)
+		return -1;
+
 	ret = m->m_ops->new_volume(m, newname, size_in_blocks,
 			make_flags | NEW_VOL_WITH_FS);
 	free(newname);
@@ -94,6 +100,9 @@ int mosaic_clone_vol(volume_t from, const char *name, int clone_flags)
 		return -1;
 
 	newname = map_vol_name(m, name);
+	if (!newname)
+		return -1;
+
 	ret = m->m_ops->clone_volume(m, from, newname, clone_flags);
 	free(newname);
 
