@@ -16,7 +16,7 @@ int usage(int ret)
 	printf("\n"
 "Usage: moctl NAME ACTION [ARGUMENT ...]\n"
 "	NAME     := mosaic name (path to .mos file)\n"
-"	ACTION   := mount|umount|attach|detach|new|clone|drop\n"
+"	ACTION   := mount|umount|attach|detach|new|clone|drop|info\n"
 "	ARGUMENT := zero or more arguments, depending on ACTION\n");
 
 	return ret;
