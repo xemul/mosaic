@@ -28,9 +28,9 @@ int usage(int ret)
 static inline int argis(const char *arg, const char *is)
 {
 	while (1) {
-		if (*is == '\0')
-			return 1;
 		if (*arg == '\0')
+			return 1;
+		if (*is == '\0')
 			return 0;
 		if (*arg != *is)
 			return 0;
