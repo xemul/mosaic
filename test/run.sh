@@ -22,5 +22,6 @@ for T in ${1//,/ }; do
 	. ../"${2}.sh"
 done
 
+cd ..
 rm -rf $TESTDIR
 echo "PASS"
