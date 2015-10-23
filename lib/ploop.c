@@ -83,20 +83,6 @@ static int have_ploop(struct mosaic *m, const char *name, int flags)
 	return -1; // error
 }
 
-static int open_ploop(struct mosaic *m, struct volume *t, int open_flags)
-{
-	/* FIXME: what is this function supposed to do?
-	 * Do we need to mount ploop here /dev/ploopXXX is available?
-	 * If yes, why there's no matching close_volume()?
-	 * Also, not all places calling this function need a device.
-	 *
-	 * Anyway, looks like current implementations just check that
-	 * the corresponding volume exists.
-	 */
-
-	return (have_ploop(m, t->t_name, open_flags) == 1) ? 0 : -1;
-}
-
 static int clone_ploop(struct mosaic *m, struct volume *parent,
 		const char *name, int clone_flags)
 {
@@ -490,7 +476,6 @@ const struct mosaic_ops mosaic_ploop = {
 	/* ploop ops */
 	.new_volume	= create_ploop,
 	.have_volume	= have_ploop,
-	.open_volume	= open_ploop,
 	.clone_volume	= clone_ploop,
 	.mount_volume	= mount_ploop,
 	.umount_volume	= umount_ploop,

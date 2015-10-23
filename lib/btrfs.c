@@ -77,12 +77,6 @@ static int have_btrfs_subvol(struct mosaic *m, const char *name, int flags)
 	return -1; // error
 }
 
-static int open_btrfs_subvol(struct mosaic *m, struct volume *t,
-		int open_flags)
-{
-	return (have_btrfs_subvol(m, t->t_name, open_flags) == 1) ? 0 : -1;
-}
-
 static int clone_btrfs_subvol(struct mosaic *m, struct volume *from,
 		const char *name, int clone_flags)
 {
@@ -171,7 +165,6 @@ const struct mosaic_ops mosaic_btrfs = {
 
 	.new_volume = new_btrfs_subvol,
 	.have_volume = have_btrfs_subvol,
-	.open_volume = open_btrfs_subvol,
 	.clone_volume = clone_btrfs_subvol,
 	.drop_volume = drop_btrfs_subvol,
 	.mount_volume = bind_vol_loc,

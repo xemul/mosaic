@@ -41,12 +41,6 @@ static int have_fsimg_vol(struct mosaic *m, const char *name, int flags)
 	return -1;
 }
 
-static int open_fsimg_vol(struct mosaic *m, struct volume *t,
-		int open_flags)
-{
-	return (have_fsimg_vol(m, t->t_name, open_flags) == 1) ? 0: -1;
-}
-
 static int new_fsimg_vol(struct mosaic *m, const char *name,
 		unsigned long size_in_blocks, int make_flags)
 {
@@ -295,7 +289,6 @@ const struct mosaic_ops mosaic_fsimg = {
 /*	.mount = FIXME: location can be device */
 
 	.have_volume = have_fsimg_vol,
-	.open_volume = open_fsimg_vol,
 	.new_volume = new_fsimg_vol,
 	.drop_volume = drop_fsimg_vol,
 	.attach_volume = attach_fsimg_vol,

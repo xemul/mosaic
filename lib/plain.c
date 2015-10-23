@@ -53,12 +53,6 @@ static int have_plain_vol(struct mosaic *m, const char *name, int flags)
 	return -1;
 }
 
-static int open_plain_vol(struct mosaic *m, struct volume *t,
-		int open_flags)
-{
-	return (have_plain_vol(m, t->t_name, open_flags) == 1) ? 0 : -1;
-}
-
 static int drop_plain_vol(struct mosaic *m, struct volume *t,
 		int drop_flags)
 {
@@ -106,7 +100,6 @@ const struct mosaic_ops mosaic_plain = {
 
 	.new_volume = new_plain_vol,
 	.have_volume = have_plain_vol,
-	.open_volume = open_plain_vol,
 	.drop_volume = drop_plain_vol,
 	.mount_volume = bind_vol_loc,
 	.get_volume_size = get_plain_size,
