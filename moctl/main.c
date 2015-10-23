@@ -16,7 +16,7 @@ int usage(int ret)
 	printf("\n"
 "Usage: moctl NAME ACTION [ARGUMENT ...]\n"
 "	NAME     := mosaic name (path to .mos file)\n"
-"	ACTION   := mount|umount|attach|detach|new|clone|drop|info\n"
+"	ACTION   := have|mount|umount|attach|detach|new|clone|drop|info\n"
 "	ARGUMENT := zero or more arguments, depending on ACTION\n");
 
 	return ret;
@@ -350,6 +350,27 @@ static int do_mosaic_info(mosaic_t mos, int argc, char **argv)
 	return 0;
 }
 
+static int do_mosaic_have_vol(mosaic_t m, int argc, char **argv)
+{
+	const char *volume;
+	int r;
+
+	if (argc < 2) {
+		printf("Usage: moctl NAME have VOLUME\n");
+		return 1;
+	}
+
+	volume = argv[1];
+	r = mosaic_have_vol(m, volume, 0);
+	if (r < 0) {
+		// error is printed by mosaic_have_vol
+		return 1;
+	}
+	printf("%s exists: %s\n", volume, r == 1 ? "yes" : "no");
+
+	return 0;
+}
+
 static int do_mosaic(char *name, int argc, char **argv)
 {
 	mosaic_t mos;
@@ -383,6 +404,8 @@ static int do_mosaic(char *name, int argc, char **argv)
 		return do_mosaic_drop_vol(mos, argc, argv);
 	if (argis(action, "info"))
 		return do_mosaic_info(mos, argc, argv);
+	if (argis(action, "have"))
+		return do_mosaic_have_vol(mos, argc, argv);
 
 	fprintf(stderr, "Unknown action: %s\n", action);
 	return usage(1);

@@ -18,7 +18,11 @@ function run_tests()
 	$moctl $mname umount - mmnt || fail "Can't clean mosaic"
 
 	echo "* Testing volumes"
+	$moctl $mname have test_fs | fgrep -q ' exists: no' \
+		|| fail "existense test (1) failed"
 	$moctl $mname new fs test_fs 512m || fail "Can't create fs"
+	$moctl $mname have test_fs | fgrep -q ' exists: yes' \
+		|| fail "existense test (2) failed"
 
 	if $moctl $mname info | fgrep -q 'features' | fgrep -q 'bdev'; then
 		$moctl $mname attach test_fs \

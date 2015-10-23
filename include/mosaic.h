@@ -21,6 +21,7 @@ struct mosaic_ops {
 
 	int (*new_volume)(struct mosaic *, const char *name, unsigned long size_in_blocks, int make_flags);
 	int (*open_volume)(struct mosaic *, struct volume *, int open_flags);
+	int (*have_volume)(struct mosaic *, const char *name, int flags);
 
 	/*
 	 * Clone is optional, NULL means COW-style cloning is not supported.

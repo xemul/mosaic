@@ -50,6 +50,25 @@ void mosaic_close_vol(volume_t t)
 	free(t);
 }
 
+int mosaic_have_vol(mosaic_t m, const char *name, int flags)
+{
+	char *newname;
+	bool ret;
+
+	if (flags) {
+		loge("%s: unsupported flags 0x%x\n", __func__, flags);
+		return -1;
+	}
+
+	newname = map_vol_name(m, name);
+	if (!newname)
+		return -1;
+
+	ret = m->m_ops->have_volume(m, newname, flags);
+	free(newname);
+	return ret;
+}
+
 int mosaic_make_vol(mosaic_t m, const char *name,
 		unsigned long size_in_blocks, int make_flags)
 {
