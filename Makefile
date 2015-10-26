@@ -15,6 +15,7 @@ moctl: lib
 install clean:
 	make -C lib/ $@
 	make -C moctl/ $@
+	make -C include/ $@
 
 test: all
 	make -C test/
