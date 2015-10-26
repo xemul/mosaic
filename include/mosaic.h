@@ -70,6 +70,7 @@ struct mosaic_ops {
 #define NEW_VOL_WITH_FS	0x1
 
 struct mosaic {
+	char *name;
 	const struct mosaic_ops *m_ops;
 	char *m_loc;
 	char *default_fs;

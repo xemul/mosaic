@@ -10,7 +10,7 @@
 typedef struct mosaic *mosaic_t;
 mosaic_t mosaic_open(const char *name, int open_flags);
 void mosaic_close(mosaic_t m);
-
+int mosaic_get_name(mosaic_t m, char *name_buf, int buf_len);
 int mosaic_mount(mosaic_t m, const char *path, int mount_flags);
 
 /*

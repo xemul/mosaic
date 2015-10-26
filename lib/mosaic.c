@@ -7,6 +7,7 @@
 #include <sys/mount.h>
 #include <regex.h>
 #include <limits.h>
+#include <libgen.h>
 
 #include "mosaic.h"
 #include "volume.h"
@@ -41,6 +42,33 @@ static const char *name_to_config(const char *name, char *buf, int blen)
 	return buf;
 }
 
+static char *name_to_name(const char *name, char *buf, int blen)
+{
+	int len;
+	char *tail;
+
+	/*
+	 * We will have so called compound mosaics -- the ones that
+	 * chose some other one upon opening. So to keep the constant
+	 * reference on it we need to provide some fixed name for
+	 * exact handler.
+	 */
+	if (name[0] != '.' && name[0] != '/')
+		return xstrdup(name);
+
+	len = readlink(name, buf, blen);
+	if (len < sizeof("/x.mos")) /* Minimal config name */
+		return NULL;
+
+	if (strcmp(buf + len - 4, ".mos"))
+		return NULL;
+
+	/* Trim the path: /foo/bar/some_name.mos -> some_name */
+	buf[len - 4] = '\0';
+	tail = basename(buf);
+	return xstrdup(tail);
+}
+
 mosaic_t mosaic_open(const char *name, int open_flags)
 {
 	const char *cfg;
@@ -55,6 +83,10 @@ mosaic_t mosaic_open(const char *name, int open_flags)
 
 	cfg = name_to_config(name, aux, sizeof(aux));
 	if (mosaic_parse_config(cfg, m))
+		goto err;
+
+	m->name = name_to_name(name, aux, sizeof(aux));
+	if (!m->name)
 		goto err;
 
 	if (m->m_ops->open && m->m_ops->open(m, open_flags))
@@ -78,7 +110,14 @@ void mosaic_close(mosaic_t m)
 			free(m->default_fs);
 	}
 	free_vol_map(m);
+	free(m->name);
 	free(m);
+}
+
+int mosaic_get_name(mosaic_t m, char *name_buf, int buf_len)
+{
+	strncpy(name_buf, m->name, buf_len);
+	return strlen(m->name);
 }
 
 int mosaic_mount(mosaic_t m, const char *path, int mount_flags)
