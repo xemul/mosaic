@@ -1,5 +1,9 @@
 #!/bin/bash
 
+set -e
+set -u
+set -o pipefail
+
 TDIR=test-rm-me-XXXXXXXX
 if [ "$1" = "clean" ]; then
 	rm -rf ${TDIR//X/?}
@@ -18,5 +22,6 @@ for T in ${1//,/ }; do
 	. ../"${2}.sh"
 done
 
+cd ..
 rm -rf $TESTDIR
 echo "PASS"

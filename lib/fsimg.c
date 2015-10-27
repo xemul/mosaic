@@ -19,14 +19,26 @@ static int open_fsimg(struct mosaic *m, int flags)
 	return open_mosaic_subdir(m);
 }
 
-
-static int open_fsimg_vol(struct mosaic *m, struct volume *t,
-		int open_flags)
+static int have_fsimg_vol(struct mosaic *m, const char *name, int flags)
 {
 	struct mosaic_subdir_priv *fp = m->priv;
-	struct stat b;
+	struct stat st;
+	(void)flags; // unused
 
-	return fstatat(fp->m_loc_dir, t->t_name, &b, 0);
+	if (fstatat(fp->m_loc_dir, name, &st, 0) == 0) {
+		if (S_ISREG(st.st_mode))
+			return 1; // exists
+
+		loge("%s: %s exists but is not a regular file\n",
+				__func__, name);
+		return -1;
+	}
+
+	if (errno == ENOENT)
+		return 0;
+
+	loge("%s: stat(%s) failed: %m\n", __func__, name);
+	return -1;
 }
 
 static int new_fsimg_vol(struct mosaic *m, const char *name,
@@ -276,7 +288,7 @@ const struct mosaic_ops mosaic_fsimg = {
 	.open = open_fsimg,
 /*	.mount = FIXME: location can be device */
 
-	.open_volume = open_fsimg_vol,
+	.have_volume = have_fsimg_vol,
 	.new_volume = new_fsimg_vol,
 	.drop_volume = drop_fsimg_vol,
 	.attach_volume = attach_fsimg_vol,

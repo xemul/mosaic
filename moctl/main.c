@@ -16,7 +16,7 @@ int usage(int ret)
 	printf("\n"
 "Usage: moctl NAME ACTION [ARGUMENT ...]\n"
 "	NAME     := mosaic name (path to .mos file)\n"
-"	ACTION   := mount|umount|attach|detach|new|clone|drop\n"
+"	ACTION   := have|mount|umount|attach|detach|new|clone|drop|info\n"
 "	ARGUMENT := zero or more arguments, depending on ACTION\n");
 
 	return ret;
@@ -28,9 +28,9 @@ int usage(int ret)
 static inline int argis(const char *arg, const char *is)
 {
 	while (1) {
-		if (*is == '\0')
-			return 1;
 		if (*arg == '\0')
+			return 1;
+		if (*is == '\0')
 			return 0;
 		if (*arg != *is)
 			return 0;
@@ -101,7 +101,8 @@ static int do_mosaic_mount(mosaic_t m, int argc, char **argv)
 	if (strcmp(volume, "-")) {
 		t = mosaic_open_vol(m, volume, 0);
 		if (!t) {
-			perror("Can't open volume");
+			// error is printed by mosaic_open_vol()
+			mosaic_close_vol(t);
 			return 1;
 		}
 	}
@@ -109,10 +110,15 @@ static int do_mosaic_mount(mosaic_t m, int argc, char **argv)
 	path = argv[1];
 
 	if (t) {
+		int ret = 0;
 		if (mosaic_mount_vol(t, path, flags)) {
 			perror("Can't mount volume");
-			return 1;
+			ret = 1;
 		}
+
+		mosaic_close_vol(t);
+
+		return ret;
 	} else {
 		if (mosaic_mount(m, path, flags) < 0) {
 			perror("Can't mount mosaic");
@@ -136,18 +142,19 @@ static int do_mosaic_umount(mosaic_t m, int argc, char **argv)
 	volume = argv[1];
 	if (strcmp(volume, "-")) {
 		t = mosaic_open_vol(m, volume, 0);
-		if (!t) {
-			perror("Can't open volume");
+		if (!t)
 			return 1;
-		}
 	}
 
 	path = argv[2];
 	if (t) {
+		int ret = 0;
 		if (mosaic_umount_vol(t, path, 0)) {
 			perror("Can't umount volume");
-			return 1;
+			ret = 1;
 		}
+		mosaic_close_vol(t);
+		return ret;
 	} else {
 		if (umount(path) < 0) {
 			perror("Can't umount mosaic");
@@ -227,10 +234,8 @@ static int do_mosaic_clone_vol(mosaic_t m, int argc, char **argv)
 	newvol = argv[2];
 
 	old = mosaic_open_vol(m, oldvol, 0);
-	if (!old) {
-		fprintf(stderr, "No volume %s\n", oldvol);
+	if (!old)
 		return 1;
-	}
 
 	ret = mosaic_clone_vol(old, newvol, 0);
 	mosaic_close_vol(old);
@@ -245,6 +250,7 @@ static int do_mosaic_clone_vol(mosaic_t m, int argc, char **argv)
 
 static int do_mosaic_drop_vol(mosaic_t m, int argc, char **argv)
 {
+	int ret;
 	volume_t t;
 	const char *volume;
 
@@ -260,13 +266,15 @@ static int do_mosaic_drop_vol(mosaic_t m, int argc, char **argv)
 		return 1;
 	}
 
+	ret = 0;
 	if (mosaic_drop_vol(t, 0) < 0) {
 		fprintf(stderr, "Can't drop %s\n", volume);
-		mosaic_close_vol(t);
-		return 1;
+		ret = 1;
 	}
 
-	return 0;
+	mosaic_close_vol(t);
+
+	return ret;
 }
 
 static int do_mosaic_attach_vol(mosaic_t m, int argc, char **argv)
@@ -274,7 +282,7 @@ static int do_mosaic_attach_vol(mosaic_t m, int argc, char **argv)
 	const char *volume;
 	volume_t t;
 	char dev[NAME_MAX];
-	int len;
+	int len, ret;
 
 	if (argc < 2) {
 		printf("Usage: moctl NAME attach VOLUME\n");
@@ -288,22 +296,25 @@ static int do_mosaic_attach_vol(mosaic_t m, int argc, char **argv)
 		return 1;
 	}
 
+	ret = 0;
 	len = mosaic_get_vol_bdev(t, dev, sizeof(dev), 0);
 	if (len < 0) {
 		fprintf(stderr, "Can't attach %s\n", volume);
-		mosaic_close_vol(t);
-		return 1;
+		ret = 1;
 	}
+	mosaic_close_vol(t);
 
-	printf("Device: %s\n", dev);
+	if (ret == 0)
+		printf("Device: %s\n", dev);
 
-	return 0;
+	return ret;
 }
 
 static int do_mosaic_detach_vol(mosaic_t m, int argc, char **argv)
 {
 	const char *volume;
 	volume_t t;
+	int ret;
 
 	if (argc < 2) {
 		printf("Usage: moctl NAME detach VOLUME\n");
@@ -317,13 +328,14 @@ static int do_mosaic_detach_vol(mosaic_t m, int argc, char **argv)
 		return 1;
 	}
 
+	ret = 0;
 	if (mosaic_put_vol_bdev(t) < 0) {
 		fprintf(stderr, "Can't detach %s\n", volume);
-		mosaic_close_vol(t);
-		return 1;
+		ret = 1;
 	}
 
-	return 0;
+	mosaic_close_vol(t);
+	return ret;
 }
 
 static int do_mosaic_info(mosaic_t mos, int argc, char **argv)
@@ -347,6 +359,27 @@ static int do_mosaic_info(mosaic_t mos, int argc, char **argv)
 	if (features & MOSAIC_FEATURE_MIGRATE)
 		printf(" migrate");
 	printf("\n");
+	return 0;
+}
+
+static int do_mosaic_have_vol(mosaic_t m, int argc, char **argv)
+{
+	const char *volume;
+	int r;
+
+	if (argc < 2) {
+		printf("Usage: moctl NAME have VOLUME\n");
+		return 1;
+	}
+
+	volume = argv[1];
+	r = mosaic_have_vol(m, volume, 0);
+	if (r < 0) {
+		// error is printed by mosaic_have_vol
+		return 1;
+	}
+	printf("%s exists: %s\n", volume, r == 1 ? "yes" : "no");
+
 	return 0;
 }
 
@@ -383,6 +416,8 @@ static int do_mosaic(char *name, int argc, char **argv)
 		return do_mosaic_drop_vol(mos, argc, argv);
 	if (argis(action, "info"))
 		return do_mosaic_info(mos, argc, argv);
+	if (argis(action, "have"))
+		return do_mosaic_have_vol(mos, argc, argv);
 
 	fprintf(stderr, "Unknown action: %s\n", action);
 	return usage(1);

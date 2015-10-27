@@ -21,6 +21,16 @@ typedef struct volume *volume_t;
 volume_t mosaic_open_vol(mosaic_t m, const char *name, int open_flags);
 void mosaic_close_vol(volume_t);
 
+/** Checks if a volume with a given @name exists in mosaic @m.
+ * Argument @flags is currently unused and should be 0.
+ *
+ * Returns:
+ *  1: exists
+ *  0: does not exist
+ * -1: some error
+ */
+int mosaic_have_vol(mosaic_t m, const char *name, int flags);
+
 /*
  * Make a new volume. The first one makes raw block device, the
  * second one also puts filesystem on it.

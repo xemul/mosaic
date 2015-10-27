@@ -66,26 +66,21 @@ static int create_ploop(struct mosaic *m, const char *name,
 	return 0;
 }
 
-static int open_ploop(struct mosaic *m, struct volume *t, int open_flags)
+static int have_ploop(struct mosaic *m, const char *name, int flags)
 {
 	char dd[PATH_MAX];
-	(void)open_flags; // unused
+	(void)flags; // unused
 
 	/* Just check that corresponding dd.xml exists */
-	snprintf(dd, sizeof(dd), "%s/%s/" DDXML, m->m_loc, t->t_name);
-	if (access(dd, R_OK) < 0) {
-		loge("%s: volume %s doesn't exist: %m\n",
-				__func__, t->t_name);
-		return -1;
-	}
+	snprintf(dd, sizeof(dd), "%s/%s/" DDXML, m->m_loc, name);
+	if (access(dd, R_OK) == 0)
+		return 1; // exists
 
-	/* FIXME: what is this function supposed to do?
-	 * Do we need to mount ploop here /dev/ploopXXX is available?
-	 * If yes, why there's no matching close_volume()?
-	 * Also, not all places calling this function need a device.
-	 */
+	if (errno == ENOENT)
+		return 0; // not exists
 
-	return 0;
+	loge("%s: can't access(%s) %m\n", __func__, dd);
+	return -1; // error
 }
 
 static int clone_ploop(struct mosaic *m, struct volume *parent,
@@ -480,7 +475,7 @@ const struct mosaic_ops mosaic_ploop = {
 
 	/* ploop ops */
 	.new_volume	= create_ploop,
-	.open_volume	= open_ploop,
+	.have_volume	= have_ploop,
 	.clone_volume	= clone_ploop,
 	.mount_volume	= mount_ploop,
 	.umount_volume	= umount_ploop,

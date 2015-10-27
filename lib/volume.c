@@ -8,46 +8,88 @@
 #include "util.h"
 #include "uapi/mosaic.h"
 
-static void init_vol(struct volume *v)
+static volume_t alloc_vol(mosaic_t m, const char *name)
 {
-	v->mig = NULL;
+	struct volume *v;
+
+	v = xzalloc(sizeof(*v));
+
+	v->t_name = map_vol_name(m, name);
+	if (!v->t_name) {
+		// error is printed by map_vol_name()
+		free(v);
+		return NULL;
+	}
+	v->m = m;
+
+	return v;
+}
+
+static void free_vol(volume_t v)
+{
+	free(v->t_name);
+	free(v);
 }
 
 volume_t mosaic_open_vol(mosaic_t m, const char *name, int open_flags)
 {
-	struct volume *t;
-
-	if (open_flags)
-		return NULL;
-
-	t = malloc(sizeof(*t));
-
-	init_vol(t);
+	volume_t v;
 
 	/*
-	 * FIXME -- refcounting against mosaic_close()
+	 * FIXME -- refcounting against mosaic_close_vol()
+	 * FIXME -- locking (so only one client can work with the volume)
 	 */
-	t->m = m;
-	t->t_name = map_vol_name(m, name);
-	if (!t->t_name) {
-		// error is printed by map_vol_name()
-		free(t);
+
+	v = alloc_vol(m, name);
+	if (!v)
+		return NULL;
+
+	// Use open_volume() if provided
+	if (m->m_ops->open_volume) {
+		if (m->m_ops->open_volume(m, v, open_flags) < 0) {
+			free(v);
+			return NULL;
+		}
+		return v;
+	}
+
+	// If no open_volume() is available, just check	the volume exists.
+	if (m->m_ops->have_volume(m, v->t_name, open_flags) != 1) {
+		loge("Volume %s not found\n", name);
+		free_vol(v);
 		return NULL;
 	}
 
-	if (m->m_ops->open_volume(m, t, open_flags)) {
-		free(t->t_name);
-		free(t);
-		return NULL;
-	}
-
-	return t;
+	return v;
 }
 
-void mosaic_close_vol(volume_t t)
+void mosaic_close_vol(volume_t v)
 {
-	free(t->t_name);
-	free(t);
+	struct mosaic *m = v->m;
+
+	if (m->m_ops->close_volume)
+		m->m_ops->close_volume(m, v);
+
+	free_vol(v);
+}
+
+int mosaic_have_vol(mosaic_t m, const char *name, int flags)
+{
+	char *newname;
+	bool ret;
+
+	if (flags) {
+		loge("%s: unsupported flags 0x%x\n", __func__, flags);
+		return -1;
+	}
+
+	newname = map_vol_name(m, name);
+	if (!newname)
+		return -1;
+
+	ret = m->m_ops->have_volume(m, newname, flags);
+	free(newname);
+	return ret;
 }
 
 int mosaic_make_vol(mosaic_t m, const char *name,
@@ -60,6 +102,9 @@ int mosaic_make_vol(mosaic_t m, const char *name,
 		return -1;
 
 	newname = map_vol_name(m, name);
+	if (!newname)
+		return -1;
+
 	ret = m->m_ops->new_volume(m, newname, size_in_blocks, make_flags);
 	free(newname);
 
@@ -75,6 +120,9 @@ int mosaic_make_vol_fs(mosaic_t m, const char *name, unsigned long size_in_block
 		return -1;
 
 	newname = map_vol_name(m, name);
+	if (!newname)
+		return -1;
+
 	ret = m->m_ops->new_volume(m, newname, size_in_blocks,
 			make_flags | NEW_VOL_WITH_FS);
 	free(newname);
@@ -94,6 +142,9 @@ int mosaic_clone_vol(volume_t from, const char *name, int clone_flags)
 		return -1;
 
 	newname = map_vol_name(m, name);
+	if (!newname)
+		return -1;
+
 	ret = m->m_ops->clone_volume(m, from, newname, clone_flags);
 	free(newname);
 
@@ -110,7 +161,6 @@ int mosaic_drop_vol(volume_t t, int drop_flags)
 	if (m->m_ops->drop_volume(m, t, drop_flags))
 		return -1;
 
-	mosaic_close_vol(t);
 	return 0;
 }
 

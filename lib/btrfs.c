@@ -55,10 +55,26 @@ static int new_btrfs_subvol(struct mosaic *m, const char *name,
 	return 0;
 }
 
-static int open_btrfs_subvol(struct mosaic *m, struct volume *t,
-		int open_flags)
+static int have_btrfs_subvol(struct mosaic *m, const char *name, int flags)
 {
-	return 0; /* FIXME: check it exists */
+	char vol[PATH_MAX];
+	struct stat st;
+	(void)flags; // unused
+
+	snprintf(vol, sizeof(vol), "%s/%s", m->m_loc, name);
+	if (stat(vol, &st) == 0) {
+		if S_ISDIR(st.st_mode)
+			return 1; // exists
+
+		loge("%s: %s exists but is not a btrfs subvolume\n",
+				__func__, name);
+		return -1; // error
+	}
+	if (errno == ENOENT)
+		return 0; // does not exist
+
+	loge("%s: stat(%s) failed: %m\n", __func__, vol);
+	return -1; // error
 }
 
 static int clone_btrfs_subvol(struct mosaic *m, struct volume *from,
@@ -148,7 +164,7 @@ const struct mosaic_ops mosaic_btrfs = {
 	.open = open_btrfs,
 
 	.new_volume = new_btrfs_subvol,
-	.open_volume = open_btrfs_subvol,
+	.have_volume = have_btrfs_subvol,
 	.clone_volume = clone_btrfs_subvol,
 	.drop_volume = drop_btrfs_subvol,
 	.mount_volume = bind_vol_loc,
