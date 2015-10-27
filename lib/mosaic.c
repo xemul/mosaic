@@ -57,11 +57,15 @@ static char *name_to_name(const char *name, char *buf, int blen)
 		return xstrdup(name);
 
 	len = readlink(name, buf, blen);
-	if (len < sizeof("/x.mos")) /* Minimal config name */
+	if (len < sizeof("/x.mos")) { /* Minimal config name */
+		loge("Path %s doesn't look like mosaic config\n", buf);
 		return NULL;
+	}
 
-	if (strcmp(buf + len - 4, ".mos"))
+	if (strcmp(buf + len - 4, ".mos")) {
+		loge("Path %s doesn't look like mosaic config\n", buf);
 		return NULL;
+	}
 
 	/* Trim the path: /foo/bar/some_name.mos -> some_name */
 	buf[len - 4] = '\0';
