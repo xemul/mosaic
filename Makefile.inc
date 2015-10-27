@@ -1,3 +1,7 @@
+NAME=mosaic
+VERSION=0.0.0
+RELEASE=
+
 CC = gcc
 CFLAGS = -Wall -Werror -Wextra
 

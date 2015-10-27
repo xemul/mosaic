@@ -3,6 +3,8 @@ SUBS += lib
 SUBS += moctl
 
 include Makefile.inc
+NAMEVER=$(NAME)-$(VERSION)$(RELEASE)
+TARBALL=$(NAMEVER).tar.xz
 
 all: $(SUBS)
 
@@ -20,7 +22,13 @@ install clean:
 test: all
 	make -C test/
 
-.PHONY: all install clean test $(SUBS)
+dist: tar
+tar: $(TARBALL)
+$(TARBALL):
+	git archive --format tar --prefix '$(NAME)-$(VERSION)/' HEAD \
+		| xz -9 > $@
+
+.PHONY: all install clean test $(SUBS) dist tar
 .DEFAULT_GOAL: all
 
 # include optional local rules
