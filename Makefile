@@ -28,7 +28,10 @@ $(TARBALL):
 	git archive --format tar --prefix '$(NAME)-$(VERSION)/' HEAD \
 		| xz -9 > $@
 
-.PHONY: all install clean test $(SUBS) dist tar
+rpms: tar
+	rpmbuild -ta $(TARBALL) ${RPMBUILD_ARGS}
+
+.PHONY: all install clean test $(SUBS) dist tar rpms
 .DEFAULT_GOAL: all
 
 # include optional local rules

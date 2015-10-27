@@ -10,7 +10,7 @@ CFLAGS += -Wno-unused-parameter -Wno-sign-compare
 #CFLAGS += -Wno-error=unused-parameter -Wno-error=sign-compare
 
 # Installation directories
-BINDIR=/usr/bin
+BINDIR=/usr/sbin
 LIBDIR=/usr/lib
 # For DEB-based systems
 DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
