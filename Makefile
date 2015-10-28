@@ -23,10 +23,9 @@ test: all
 	make -C test/
 
 dist: tar
-tar: $(TARBALL)
-$(TARBALL):
+tar:
 	git archive --format tar --prefix '$(NAME)-$(VERSION)/' HEAD \
-		| xz -9 > $@
+		| xz -9 > $(TARBALL)
 
 rpms: tar
 	rpmbuild -ta $(TARBALL) ${RPMBUILD_ARGS}
