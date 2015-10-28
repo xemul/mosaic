@@ -136,18 +136,28 @@ int bind_mosaic_subdir_loc(struct mosaic *m, const char *path, int mount_flags)
 {
 	struct mosaic_subdir_priv *p = m->priv;
 	char *src;
+	int ret;
 
 	src = p->fs_subdir ? : m->m_loc;
-	return mount(src, path, NULL, MS_BIND | mount_flags, NULL);
+	ret = mount(src, path, NULL, MS_BIND | mount_flags, NULL);
+	if (ret)
+		loge("%s: can't mount: %m\n", __func__);
+
+	return ret;
 }
 
 int bind_vol_loc(struct mosaic *m, struct volume *t,
 		const char *path, int mount_flags)
 {
 	char aux[1024];
+	int ret;
 
 	snprintf(aux, sizeof(aux), "%s/%s", m->m_loc, t->t_name);
-	return mount(aux, path, NULL, MS_BIND | mount_flags, NULL);
+	ret = mount(aux, path, NULL, MS_BIND | mount_flags, NULL);
+	if (ret)
+		loge("%s: can't mount: %m\n", __func__);
+
+	return ret;
 }
 
 int init_mosaic_subdir(struct mosaic *m)
