@@ -16,17 +16,17 @@
 #define DB_DIRNAME	"/var/run/mosaic/"
 #endif
 
-static inline void dbp(char *name, char *p, int ps)
+static inline void dbp(const char *name, char *p, int ps)
 {
 	snprintf(p, ps, DB_DIRNAME "/%s.db", name);
 }
 
-static inline void dbup(char *name, char *p, int ps)
+static inline void dbup(const char *name, char *p, int ps)
 {
 	snprintf(p, ps, DB_DIRNAME "/.%s.upd", name);
 }
 
-static FILE *open_db(char *name, FILE **update_db)
+static FILE *open_db(const char *name, FILE **update_db)
 {
 	char path[PATH_MAX];
 	FILE *db;
@@ -57,7 +57,7 @@ static FILE *open_db(char *name, FILE **update_db)
 	return db;
 }
 
-static int close_db(char *name, FILE *db, FILE *udb, bool updated)
+static int close_db(const char *name, FILE *db, FILE *udb, bool updated)
 {
 	fclose(db);
 
@@ -84,7 +84,7 @@ static int close_db(char *name, FILE *db, FILE *udb, bool updated)
 	return 0;
 }
 
-int thin_id_new(char *m_name, char *v_name, unsigned *ret_id)
+int thin_id_new(const char *m_name, const char *v_name, unsigned *ret_id)
 {
 	FILE *db, *udb;
 	char str[1024];
@@ -131,7 +131,7 @@ fatal:
 	return -1;
 }
 
-int thin_id_get(char *m_name, char *v_name, unsigned *ret_id)
+int thin_id_get(const char *m_name, const char *v_name, unsigned *ret_id)
 {
 	FILE *db;
 	char str[1024];
@@ -171,7 +171,7 @@ fatal:
 	return -1;
 }
 
-int thin_id_del(char *m_name, char *v_name)
+int thin_id_del(const char *m_name, const char *v_name)
 {
 	FILE *db, *udb;
 	char str[1024];
