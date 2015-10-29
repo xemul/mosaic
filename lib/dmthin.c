@@ -1,4 +1,10 @@
-#include <mosaic.h>
+#include <stdio.h>
+
+#include "mosaic.h"
+#include "volume.h"
+#include "thin-internal.h"
+#include "log.h"
+#include "util.h"
 
 /* ID of a thin volume with mosaic metadata part */
 #define THIN_MOSAIC_SUBVOL	(0)
@@ -31,8 +37,28 @@ static int mount_thin_mosaic(struct mosaic *m, const char *path, int mount_flags
 static int new_thin_subvol(struct mosaic *m, const char *name,
 		unsigned long size_in_blocks, int make_flags)
 {
-	/* TODO: generate new ID, save name:ID map, call dmsetup 'create_thin ID' */
-	return -1;
+	unsigned id;
+	char *argv[8], creat_cmd[64];
+
+	if (thin_id_new(m->name, name, &id) != 0) {
+		loge("Name [%s] already exists\n", name);
+		return -1;
+	}
+
+	argv[0] = "dmsetup";
+	argv[1] = "message";
+	argv[2] = m->m_loc;
+	argv[3] = "0";
+	snprintf(creat_cmd, sizeof(creat_cmd), "create_thin %u", id);
+	argv[4] = creat_cmd;
+	argv[5] = NULL;
+
+	if (run_prg(argv)) {
+		thin_id_del(m->name, name);
+		return -1;
+	}
+
+	return 0;
 }
 
 static int clone_thin_subvol(struct mosaic *m, struct volume *from, const char *name, int clone_flags)
@@ -46,8 +72,27 @@ static int clone_thin_subvol(struct mosaic *m, struct volume *from, const char *
 
 static int drop_thin_subvol(struct mosaic *m, struct volume *v, int drop_flags)
 {
-	/* TODO: call dmsetup 'delete ID', remove name:ID mapping */
-	return -1;
+	unsigned id;
+	char *argv[8], drop_cmd[64];
+
+	if (thin_id_get(m->name, v->t_name, &id) != 1) {
+		loge("Name [%s] doesn't exist\n", v->t_name);
+		return -1;
+	}
+
+	argv[0] = "dmsetup";
+	argv[1] = "message";
+	argv[2] = m->m_loc;
+	argv[3] = "0";
+	snprintf(drop_cmd, sizeof(drop_cmd), "delete %u", id);
+	argv[4] = drop_cmd;
+	argv[5] = NULL;
+
+	if (run_prg(argv))
+		return -1;
+
+	thin_id_del(m->name, v->t_name);
+	return 0;
 }
 
 static int resize_thin_subvol(struct mosaic *m, struct volume *v, unsigned long size_in_blocks, int resize_flags)
