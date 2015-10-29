@@ -100,6 +100,7 @@ extern const struct mosaic_ops mosaic_fsimg;
 extern const struct mosaic_ops mosaic_btrfs;
 extern const struct mosaic_ops mosaic_plain;
 extern const struct mosaic_ops mosaic_ploop;
+extern const struct mosaic_ops mosaic_thin;
 
 #define MOSAIC_BLOCK_SHIFT	9
 #endif

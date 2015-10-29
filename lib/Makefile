@@ -25,6 +25,7 @@ OBJS += util.o
 OBJS += ploop.o ploop_uuid.o
 OBJS += volmap.o
 OBJS += migrate.o
+OBJS += dmthin.o
 
 CFLAGS+= -I../include
 CFLAGS+= -fPIC -fvisibility=hidden

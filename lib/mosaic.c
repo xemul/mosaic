@@ -29,6 +29,8 @@ const struct mosaic_ops *mosaic_find_ops(char *type)
 		return &mosaic_plain;
 	if (!strcmp(type, "ploop"))
 		return &mosaic_ploop;
+	if (!strcmp(type, "thin"))
+		return &mosaic_thin;
 
 	return NULL;
 }
