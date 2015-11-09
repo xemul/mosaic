@@ -58,7 +58,13 @@ static char *name_to_name(const char *name, char *buf, int blen)
 	if (name[0] != '.' && name[0] != '/')
 		return xstrdup(name);
 
-	len = readlink(name, buf, blen);
+	// assuming blen >= PATH_MAX
+	if (realpath(name, buf) == NULL) {
+		loge("Error in realpath(%s): %m\n", name);
+		return NULL;
+	}
+	len = strlen(buf);
+
 	if (len < sizeof("/x.mos")) { /* Minimal config name */
 		loge("Path %s doesn't look like mosaic config\n", buf);
 		return NULL;
