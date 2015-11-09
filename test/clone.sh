@@ -10,7 +10,7 @@ function run_tests()
 	mkdir tmnt tmnt1 tmnt2 tmnt21
 
 	echo "* Testing cloning"
-	$moctl $mname new fs orig 512m || fail "Can't create orig fs"
+	$moctl $mname create fs orig 512m || fail "Can't create orig fs"
 	$moctl $mname mount orig tmnt || fail "Can't mount orig"
 	echo "O is for OpenVZ" > tmnt/t-tfile
 	$moctl $mname umount orig tmnt || fail "Can't umount orig"

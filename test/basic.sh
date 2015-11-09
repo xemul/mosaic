@@ -20,7 +20,7 @@ function run_tests()
 	echo "* Testing volumes"
 	$moctl $mname have test_fs | fgrep -q ' exists: no' \
 		|| fail "existense test (1) failed"
-	$moctl $mname new fs test_fs 512m || fail "Can't create fs"
+	$moctl $mname create fs test_fs 512m || fail "Can't create fs"
 	$moctl $mname have test_fs | fgrep -q ' exists: yes' \
 		|| fail "existense test (2) failed"
 
