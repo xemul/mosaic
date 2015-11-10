@@ -16,7 +16,7 @@ int usage(int ret)
 	printf("\n"
 "Usage: moctl NAME ACTION [ARGUMENT ...]\n"
 "	NAME     := mosaic name (path to .mos file)\n"
-"	ACTION   := have|mount|umount|attach|detach|new|clone|drop|info\n"
+"	ACTION   := have|mount|umount|attach|detach|create|clone|drop|info\n"
 "	ARGUMENT := zero or more arguments, depending on ACTION\n");
 
 	return ret;
@@ -194,14 +194,14 @@ static int parse_size(char *sz)
 	return ret;
 }
 
-static int do_mosaic_new_vol(mosaic_t m, int argc, char **argv)
+static int do_mosaic_create_vol(mosaic_t m, int argc, char **argv)
 {
 	int ret;
 	const char *type, *volume;
 	unsigned long size;
 
 	if (argc < 4) {
-		printf("Usage: moctl <name> new fs|disk <name> <size>\n");
+		printf("Usage: moctl <name> create fs|disk <name> <size>\n");
 		return 1;
 	}
 
@@ -408,8 +408,8 @@ static int do_mosaic(char *name, int argc, char **argv)
 		return do_mosaic_attach_vol(mos, argc, argv);
 	if (argis(action, "detach"))
 		return do_mosaic_detach_vol(mos, argc, argv);
-	if (argis(action, "new"))
-		return do_mosaic_new_vol(mos, argc, argv);
+	if (argis(action, "create"))
+		return do_mosaic_create_vol(mos, argc, argv);
 	if (argis(action, "clone"))
 		return do_mosaic_clone_vol(mos, argc, argv);
 	if (argis(action, "drop"))
