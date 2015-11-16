@@ -16,7 +16,7 @@
 #include "uapi/mosaic.h"
 
 #ifndef MOSAIC_CONFIG_DIR
-#define MOSAIC_CONFIG_DIR	"/etc/mosaic.d"
+#define MOSAIC_CONFIG_DIR	"/etc/mosaic"
 #endif
 
 const struct mosaic_ops *mosaic_find_ops(char *type)
